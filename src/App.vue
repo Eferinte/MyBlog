@@ -5,8 +5,8 @@
       <div id="loginPart" v-show="masked">
         <div id="loginMask"/>
         <div id="loginDialog" v-show="select.login">
-          <div id="quit" @click="loginQuit">
-            <img id="quitIcon" src="./assets/quit.png"/>
+          <div class="quit" @click="loginQuit">
+            <img class="quitIcon" src="./assets/quit.png"/>
           </div>
           <div id="inputArea">
             <br>
@@ -21,8 +21,8 @@
           </div>
         </div>
         <div id="HKrecorder" v-show="select.recorder">
-          <div id="quit" @click="loginQuit">
-            <img id="quitIcon" src="./assets/quit.png"/>
+          <div class="quit" @click="recorderQuit">
+            <img class="quitIcon" src="./assets/quit.png"/>
           </div>
           <br/>
           <div id="recordInput" >
@@ -30,16 +30,38 @@
             <transition name="fade">
               <button id="useTime" @click="openTimeSetter" v-show="switchStatus">00:00</button>
             </transition>
+            <!-- 时间选择器 -->
+            <transition name="fade">
+              <div id="timeSetter" v-show="timeSetter">
+                <div class="quit" @click="timeSetterQuit">
+                  <img class="quitIcon" src="./assets/quit.png"/>
+                </div>
+                <div id="nums">
+                  <div id="hour" class="numCol">
+                    <div class="numCell"><span class="number">{{timer.preHour}}</span></div>
+                    <div class="numCell"><span class="number">{{timer.currentHour}}</span></div>
+                    <div class="numCell"><span class="number">{{timer.nextHour}}</span></div>
+                  </div>
+                  <div id="minute" class="numCol">
+                    <div class="numCell"><span class="number">{{timer.preMinute}}</span></div>
+                    <div class="numCell"><span class="number">{{timer.currentMinute}}</span></div>
+                    <div class="numCell"><span class="number">{{timer.nextMinute}}</span></div>
+                  </div>
+                  <div id="second" class="numCol">
+                    <div class="numCell"><span class="number">{{timer.preSecond}}</span></div>
+                    <div class="numCell"><span class="number">{{timer.currentSecond}}</span></div>
+                    <div class="numCell"><span class="number">{{timer.nextSecond}}</span></div>
+                  </div>
+                </div>
+              </div>
+            </transition>
             <transition name="fade">
               <button id="upload" @click="upload" v-show="switchStatus">上传</button>
             </transition>
           </div>
-          <div id="timeSetter" v-show="select.timeSetter">
-          
-          </div>
           <div id="recorderBlank">
+            <!-- 提交选择 -->
             <transition-group name="bosses">
-                <!-- 提交选择 -->
               <div class="HKcell" v-show="switchStatus" v-for="boss in bosses" :key="boss.order" >
                 <div class="HKcellShell" @click="choose">
                   <img class="HKcellIcon" :src="boss.iconSrc"/>
@@ -96,17 +118,24 @@ export default {
       this.masked = true;
       this.select.login = true;
     },
+    // 应该写个event获取到触发事件的具体部件，然后对其进行操作，实现对象化
     loginQuit(){
       this.masked = false;
-      this.select.recorder = false;
       this.select.login = false;
     },
+    recorderQuit(){
+      this.masked = false;
+      this.select.recorder = false;
+    },
+    timeSetterQuit(){
+      this.timeSetter = false;
+    },        
     openRecorder(){
       this.masked = true;
       this.select.recorder = true;
     },
     openTimeSetter(){
-      this.select.timeSetter = true;
+      this.timeSetter = true;
     },
     switcher(){
       if(this.switchStatus==false){
@@ -158,10 +187,21 @@ export default {
       masked:false,
       select:{
         login:false,
-        recorder:false,
-        timeSetter:false
+        recorder:false
+      },
+      timer:{
+        preHour:"23",
+        currentHour:"00",
+        nextHour:"01",
+        preMinute:"59",
+        currentMinute:"00",
+        nextMinute:"01",
+        preSecond:"59",
+        currentSecond:"00",
+        nextSecond:"01"
       },
       switchStatus:false,
+      timeSetter:false,
       switcherText:"添加数据",
       bosses:require("./bossData.json").boss,
       sortedBosses:[]
@@ -171,11 +211,20 @@ export default {
 </script>
 
 <style>
-.fade-enter-active, .fade-leave-active {
-  transition: all 0.3s ease-out;
+.bosses-enter-from,
+.bosses-leave-to {
+  opacity: 0;
+}
+.bosses-leave-active {
+  position: absolute;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
 }
 
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 #app {
@@ -185,6 +234,58 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.numCol{
+  width: 60px;
+  height: 180px;
+  margin: auto;
+  background-color: gray;
+  z-index: 6;
+  border-radius: 3px;
+  transition: 0.3s;
+  display: flex;
+  flex-direction:column;
+  justify-content:space-around;
+}
+.numCell{
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  z-index: 6;
+  border-radius: 3px;
+  transition: 0.3s;
+  margin: auto;
+  display: flex;
+  flex-direction:column;
+  justify-content:space-around;
+}
+.number{
+  font-size: 35px;
+}
+#nums{
+  position: fixed;
+  top: 35%;
+  left: 40%;
+  width: 20%;
+  height: 40%;
+  background-color: whitesmoke;
+  z-index: 6;
+  border-radius: 10px;
+  transition: 0.3s;
+  display: flex;
+  flex-direction:row;
+  justify-content:space-around;
+}
+#timeSetter{
+  position: fixed;
+  top: 30%;
+  left: 40%;
+  width: 20%;
+  height: 50%;
+  background-color: whitesmoke;
+  z-index: 6;
+  border-radius: 10px;
+  transition: 0.3s;
 }
 #useTime{
   background-color: #4CAF50; /* Green */
@@ -199,7 +300,6 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   margin-right: 5px;
-  transition: 0.5s;
 }
 #upload{
   background-color: #4CAF50; /* Green */
@@ -213,7 +313,6 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   margin-right: 5px;
-  transition: 0.5s;
 }
 #switcher{
   background-color: #4CAF50; /* Green */
@@ -240,7 +339,7 @@ export default {
   width: 100%;
   height: 100%;
   background-color: black;
-  transition: z-index 0s;;
+  transition: z-index 0.5s;;
 }
 #loginDialog{
   position: fixed;
@@ -251,7 +350,7 @@ export default {
   height: 60%;
   background-color: white;
   z-index: 5;
-  transition: z-index 0s;
+  transition: z-index 0.5s;
 }
 #HKrecorder{
   position: fixed;
@@ -310,7 +409,7 @@ export default {
   background-color: white;
   bottom: 0px;
 }
-#quit{
+.quit{
   float: right;
   width: 30px;
   height: 30px;
@@ -471,11 +570,11 @@ export default {
     transition: 0.3s;
     display:inline;
 }
-#quitIcon{
+.quitIcon{
   width: 100%;
   height: auto;
 }
-#quit:hover{
+.quit:hover{
     transform: scale(1.1);
     cursor:pointer;
     transform:rotate(150deg);
