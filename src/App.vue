@@ -1,6 +1,7 @@
 
 <template>
-  <body>
+<!-- 将拖拽滑块的过程和结束判断至于全局，开始判定放在对应滑块组件上 -->
+  <body @mousemove="dragging" @mouseup="dragEnd">
     <transition name="fade">
       <div id="loginPart" v-show="masked">
         <div id="loginMask"/>
@@ -37,20 +38,50 @@
                   <img class="quitIcon" src="./assets/quit.png"/>
                 </div>
                 <div id="nums">
-                  <div id="hour" class="numCol">
-                    <div class="numCell"><span class="number">{{timer.preHour}}</span></div>
-                    <div class="numCell"><span class="number">{{timer.currentHour}}</span></div>
-                    <div class="numCell"><span class="number">{{timer.nextHour}}</span></div>
+                  <div class="numShell">
+                    <div class="dragBlock"  @mousedown="dragBegin" >
+                      <div id="hour" class="numCol">
+                        <div class="numShell2">
+                          <div class="numCell"><span :style="preHourCSS" class="number">{{timer.preHour}}</span></div>
+                        </div>
+                        <div class="numShell2">
+                          <div class="numCell"><span :style="{opacity:timerCSS.currentHour_opacity}" class="number">{{timer.currentHour}}</span></div>
+                        </div>
+                        <div class="numShell2">
+                          <div class="numCell"><span :style="{opacity:timerCSS.nextHour_opacity}" class="number">{{timer.nextHour}}</span></div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div id="minute" class="numCol">
-                    <div class="numCell"><span class="number">{{timer.preMinute}}</span></div>
-                    <div class="numCell"><span class="number">{{timer.currentMinute}}</span></div>
-                    <div class="numCell"><span class="number">{{timer.nextMinute}}</span></div>
+                  <div class="numShell">
+                    <div class="dragBlock" draggable="true">
+                      <div id="minute" class="numCol">
+                        <div class="numShell2">
+                          <div class="numCell"><span class="number">{{timer.preMinute}}</span></div>
+                        </div>
+                        <div class="numShell2">
+                         <div class="numCell"><span class="number">{{timer.currentMinute}}</span></div>
+                        </div>
+                        <div class="numShell2">
+                          <div class="numCell"><span class="number">{{timer.nextMinute}}</span></div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div id="second" class="numCol">
-                    <div class="numCell"><span class="number">{{timer.preSecond}}</span></div>
-                    <div class="numCell"><span class="number">{{timer.currentSecond}}</span></div>
-                    <div class="numCell"><span class="number">{{timer.nextSecond}}</span></div>
+                  <div class="numShell">
+                    <div class="dragBlock" draggable="true">
+                      <div id="second" class="numCol">
+                        <div class="numShell2">
+                          <div class="numCell"><span class="number">{{timer.preSecond}}</span></div>
+                        </div>
+                        <div class="numShell2">
+                          <div class="numCell"><span class="number">{{timer.currentSecond}}</span></div>
+                        </div>
+                        <div class="numShell2">
+                          <div class="numCell"><span class="number">{{timer.nextSecond}}</span></div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -137,6 +168,27 @@ export default {
     openTimeSetter(){
       this.timeSetter = true;
     },
+    // 根据鼠标事件获取拖动方向和距离
+    dragBegin(e){
+      console.log(e.target);
+      this.draggable = true;
+      this.tempForMouseLocate = e.pageY;
+    },
+    dragging(e){
+      // console.log(e.target);
+      if(this.draggable){
+        if(e.pageY-this.tempForMouseLocate>0){
+          this.timerCSS.preHour_scaleValue++ ;
+        }else{
+          this.timerCSS.preHour_scaleValue--;
+        }
+        this.tempForMouseLocate = e.pageY;
+      }
+    },
+    dragEnd(e){
+      console.log(e.target);
+      this.draggable = false;
+    },
     switcher(){
       if(this.switchStatus==false){
         this.switchStatus = true;
@@ -180,8 +232,21 @@ export default {
     this.sortedBosses.sort((a,b)=>{return a.hitTimes-b.hitTimes})
     console.log(this.sortedBosses)
   },
+  computed:{
+    preHourCSS(){
+      // 由于不能直接对span进行缩放，故需要一个缩放等级到字体大小的映射过程
+      var scale = this.timerCSS.preHour_scaleValue;
+      var value = {
+        opacity: String(0.3*Math.atan(0.01*scale)+0.5),
+        fontSize: String(7*Math.atan(0.01*scale)+25)+'px' 
+      }
+      return value;
+    }
+  },
   data() {
     return {
+      tempForMouseLocate:0,
+      draggable:false,
       username:"",
       paasword:"",
       masked:false,
@@ -199,6 +264,15 @@ export default {
         preSecond:"59",
         currentSecond:"00",
         nextSecond:"01"
+      },
+      timerCSS:{
+        preHour_opacity:0.5,
+        currentHour_opacity:1,
+        nextHour_opacity:0.5,
+        // vue会将scale识别为用户自定义的函数
+        preHour_scaleValue:1,
+        currentHour_scale:1,
+        nextHour_scale:0.5
       },
       switchStatus:false,
       timeSetter:false,
@@ -238,7 +312,7 @@ export default {
 .numCol{
   width: 60px;
   height: 180px;
-  margin: auto;
+  margin: 0;
   background-color: gray;
   z-index: 6;
   border-radius: 3px;
@@ -247,7 +321,7 @@ export default {
   flex-direction:column;
   justify-content:space-around;
 }
-.numCell{
+.numShell2{
   width: 50px;
   height: 50px;
   background-color: white;
@@ -262,6 +336,18 @@ export default {
 .number{
   font-size: 35px;
 }
+.dragBlock{
+  height: 180px;
+  display: flex;
+  flex-direction:column;
+  justify-content:space-around;
+  background-color: #74759b;
+}
+.numShell{
+  display: flex;
+  flex-direction:column;
+  justify-content:center;
+}
 #nums{
   position: fixed;
   top: 35%;
@@ -275,6 +361,7 @@ export default {
   display: flex;
   flex-direction:row;
   justify-content:space-around;
+  user-select: none;
 }
 #timeSetter{
   position: fixed;
