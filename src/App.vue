@@ -39,7 +39,7 @@
                 </div>
                 <div id="nums">
                   <div class="numShell">
-                    <div class="dragBlock"  @mousedown="dragBegin" >
+                    <div class="dragBlock" id="dragBlock1" @mousedown="dragBegin" >
                       <div id="hour" class="numCol">
                         <div class="numShell2">
                           <div class="numCell"><span :style="preHourCSS" class="number">{{timer.preHour}}</span></div>
@@ -170,7 +170,6 @@ export default {
     },
     // 根据鼠标事件获取拖动方向和距离
     dragBegin(e){
-      console.log(e.target);
       this.draggable = true;
       this.tempForMouseLocate = e.pageY;
     },
@@ -178,15 +177,20 @@ export default {
       // console.log(e.target);
       if(this.draggable){
         if(e.pageY-this.tempForMouseLocate>0){
-          this.timerCSS.preHour_scaleValue++ ;
+          this.timerCSS.preHour_scaleValue++;
         }else{
           this.timerCSS.preHour_scaleValue--;
         }
-        this.tempForMouseLocate = e.pageY;
+        if(e.pageY - this.tempForMouseLocate>0){
+          document.getElementById("dragBlock1").style.top = Math.min(e.pageY - this.tempForMouseLocate, 50)+"px";
+        }else{
+          document.getElementById("dragBlock1").style.top = Math.max(e.pageY - this.tempForMouseLocate, -50)+"px";
+        }
       }
+
     },
     dragEnd(e){
-      console.log(e.target);
+      // console.log(e.target);
       this.draggable = false;
     },
     switcher(){
@@ -204,7 +208,7 @@ export default {
     },
     choose(){
       if(this.switchStatus){
-        console.log("点击了");
+        // console.log("点击了");
       }
     },
     // 提交表单登录
@@ -246,6 +250,8 @@ export default {
   data() {
     return {
       tempForMouseLocate:0,
+      offsetX:0,
+      offsetY:0,
       draggable:false,
       username:"",
       paasword:"",
@@ -337,6 +343,8 @@ export default {
   font-size: 35px;
 }
 .dragBlock{
+  position: relative;
+  top:30px;
   height: 180px;
   display: flex;
   flex-direction:column;
