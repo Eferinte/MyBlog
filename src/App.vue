@@ -133,17 +133,19 @@
         </div>
         <br>
         <div id="articlesPart">
+          <bolg-card v-for="article in articles" :key="article.aid" :title="article.title" :brief="article.brief" :TAGS="article.tags">
+          </bolg-card>
+
         </div>
     </div>
   </body>
 </template>
 <script>
 import axios from 'axios' 
-
-
-
+import BolgCard from './components/BolgCard'
 export default {
   name: 'App',
+  components:{BolgCard},
   methods: {
     openLogin(){
       this.masked = true;
@@ -284,7 +286,70 @@ export default {
       timeSetter:false,
       switcherText:"添加数据",
       bosses:require("./bossData.json").boss,
-      sortedBosses:[]
+      sortedBosses:[],
+      articles:
+        [
+          {
+            title:"test-title",
+            brief:"test-brief",
+            aid:"001",
+            tags:["tag1","tag2","tag3"]
+          },
+          {
+            title:"test-title",
+            brief:"test-brief",
+            aid:"002",
+            tags:["tag1","tag2","tag3"]
+          },
+          {
+            title:"test-title",
+            brief:"test-brief",
+            aid:"003",
+            tags:["tag1","tag2","tag3"]
+          },
+          {
+            title:"test-title",
+            brief:"test-brief",
+            aid:"004",
+            tags:["tag1","tag2","tag3"]
+          },
+          {
+            title:"test-title",
+            brief:"test-brief",
+            aid:"005",
+            tags:["tag1","tag2","tag3"]
+          },
+          {
+            title:"test-title",
+            brief:"test-brief",
+            aid:"006",
+            tags:["tag1","tag2","tag3"]
+          },
+          {
+            title:"test-title",
+            brief:"test-brief",
+            aid:"007",
+            tags:["tag1","tag2","tag3"]
+          },
+          {
+            title:"test-title",
+            brief:"test-brief",
+            aid:"008",
+            tags:["tag1","tag2","tag3"]
+          },
+          {
+            title:"test-title",
+            brief:"test-brief",
+            aid:"009",
+            tags:["tag1","tag2","tag3"]
+          },
+          {
+            title:"test-title",
+            brief:"test-brief",
+            aid:"010",
+            tags:["tag1","tag2","tag3"]
+          },
+        ]
     }
   }
 }
@@ -350,6 +415,7 @@ export default {
   flex-direction:column;
   justify-content:space-around;
   background-color: #74759b;
+  transition: 0.5s;
 }
 .numShell{
   display: flex;
@@ -620,12 +686,18 @@ export default {
     z-index:-2;
 }
 #articlesPart{
-    margin: auto;
-    margin-top: 7%;
-    background-color: #cad3c3;
-    height: 600px;
-    width: 1000px;
-    border-radius: 10px;
+  /* 这个水平居中方法记得收录 */
+  position: absolute;
+  margin-top: 7%;
+  margin-left: -600px;
+  margin-bottom: 3%;
+  left: 50%;
+  background-color: #cad3c3;
+  width: 1200px;
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 #root{
     position: absolute;
@@ -636,6 +708,7 @@ export default {
     background-color: rgb(208, 231, 251);
     border-radius: 0px 0px 20px 0px;
     z-index: -5;
+    text-align:center
 }
 #leftBar{
     position: fixed;
