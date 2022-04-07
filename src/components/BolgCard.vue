@@ -1,5 +1,5 @@
 <template>
-  <div class="cardShell">
+  <div class="cardShell" @click="intoArticle()">
         <div class="title">
             {{title}}
         </div>
@@ -7,7 +7,7 @@
             {{brief}}
         </div>
         <div class="tagShell">
-            <div class="tag" v-for="tag in TAGS" :key="tag" @click="intoTag()">
+            <div class="tag" v-for="tag in TAGS" :key="tag" @click.stop="intoTag(tag)">
                 {{tag}}
             </div>
         </div>
@@ -19,13 +19,17 @@ export default{
     name:"articleCard",
     props:["title","brief","author","time","content","TAGS"],
     methods: {
-        // 跳转到对应Tag分类页面
-        intoTag(){
+        //跳转到对应的博文页
+        intoArticle(){
             console.log(this)
+        },
+        // 跳转到对应Tag分类页面
+        intoTag(tag){
+            // 根据获取到的tag转到对应页面
+            console.log("跳转到"+tag)
         }
     },
     created(){
-        console.log(this)
     }
 }
 </script>
