@@ -19,11 +19,20 @@ export default{
     name:"articleCard",
     props:["title","brief","author","time","content","TAGS"],
     methods: {
-        //跳转到对应的博文页
+        //操作路由，跳转到对应的博文页
         intoArticle(){
-            console.log(this)
+            this.$router.push({
+                name:"Blog",
+                // params:{
+                //     title:this.title,
+                //     author:this.author,
+                //     time:this.time,
+                //     content:this.content,
+                //     tags:this.TAGS
+                // }
+            })
         },
-        // 跳转到对应Tag分类页面
+        //操作路由，跳转到对应Tag分类页面
         intoTag(tag){
             // 根据获取到的tag转到对应页面
             console.log("跳转到"+tag)
@@ -45,6 +54,9 @@ export default{
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
+    }
+    .cardShell{
+        cursor:pointer
     }
     .title{
         margin-top: 3%;
@@ -76,5 +88,10 @@ export default{
         height: 60%;
         background-color: orange;
         font-size: 10px;
+        transition: 0.5s;
+    }
+    .tag:hover{
+        background-color: orangered;
+        cursor:pointer;
     }
 </style>
