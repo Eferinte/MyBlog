@@ -10,7 +10,7 @@
         </div>
         <br>
         <div class="inputLine">
-            <input class="loginInput" v-model="password" placeholder=" 请输入密码"/>
+            <input class="loginInput" v-model="password" @keypress.enter="login" placeholder=" 请输入密码"/>
         </div>
             <button id="loginBtn" @click="login">登录</button>
         </div>
@@ -38,8 +38,9 @@ export default {
           alert("用户名或密码错误");
         }else{//登录成功
           let uid = response.data.uid;
+          localStorage.setItem("uid",uid);//本地存储记录登录状态
           this.$store.commit("setUid",uid);
-          console.log(this.$store.state.uid);
+          console.log(localStorage.getItem("uid"));
           this.$emit("listenClose");
         }
       })
@@ -57,7 +58,7 @@ export default {
 }
 </script>
 
-<style>
+<style  scoped>
 .quit{
   float: right;
   width: 30px;

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="root">
     <router-view></router-view>
   </div>
 </template>
@@ -8,6 +8,10 @@
 export default {
   name: 'App',
   created() {
+    // 读取本地登录状态
+    if(localStorage.getItem('uid')){
+      this.$store.commit("setUid",localStorage.getItem('uid'));
+    }
     this.$router.push('/home')
   },
 }

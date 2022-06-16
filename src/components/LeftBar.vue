@@ -1,13 +1,19 @@
 <template>
     <div id="leftBar">
         <div  class="cell" @click="userClick" >
-            <div id="userCell">
-            <!-- <div class="cellMask" ref="userMask"></div> -->
-            <img id="user" class="cellImg" :src="userIcon" />
+            <div class="imgShell">
+              <img id="user" class="cellImg" :src="userIcon" />
             </div>
         </div>
+        <div class="cell" @click="openEditor">
+          <div class="imgShell">
+            <img id="editor" class="cellImg" src="../assets/editor.png"/>
+          </div>
+        </div>
         <div class="cell" @click="openRecorder">
+          <div class="imgShell">
             <img id="hollowKnightRecorder" class="cellImg" src="../assets/Pantheon_of_Hallownest.png"/>
+          </div>
         </div>
     </div>
 </template>
@@ -19,11 +25,23 @@ export default {
     name:"LeftBar",
     methods: {
         userClick(){
-            if(this.$store.state.uid){
-                // 跳转到个人主页
-            }else{
-                this.$emit("listenOpen")
-            }
+          if(this.$store.state.uid){
+            // 跳转到个人主页
+            this.$router.push('/UserSpace')
+          }else{
+            // 打开登录窗口
+            this.$emit("listenOpen")
+          }
+        },
+        openEditor(){
+          if(this.$store.state.uid){
+            // 跳转到创建页
+            this.$router.push('/Editor')
+          }else{
+            // 打开登录窗口
+            this.$emit("listenOpen")
+          }
+          // 
         },
         // userOver(){
         //     this.$refs.userMask.style.opacity="0.2";
@@ -62,7 +80,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 
 #leftBar{
   margin: 0;
@@ -75,7 +93,7 @@ export default {
   z-index: -3;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content:flex-start;
 }
 .cell{
   margin: 20px auto;
@@ -101,13 +119,29 @@ export default {
   top: -15px;
   left: -15px;
 }
-#userCell{
+#editor{
+  width: 50px;
+  height: 50px;
+  z-index: 0;
+  position: absolute;
+  top: 12px;
+  left: 8px;
+}
+#hollowKnightRecorder{
+  width: 90px;
+  z-index: 0;
+  position: absolute;
+  top: -30px;
+  left: -10px;
+}
+.imgShell{
   position: relative;
   overflow: hidden;
   width: 70px;
   height: 70px;
   border-radius: 100%;
   /* border: solid 2px rgb(135, 167, 253); */
+  box-shadow: 10px 10px 10px #515050;
   background-color: white;
 }
 .cellMask{

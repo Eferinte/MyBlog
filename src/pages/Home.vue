@@ -9,7 +9,7 @@
       </div>
     </transition>
     <LeftBar @listenOpen="openLogin" @listenClose="closeLogin" ></LeftBar>
-    <div id="root">
+    <div id="main">
       <Head></Head>
       <br>
       <div id="mainBox">
@@ -52,12 +52,16 @@ export default {
     }
   },
   created() {
+    // 读取本地登录状态
+    if(localStorage.getItem('uid')){
+      this.$store.commit("setUid",localStorage.getItem('uid'));
+    }
     this.$router.push('/home/articles')
   },
 }
 </script>
 
-<style>
+<style scoped>
 .bosses-enter-from,
 .bosses-leave-to {
   opacity: 0;
@@ -111,7 +115,7 @@ export default {
   transition: z-index 0.5s;;
 }
 
-#root{
+#main{
     position: absolute;
     top: 0px;
     width: calc(100% - 100px);

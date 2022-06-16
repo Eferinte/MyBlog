@@ -44,7 +44,7 @@ export default{
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style>
+<style scoped>
     .cardShell{
         margin: 20px;
         width: 300px;
