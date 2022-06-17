@@ -41,12 +41,16 @@ export default {
           localStorage.setItem("uid",uid);//本地存储记录登录状态
           this.$store.commit("setUid",uid);
           console.log(localStorage.getItem("uid"));
-          this.$emit("listenClose");
+          // 关闭登录窗口
+          this.$store.commit("closeMask");
+          this.$store.commit("closeLogin");
         }
       })
     },
     loginQuit(){
-      this.$emit("listenClose");
+      // 关闭登录窗口
+      this.$store.commit("closeMask");
+      this.$store.commit("closeLogin");
     },
   },
   data(){

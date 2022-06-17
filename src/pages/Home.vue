@@ -2,13 +2,13 @@
 <!-- 将拖拽滑块的过程和结束判断至于全局，开始判定放在对应滑块组件上 -->
   <body>
     <transition name="fade">
-      <div id="loginPart" v-show="masked" >
+      <div id="loginPart" v-show="maskShow" >
         <div id="loginMask"/>
-        <Login v-show="select.login" @listenClose="closeLogin"></Login>
+        <Login v-show="loginShow"></Login>
         <!-- <HollowKnightCounter  v-show="select.recorder"></HollowKnightCounter> -->
       </div>
     </transition>
-    <LeftBar @listenOpen="openLogin" @listenClose="closeLogin" ></LeftBar>
+    <LeftBar></LeftBar>
     <div id="main">
       <Head></Head>
       <br>
@@ -26,29 +26,15 @@ import LeftBar from '../components/LeftBar.vue'
 export default {
   components:{Head,Login,LeftBar},
   name: 'Home',
-  methods: {
-    openLogin(){
-      // 打开登陆界面
-      this.masked = true;
-      this.select.login = true;
-    },
-    closeLogin(){
-      this.masked = false;
-      this.select.login = false;
-    }
-  },
   computed:{
     uid(){
       return this.$store.state.uid;
     },
-  },
-  data(){
-    return{
-      masked:false,
-      select:{
-          login:false,
-          recorder:false
-      },
+    maskShow(){
+      return this.$store.state.maskShow;
+    },
+    loginShow(){
+      return this.$store.state.loginShow;
     }
   },
   created() {

@@ -25,23 +25,12 @@ export default {
     name:"LeftBar",
     methods: {
         userClick(){
-          if(this.$store.state.uid){
-            // 跳转到个人主页
-            this.$router.push('/UserSpace')
-          }else{
-            // 打开登录窗口
-            this.$emit("listenOpen")
-          }
+          // 跳转到个人主页
+          this.$router.push('/UserSpace')
         },
         openEditor(){
-          if(this.$store.state.uid){
-            // 跳转到创建页
-            this.$router.push('/Editor')
-          }else{
-            // 打开登录窗口
-            this.$emit("listenOpen")
-          }
-          // 
+          // 跳转到创建页
+          this.$router.push('/Editor')
         },
         // userOver(){
         //     this.$refs.userMask.style.opacity="0.2";
@@ -59,9 +48,6 @@ export default {
         openRecorder(){
         // this.masked = true;
         // this.select.recorder = true;
-        },
-        closeLogin(){
-            this.$emit("listenClose")
         },
         // closeRecorder(){
         //     this.masked = false;

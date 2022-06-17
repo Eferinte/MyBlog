@@ -4,6 +4,7 @@ import Home from '../pages/Home'
 import Blog from '../pages/Blog'
 import UserSpace from '../pages/UserSpace'
 import Editor from '../pages/Editor'
+import store from '../main'
 const router = createRouter({
     history:createWebHistory(),
     routes:[
@@ -40,4 +41,18 @@ const router = createRouter({
         }
     ]
 })
+router.beforeEach((to, from) => {
+    // 若未登录则取消导航并打开登陆页
+    console.log("to=",to)
+    if(to.fullPath=="/UserSpace"||to.fullPath=="/Editor"){
+        console.log(store);
+        if(!store.state.uid){
+            // 返回 false 以取消导航
+            // 打开登录窗口
+            store.commit("openMask");
+            store.commit("openLogin");
+            return false
+        }
+    }
+  })
 export default router
