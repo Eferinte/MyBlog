@@ -3,8 +3,8 @@
         <div class="title">
             {{title}}
         </div>
-        <div class="content">
-            {{content}}
+        <div class="context">
+            <v-md-preview :text="context"></v-md-preview>
         </div>
         <div class="tagShell">
             <div class="tag" v-for="tag in tags" :key="tag" @click.stop="intoTag(tag)">
@@ -15,16 +15,30 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default{
     name:"atricle",
-    props:["title","author","time","content","tags"],
     methods: {
-        intoTag(){
-            
+        //初始化请求数据
+        init(){
+            let blogId =  this.$route.params.blogId
+            console.log(this.$route.params)
+            axios.get('http://localhost:8888/blog',{params:{
+                blogId:blogId
+            }}).then((Response)=>{
+                this.data = Response.data;
+                console.log(Response);
+            });
         }
     },
     created(){
-    }
+        this.init()
+    },
+    data() {
+        return {
+            data:{},
+        }
+    },
 }
 </script>
 

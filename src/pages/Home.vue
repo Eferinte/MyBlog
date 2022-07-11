@@ -1,5 +1,4 @@
 <template>
-<!-- 将拖拽滑块的过程和结束判断至于全局，开始判定放在对应滑块组件上 -->
   <body>
     <transition name="fade">
       <div id="loginPart" v-show="maskShow" >
@@ -41,8 +40,10 @@ export default {
     // 读取本地登录状态
     if(localStorage.getItem('uid')){
       this.$store.commit("setUid",localStorage.getItem('uid'));
+      this.$store.commit("setUsername",localStorage.getItem('username'));
     }
     this.$router.push('/home/articles')
+
   },
 }
 </script>

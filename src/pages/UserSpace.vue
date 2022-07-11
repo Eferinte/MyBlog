@@ -24,6 +24,7 @@ export default {
     methods:{
         logout(){
             localStorage.removeItem('uid');
+            localStorage.removeItem('username');
             this.$store.commit("clear");
             this.$router.push('/');
         },
@@ -46,6 +47,9 @@ export default {
 .button1{
     width: 150px;
     height: 30px;
+}
+.button1:hover{
+    cursor: pointer;
 }
 #head{
     position: absolute;

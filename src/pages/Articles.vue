@@ -1,87 +1,42 @@
 <template>
   <div class="articlesPart">
-        <blog-card v-for="article in articles" :key="article.aid" :title="article.title" :brief="article.brief" :TAGS="article.tags">
+        <blog-card v-for="blog in blogs" :key="blog.blog_id" :title="blog.title" :blogId="blog.blogId">
         </blog-card>
   </div>
 </template>
 
 <script>
 import BlogCard from '../components/BlogCard.vue'
+import axios from 'axios'
 export default{
     name:"atricle",
     components:{BlogCard},
     methods: {
         intoTag(){
             
+        },
+        //初始化请求数据
+        init(){
+            axios.get('http://localhost:8888/all_blogs').then((Response)=>{
+                console.log(Response);
+                for(let index in Response.data){
+                    let obj = Response.data[index]
+                    this.blogs.push({
+                        title:obj.title,
+                        author:obj.author,
+                        subDate:obj.sub_date,
+                        blogId:obj.blog_id
+                    })
+                }
+            });
         }
     },
     created(){
-
+        this.init();
     },
     data() {
         return {
-            articles:[
-                {
-                    title:"test-title",
-                    brief:"test-brief",
-                    aid:"001",
-                    tags:["tag1","tag2","tag3"]
-                },
-                {
-                    title:"test-title",
-                    brief:"test-brief",
-                    aid:"002",
-                    tags:["tag1","tag2","tag3"]
-                },
-                {
-                    title:"test-title",
-                    brief:"test-brief",
-                    aid:"003",
-                    tags:["tag1","tag2","tag3"]
-                },
-                {
-                    title:"test-title",
-                    brief:"test-brief",
-                    aid:"004",
-                    tags:["tag1","tag2","tag3"]
-                },
-                {
-                    title:"test-title",
-                    brief:"test-brief",
-                    aid:"005",
-                    tags:["tag1","tag2","tag3"]
-                },
-                {
-                    title:"test-title",
-                    brief:"test-brief",
-                    aid:"006",
-                    tags:["tag1","tag2","tag3"]
-                },
-                {
-                    title:"test-title",
-                    brief:"test-brief",
-                    aid:"007",
-                    tags:["tag1","tag2","tag3"]
-                },
-                {
-                    title:"test-title",
-                    brief:"test-brief",
-                    aid:"008",
-                    tags:["tag1","tag2","tag3"]
-                },
-                {
-                    title:"test-title",
-                    brief:"test-brief",
-                    aid:"009",
-                    tags:["tag1","tag2","tag3"]
-                },
-                {
-                    title:"test-title",
-                    brief:"test-brief",
-                    aid:"010",
-                    tags:["tag1","tag2","tag3"]
-                },
-            ]
+            blogs:[]
         }
     },
 }

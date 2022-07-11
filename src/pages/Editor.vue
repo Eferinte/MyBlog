@@ -17,78 +17,78 @@
     <div id="editorShell">
         <v-md-editor id="editor" v-model="text" height="550px"></v-md-editor>
     </div>
-    <div id="hint" ref="hint">
-        <div class="textCell">
-            {{hint}}
-        </div>
-    </div>
+    <Hint ref="hint"></Hint>
 </div>
 </template>
 
 <script>
 import userIcon from '../assets/myuserImg.jpg'
+import axios from 'axios';
+import store from '../main';
+import Hint from '../components/Hint.vue';
 export default {
-    name:"Editor",
-    methods:{
-        back(){
-            this.$router.push('/');
-            localStorage.setItem("draft",this.text);
-            localStorage.setItem("draft-title",this.title);
+    name: "Editor",
+    methods: {
+        back() {
+            this.$router.push("/");
+            localStorage.setItem("draft", this.text);
+            localStorage.setItem("draft-title", this.title);
         },
-        timeFunc1(){
-            console.log("消失")
-            this.$refs.hint.style.transition="1s";
-            this.$refs.hint.style.opacity="0";
-            this.$refs.hint.style.top="200px";
+        save() {
+            localStorage.setItem("draft", this.text);
+            localStorage.setItem("draft-title", this.title);
+                this.$refs.hint.doHint("保存成功");
         },
-        timeFunc2(){
-            console.log("消失")
-            this.$refs.hint.style.visibility="hidden";
-        },
-        doHint(text){         
-            this.hint=text   
-            console.log("提示")
-            this.$refs.hint.style.top="calc(50% - 25px)";
-            this.$refs.hint.style.opacity="1";
-            this.$refs.hint.style.visibility="visible";
-            this.$refs.hint.style.transition="0s";
-            setTimeout(this.timeFunc1,800);
-            setTimeout(this.timeFunc2,1200);
-        },
-        save(){
-            localStorage.setItem("draft",this.text);
-            localStorage.setItem("draft-title",this.title);
-            this.doHint("保存成功");
-
-        },
-        post(){
-            if(this.title.length == ""){
-                this.doHint("标题不能为空");
-            }else if(this.text.length<10){
-                this.doHint("正文不能少于10个字符");
+        post() {
+            if (this.title.length == "") {
+                this.$refs.hint.doHint("标题不能为空");
+            }
+            else if (this.text.length < 10) {
+                this.$refs.hint.doHint("正文不能少于10个字符");
+            }
+            else {
+                if (confirm("确认发布吗？")) {
+                    axios.get("http://localhost:8888/post", { params: {
+                            title: this.title,
+                            author: this.author,
+                            context: this.text,
+                        } }).then((Response) => {
+                        this.$refs.hint.doHint("发布成功");
+                    });
+                }
+                else {
+                    this.save();
+                }
             }
         }
     },
     data() {
         return {
-            userIcon:userIcon,
-            title:"",
-            text:"",
-            hint:"保存成功"
+            userIcon: userIcon,
+            title: "",
+            text: "",
+            hint: "保存成功"
+        };
+    },
+    computed: {
+        author() {
+            return store.state.username;
         }
     },
-    created(){
+    created() {
         console.log(window.innerWidth);
-        window.addEventListener('resize', () => {
-            if(window.innerWidth<1000){
-                this.$refs.icon.style.opacity="0";
-            }else{
-                this.$refs.icon.style.opacity="1";
+        window.addEventListener("resize", () => {
+            if (window.innerWidth < 1000) {
+                this.$refs.icon.style.opacity = "0";
+            }
+            else {
+                this.$refs.icon.style.opacity = "1";
             }
         });
-        this.text=localStorage.getItem("draft");
-        this.title=localStorage.getItem("draft-title");
-    }
+        this.text = localStorage.getItem("draft");
+        this.title = localStorage.getItem("draft-title");
+    },
+    components: { Hint }
 }
 </script>
 
@@ -162,22 +162,5 @@ export default {
 .shell{
     position: absolute;
     top: 0;
-}
-#hint{
-    position: absolute;
-    height: 50px;
-    width: 200px;
-    top: calc(50% - 25px);
-    left: calc(50% - 100px);
-    border: 4px;
-    background-color: #fff;
-    box-shadow: 0 5px 30px 10px rgb(0 0 0 / 10%);
-    z-index: 2000;
-    visibility:hidden;
-}
-.textCell{
-    width: fit-content;
-    height: fit-content;
-    margin: 10px auto;
 }
 </style>

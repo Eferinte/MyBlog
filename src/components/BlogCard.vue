@@ -1,10 +1,10 @@
 <template>
-  <div class="cardShell" @click="intoArticle()">
+  <div class="cardShell" @click="intoBlog()">
         <div class="title">
             {{title}}
         </div>
         <div class="brief">
-            {{brief}}
+
         </div>
         <div class="tagShell">
             <div class="tag" v-for="tag in TAGS" :key="tag" @click.stop="intoTag(tag)">
@@ -17,19 +17,15 @@
 <script>
 export default{
     name:"articleCard",
-    props:["title","brief","author","time","content","TAGS"],
+    props:["title","blogId"],
     methods: {
         //操作路由，跳转到对应的博文页
-        intoArticle(){
+        intoBlog(){
             this.$router.push({
                 name:"Blog",
-                // params:{
-                //     title:this.title,
-                //     author:this.author,
-                //     time:this.time,
-                //     content:this.content,
-                //     tags:this.TAGS
-                // }
+                params:{
+                    blogId:this.blogId
+                }
             })
         },
         //操作路由，跳转到对应Tag分类页面
@@ -39,6 +35,7 @@ export default{
         }
     },
     created(){
+        console.log("blogId=",this.blogId);
     }
 }
 </script>

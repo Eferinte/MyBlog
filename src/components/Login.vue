@@ -39,8 +39,9 @@ export default {
         }else{//登录成功
           let uid = response.data.uid;
           localStorage.setItem("uid",uid);//本地存储记录登录状态
+          localStorage.setItem("username",this.username);//本地存储记录登录状态
           this.$store.commit("setUid",uid);
-          console.log(localStorage.getItem("uid"));
+          this.$store.commit("setUsername",this.username);
           // 关闭登录窗口
           this.$store.commit("closeMask");
           this.$store.commit("closeLogin");
