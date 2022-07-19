@@ -4,12 +4,13 @@
       <div id="loginPart" v-show="maskShow" >
         <div id="loginMask"/>
         <Login v-show="loginShow"></Login>
+        <Recorder v-show="recorderShow"></Recorder>
         <!-- <HollowKnightCounter  v-show="select.recorder"></HollowKnightCounter> -->
       </div>
     </transition>
     <LeftBar></LeftBar>
     <div id="main">
-      <Head></Head>
+      <Head2></Head2>
       <br>
       <div id="mainBox">
         <router-view></router-view>
@@ -18,12 +19,13 @@
   </body>
 </template>
 <script>
-import Head from '../components/Head.vue'
+import Head2 from '../components/Head2.vue'
 import Login from '../components/Login.vue'
 import LeftBar from '../components/LeftBar.vue'
+import Recorder from '../components/Recorder.vue';
 // import HollowKnightCounter from './components/HollowKnightCounter.vue'
 export default {
-  components:{Head,Login,LeftBar},
+  components:{ Head2, Login, LeftBar, Recorder },
   name: 'Home',
   computed:{
     uid(){
@@ -34,6 +36,9 @@ export default {
     },
     loginShow(){
       return this.$store.state.loginShow;
+    },
+    recorderShow(){
+      return this.$store.state.recorderShow;
     }
   },
   created() {
@@ -103,11 +108,13 @@ export default {
 }
 
 #main{
+    background-image: url("../../public/assert/background.jpg");
+    background-size: 100% 180%;
     position: absolute;
     top: 0px;
     width: calc(100% - 100px);
     margin: 0;
-    height: 30%;
+    height: 200px;
     left: 100px;
     background-color: rgb(208, 231, 251);
     z-index: -5;

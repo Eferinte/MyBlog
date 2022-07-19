@@ -26,7 +26,8 @@ const store = createStore({
         username:undefined,
         maskShow:false,
         loginShow:false,
-        recorderShow:false
+        recorderShow:false,
+        hintText:"",
       }
     },
     mutations: {
@@ -38,7 +39,7 @@ const store = createStore({
       setUsername (state,username) {
         state.username=username
       },
-    //   清楚uid
+    //   清除uid
       clear(state){
         state.uid=undefined
         state.username=undefined
@@ -58,9 +59,25 @@ const store = createStore({
       // 关闭登录页
       closeLogin(state){
         state.loginShow=false
+      },
+      // 打开记录页
+      openRecorder(state){
+        state.recorderShow=true
+      },
+      // 关闭记录页
+      closeRecorder(state){
+        state.recorderShow=false
+      },
+      //设置提示信息
+      setHintText(state,text){
+        state.hintText=text
+      },
+      //清除提示信息
+      clearHint(state){
+        state.hintText=""
       }
     }
 })
-export default store
 
+export default store
 createApp(App).use(VueMarkdownEditor).use(VMdPreview).use(router).use(store).mount('#app')

@@ -15,17 +15,23 @@
             <img id="hollowKnightRecorder" class="cellImg" src="../assets/Pantheon_of_Hallownest.png"/>
           </div>
         </div>
+        <div class="cell" @click="openTimer">
+          <div class="imgShell">
+            <img id="timer" class="cellImg" src="../assets/timer.png"/>
+          </div>
+        </div>
     </div>
 </template>
 
 <script>
 import login from '../assets/login.png'
 import userIcon1 from '../assets/myuserImg.jpg'
+import store from '../main'
 export default {
     name:"LeftBar",
     methods: {
         userClick(){
-          // 跳转到个人主页
+          // 跳转到个人主页,登录逻辑交给路由守卫处理
           this.$router.push('/UserSpace')
         },
         openEditor(){
@@ -46,8 +52,9 @@ export default {
         //     this.$refs.userMask.style.opacity="0"
         // },
         openRecorder(){
-        // this.masked = true;
-        // this.select.recorder = true;
+          // 打开登录窗口
+          store.commit("openMask");
+          store.commit("openRecorder");
         },
         // closeRecorder(){
         //     this.masked = false;
@@ -119,6 +126,14 @@ export default {
   position: absolute;
   top: -30px;
   left: -10px;
+}
+#timer{
+  width: 50px;
+  height: 50px;
+  z-index: 0;
+  position: absolute;
+  top: 10px;
+  left: 10px;
 }
 .imgShell{
   position: relative;

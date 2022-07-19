@@ -25,7 +25,6 @@ export default {
     user-select:none;
     text-align:center;
     z-index:-4;
-    border-radius: 10px;
 }
 #bird{
     position:absolute;

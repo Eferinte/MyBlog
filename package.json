@@ -13,6 +13,7 @@
     "core-js": "^3.6.5",
     "editor.md": "^1.5.0",
     "jquery": "^3.6.0",
+    "matter-js": "^0.18.0",
     "mavon-editor": "^2.10.4",
     "prismjs": "^1.28.0",
     "vue": "^3.0.0",

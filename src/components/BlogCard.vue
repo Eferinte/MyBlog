@@ -35,7 +35,6 @@ export default{
         }
     },
     created(){
-        console.log("blogId=",this.blogId);
     }
 }
 </script>
@@ -44,7 +43,7 @@ export default{
 <style scoped>
     .cardShell{
         margin: 20px;
-        width: 300px;
+        width: 800px;
         height: 250px;
         background-color: white;
         border-radius: 5px;
@@ -56,7 +55,7 @@ export default{
         cursor:pointer
     }
     .title{
-        margin-top: 3%;
+        margin-top: 1%;
         background-color: aliceblue;
         width: 90%;
         height: 20%;

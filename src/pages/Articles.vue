@@ -1,7 +1,9 @@
 <template>
   <div class="articlesPart">
+    <transition-group name="flip-list" tag="blog-card">
         <blog-card v-for="blog in blogs" :key="blog.blog_id" :title="blog.title" :blogId="blog.blogId">
         </blog-card>
+    </transition-group>
   </div>
 </template>
 
@@ -39,12 +41,17 @@ export default{
             blogs:[]
         }
     },
+    unmounted() {
+        console.log("被销毁了")
+    },
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.flip-list-move {
+  transition: transform 0.8s ease;
+}
 .articlesPart{
     margin: auto;
     width: 1200px;
