@@ -11,7 +11,7 @@
                 </div>
             </div>
         </div>
-        <div class="change" @click="doChange">
+        <div class="change" @click="doChange" v-if="ifEf">
 
         </div>
         <div class="main" v-show="!show" v-if="!ds">
@@ -67,18 +67,18 @@ export default {
             let date = new Date();
             console.log(date);
             let strDate = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()
-            axios.get("http://localhost:8888/upRecorder",{params:{
+            axios.get(store.state.preUrl+"/upRecorder",{params:{
                 recorder:this.recorder,
                 date:strDate,
                 useTime:this.$refs.timer.getTime()
             }}).then((response)=>{
                 store.commit("setHintText","发布成功")
-                this.initMissTimes()
+                this.initMissTimes()//使用promise实现
                 this.show=!this.show
             })
         },
         initMissTimes(){        
-            axios.get("http://localhost:8888/missTimes").then((response) => {
+            axios.get(store.state.preUrl+"/missTimes").then((response) => {
                 let missTimes = response.data[0];
                 this.bosses.forEach(function (item) {
                     item.hitTimes = missTimes[item.name];
@@ -101,6 +101,12 @@ export default {
             item.iconSrc = preUrl + item.name + ".png";
         });
         this.initMissTimes();
+    },
+    computed:{
+        ifEf(){
+            console.log(store.state.username);
+            return store.state.username=="eferinte";
+        }
     },
     components: { StatueCell, TimeSelector }
 }
@@ -132,19 +138,21 @@ export default {
         /* background-color: #7b7777; */
         display: flex;
         flex-direction: row;
-        background-color: rgb(199, 193, 193);
+        background-color: #F2F1DC;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
     }
     .change{
         width: 30px;
         height: 400px;
-        background-color: #7b7777;
+        background-color: #c1c1c1;
         position: absolute;
         top: calc(50% - 200px);
         left: 30px;
+        transition: 0.25s;
     }
     .change:hover{
         cursor: pointer;
+        background-color: #a8a8a8;
     }
     .hitTimesText{
         margin: 0 auto; 
@@ -190,7 +198,7 @@ export default {
         margin:0;
         width: 1100px;
         height: 600px;
-        background-color: #ffffff;
+        background-color: #F2F1DC;
         z-index: 5;
         transition: 0.5s;
     }
@@ -198,7 +206,7 @@ export default {
         position: relative;
         top: 25px;
         left: calc(50% - 450px);
-        background-color: rgb(199, 193, 193);
+        background-color: #F2F1DC;
         width: 900px;
         height: 550px;
         display: flex;

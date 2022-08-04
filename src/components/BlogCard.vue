@@ -7,9 +7,9 @@
 
         </div>
         <div class="tagShell">
-            <div class="tag" v-for="tag in TAGS" :key="tag" @click.stop="intoTag(tag)">
+            <!-- <div class="tag" v-for="tag in TAGS" :key="tag" @click.stop="intoTag(tag)">
                 {{tag}}
-            </div>
+            </div> -->
         </div>
   </div>
 </template>
@@ -42,7 +42,6 @@ export default{
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
     .cardShell{
-        margin: 20px;
         width: 800px;
         height: 250px;
         background-color: white;
@@ -50,26 +49,31 @@ export default{
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
+        transition: 0.25s;
     }
-    .cardShell{
-        cursor:pointer
+    .cardShell:hover{
+        cursor:pointer;
+    }
+    .cardShell:active{
+        transform: scale(1.03);
     }
     .title{
         margin-top: 1%;
-        background-color: aliceblue;
+        background-color:#FBF7D4;
         width: 90%;
         height: 20%;
         font-size: 30px;
+        text-align: start;
     }
     .brief{
         text-align: left;
-        background-color: aliceblue;
+        background-color: #FBF7D4;
         width: 90%;
         height: 60%;
         font-size: 16px;
     }
     .tagShell{
-        background-color: aliceblue;
+        background-color: #FBF7D4;
         width: 90%;
         height: 10%;
         display: flex;

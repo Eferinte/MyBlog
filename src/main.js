@@ -1,6 +1,9 @@
 import { createApp } from 'vue'
 import { createStore } from 'vuex'
 
+// import ElementPlus from 'element-plus'
+// import 'element-plus/dist/index.css'
+
 import VueMarkdownEditor from '@kangc/v-md-editor';
 import VMdPreview from '@kangc/v-md-editor/lib/preview';
 import '@kangc/v-md-editor/lib/style/base-editor.css';
@@ -27,7 +30,10 @@ const store = createStore({
         maskShow:false,
         loginShow:false,
         recorderShow:false,
+        timerShow:false,
+        setTime:0,
         hintText:"",
+        preUrl:"http://localhost:50001"
       }
     },
     mutations: {
@@ -67,6 +73,22 @@ const store = createStore({
       // 关闭记录页
       closeRecorder(state){
         state.recorderShow=false
+      },
+      // 打开计时器
+      openTimer(state){
+        state.timerShow=true
+      },
+      // 关闭计时器
+      closeTimer(state){
+        state.timerShow=false
+      },
+      // 设置计时
+      setSetTime(state,value){
+        state.setTime=value
+      },
+      // 清除计时
+      clearSetTime(state){
+        state.setTime=0
       },
       //设置提示信息
       setHintText(state,text){

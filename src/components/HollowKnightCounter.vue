@@ -208,68 +208,6 @@ export default {
         switcherText:"添加数据",
         bosses:require("./bossData.json").boss,
         sortedBosses:[],
-        articles:[
-            {
-                title:"test-title",
-                brief:"test-brief",
-                aid:"001",
-                tags:["tag1","tag2","tag3"]
-            },
-            {
-                title:"test-title",
-                brief:"test-brief",
-                aid:"002",
-                tags:["tag1","tag2","tag3"]
-            },
-            {
-                title:"test-title",
-                brief:"test-brief",
-                aid:"003",
-                tags:["tag1","tag2","tag3"]
-            },
-            {
-                title:"test-title",
-                brief:"test-brief",
-                aid:"004",
-                tags:["tag1","tag2","tag3"]
-            },
-            {
-                title:"test-title",
-                brief:"test-brief",
-                aid:"005",
-                tags:["tag1","tag2","tag3"]
-            },
-            {
-                title:"test-title",
-                brief:"test-brief",
-                aid:"006",
-                tags:["tag1","tag2","tag3"]
-            },
-            {
-                title:"test-title",
-                brief:"test-brief",
-                aid:"007",
-                tags:["tag1","tag2","tag3"]
-            },
-            {
-                title:"test-title",
-                brief:"test-brief",
-                aid:"008",
-                tags:["tag1","tag2","tag3"]
-            },
-            {
-                title:"test-title",
-                brief:"test-brief",
-                aid:"009",
-                tags:["tag1","tag2","tag3"]
-            },
-            {
-                title:"test-title",
-                brief:"test-brief",
-                aid:"010",
-                tags:["tag1","tag2","tag3"]
-            },
-        ]
         }
     }
 }

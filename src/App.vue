@@ -1,21 +1,32 @@
 <template>
-  <div id="root">
-    <router-view></router-view>
+  <div id="root">    
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
     <Hint ref="rootHint"></Hint>
   </div>
 </template>
 <script>
 import Hint from './components/Hint.vue';
 import store from './main';
+import { getCookie } from './utils/cookies';
 // import HollowKnightCounter from './components/HollowKnightCounter.vue'
 export default {
     name: "App",
     created() {
-        // 读取本地登录状态
-        if (localStorage.getItem("uid")) {
-            this.$store.commit("setUid", localStorage.getItem("uid"));
+      // 读取本地登录状态
+      //使用cookies
+      setTimeout(()=>{
+        console.log("cookies=",getCookie("uid"),getCookie("username"));
+        if(getCookie("uid")){
+          this.$store.commit("setUid",getCookie('uid'));
+          this.$store.commit("setUsername",getCookie('username'));
         }
-        this.$router.push("/home");
+      },500)
+
+      this.$router.push("/home");
     },
     watch:{
       hintText(newText,oldText){
@@ -29,14 +40,24 @@ export default {
     computed:{
       hintText(){
         return store.state.hintText;
-      }
+      },
     },
     components: { Hint }
 }
 </script>
 
 <style>
+/* 过渡 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 #root{
-  transition: 0.3s;
+  transition: 0.25s;
 }
 </style>

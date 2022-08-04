@@ -20,12 +20,13 @@
 <script>
 import axios from 'axios'
 import store from '../main';
+import { setCookie } from '../utils/cookies';
 export default {
     name: "Login",
     methods: {
         // 提交表单登录
         login() {
-            axios.get("http://localhost:8888/login", {
+            axios.get(store.state.preUrl+"/login", {
                 params: {
                     username: this.username,
                     password: this.password
@@ -42,8 +43,11 @@ export default {
                 }
                 else { //登录成功
                     let uid = response.data.uid;
-                    localStorage.setItem("uid", uid); //本地存储记录登录状态
-                    localStorage.setItem("username", this.username); //本地存储记录登录状态
+                    // localStorage.setItem("uid", uid); //本地存储记录登录状态
+                    // localStorage.setItem("username", this.username); //本地存储记录登录状态
+                    //使用cookie存储
+                    setCookie("uid",uid,365);
+                    setCookie("username",this.username,365);
                     store.commit("setUid", uid);
                     store.commit("setUsername", this.username);
                     // 关闭登录窗口

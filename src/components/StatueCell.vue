@@ -22,8 +22,8 @@ export default {
             required: true
         },
         banned:{
-            type: Boolean,
-            default:false
+            type: Number,
+            default:0
         }
     },
     methods: {
@@ -56,7 +56,7 @@ export default {
             return !this.ifChosed?"none":"line-through"
         },
         backgroundColor(){
-            return !this.ifChosed?"rgb(199, 193, 193)":"#777777"
+            return !this.ifChosed?"#F2F1DC":"#A67468"
         },
         boxShadow(){
             return !this.ifChosed?"none":"0 0 15px 10px #974746"
@@ -88,7 +88,6 @@ export default {
     .statue2{
         width: 120px;
         height: 120px;
-        /* background-color: #7b7777; */
         display: flex;
         justify-content: flex-end;
         flex-direction: column;
