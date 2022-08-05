@@ -7,12 +7,7 @@
         </div>
         <div class="cell" @click="openEditor">
           <div class="imgShell">
-            <img id="editor" class="cellImg" src="../assets/editor.png"/>
-          </div>
-        </div>
-        <div class="cell" @click="openRecorder">
-          <div class="imgShell">
-            <img id="hollowKnightRecorder" class="cellImg" src="../assets/Pantheon_of_Hallownest.png"/>
+            <img id="editor" class="cellImg" src="../assets/editor2.png"/>
           </div>
         </div>
         <div class="cell" @click="openTimer">
@@ -21,16 +16,27 @@
             <!-- <div class="leftTime">00:00:00</div> -->
           </div>
         </div>
+        <div class="cell" @click="openManga">
+          <div class="imgShell">
+            <img id="manga" class="cellImg" src="../assets/manga.png"/>
+            <!-- <div class="leftTime">00:00:00</div> -->
+          </div>
+        </div>
         <div class="cell" @click="doTest">
           <div class="imgShell">
             <img id="test" class="cellImg" src="../assets/test.png"/>
+          </div>
+        </div>
+        <div class="cell" @click="openRecorder">
+          <div class="imgShell">
+            <img id="hollowKnightRecorder" class="cellImg" src="../assets/Pantheon_of_Hallownest.png"/>
           </div>
         </div>
     </div>
 </template>
 
 <script>
-import login from '../assets/login.png'
+import login from '../assets/user.png'
 import userIcon1 from '../assets/myuserImg.jpg'
 import store from '../main'
 import { test } from '../utils/test'
@@ -54,16 +60,12 @@ export default {
       openRecorder(){
         // 打开记录窗口
         //是否登录
-        if(!store.state.uid){
-            // 返回 false 以取消导航
-            // 打开登录窗口
-            store.commit("openMask");
-            store.commit("openLogin");
-            return false
-        }else{
           store.commit("openMask");
           store.commit("openRecorder");
-        }
+      },
+      openManga(){
+        // 跳转到创建页
+        this.$router.push('/manga')
       },
       openTimer(){
         // 打开沙漏窗口
@@ -102,9 +104,6 @@ export default {
 </script>
 
 <style scoped>
-#test{
-  transform: scale(0.7);
-}
 .leftTime{
   position: relative;
   top: 24px;
@@ -140,20 +139,21 @@ export default {
   z-index: 0;
 }
 #user{
-  width: 100px;
-  height: 100px;
+  width: 50px;
+  height: 50px;
   z-index: 0;
   position: absolute;
-  top: -15px;
-  left: -15px;
+  top: 10px;
+  left: 10px;
 }
 #editor{
   width: 50px;
   height: 50px;
   z-index: 0;
   position: absolute;
-  top: 12px;
-  left: 8px;
+  top: 10px;
+  left: 11px;
+  opacity: 0.8;
 }
 #hollowKnightRecorder{
   width: 90px;
@@ -169,6 +169,16 @@ export default {
   position: absolute;
   top: 10px;
   left: 10px;
+  transform: scale(0.9);
+  opacity: 0.65;
+}
+#manga{
+  transform: scale(0.7);
+  opacity: 0.7;
+}
+#test{
+  transform: scale(0.7);
+  opacity: 0.7;
 }
 .imgShell{
   position: relative;

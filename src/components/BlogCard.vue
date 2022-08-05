@@ -1,5 +1,5 @@
 <template>
-  <div class="cardShell" @click="intoBlog()">
+  <div class="cardShell" @click="intoBlog()" id="card">
         <div class="title">
             {{title}}
         </div>
@@ -21,6 +21,7 @@ export default{
     methods: {
         //操作路由，跳转到对应的博文页
         intoBlog(){
+            document.getElementById("card").style="transition: 0.3s ease-out;transform: scaleY(3) scaleX(2);opacity:0"
             this.$router.push({
                 name:"Blog",
                 params:{
@@ -53,9 +54,6 @@ export default{
     }
     .cardShell:hover{
         cursor:pointer;
-    }
-    .cardShell:active{
-        transform: scale(1.03);
     }
     .title{
         margin-top: 1%;

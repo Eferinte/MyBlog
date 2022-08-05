@@ -194,7 +194,7 @@ export default {
     .dialogShell{
         position: fixed;
         top: calc(50% - 300px);
-        left: calc(50% - 500px);
+        left: calc(50% - 550px);
         margin:0;
         width: 1100px;
         height: 600px;

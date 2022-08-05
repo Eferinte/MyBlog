@@ -4,6 +4,7 @@ import Home from '../pages/Home'
 import Blog from '../pages/Blog'
 import UserSpace from '../pages/UserSpace'
 import Editor from '../pages/Editor'
+import Manga from '../pages/Manga'
 import store from '../main'
 const router = createRouter({
     history:createWebHistory(),
@@ -37,6 +38,11 @@ const router = createRouter({
             name:"Blog",
             path:'/blog',
             component:Blog,
+        },
+        {
+            name:"Manga",
+            path:'/manga',
+            component:Manga,
         }
     ]
 })

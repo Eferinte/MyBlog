@@ -9,9 +9,9 @@
     </div>
     <div class="BlogShell">
         <div class="headLine">
-                <span class="centerText title" >
+            <span class="centerText title" >
                 {{data.title}}
-                </span>
+            </span>
         </div>
         <div class="line">
 
@@ -31,10 +31,16 @@
                     {{data.sub_date}}
                 </span>
             </div>
-            <div class="ops">                
+            <div style="margin:auto"></div>
+            <div class="ops" v-if="ifAuthor">
+                <div class="btn" @click="unAlter" v-if="ifAlter">
+                    <span class="centerText" >
+                        取消修改
+                    </span>
+                </div>
                 <div class="btn" @click="alter" id="alter">
                     <span class="centerText" >
-                        修改
+                        {{btn2Name}}
                     </span>
                 </div>
                 <div class="btn" @click="del" id="del">
@@ -45,7 +51,10 @@
             </div>
         </div>
         <div class="context">
-            <v-md-preview id="mdView" :text="data.context" height="550px"></v-md-preview>
+            <v-md-preview class="mdPart" :text="data.context" height="550px" v-if="!ifAlter"></v-md-preview>
+            <div class="editorShell" style="width:1200px" v-if="ifAlter">
+                <v-md-editor v-model="newContext" height="550px"></v-md-editor>
+            </div>
         </div>
         <div class="tagShell">
             <div class="tag" v-for="tag in tags" :key="tag" @click.stop="intoTag(tag)">
@@ -61,7 +70,6 @@
 import axios from 'axios'
 import store from '../main';
 import Foot from '../components/Foot.vue';
-// import Head2 from '../components/Head2.vue';
 export default{
     name: "atricle",
     methods: {
@@ -75,14 +83,35 @@ export default{
                 this.data = Response.data;
                 let subDate = new Date(this.data.sub_date);
                 this.data.sub_date = subDate.getFullYear() + "-" + (subDate.getMonth() + 1) + "-" + subDate.getDate();
-                console.log(this.data);
+                this.ifAuthor = this.data.author==store.state.username?true:false;
             });
         },
         doBack() {
             this.$router.push("/");
         },
+        unAlter(){
+            this.ifAlter=false;
+        },
         alter(){
-
+            if(!this.ifAlter){
+                this.ifAlter=true;
+                this.newContext = this.data.context;
+            }else{
+                //提交修改
+                axios.get(store.state.preUrl+"/updateBlog", { params: {
+                    username: store.state.username,
+                    author:this.data.author,
+                    blogId: this.data.blog_id,
+                    newContext:this.newContext
+                } }).then((Response) => {
+                    console.log(Response.data);
+                    if(Response.data=="update success"){
+                        store.commit("setHintText","修改成功");
+                        this.ifAlter = false;
+                        this.init();
+                    }
+                });
+            }
         },
         del(){
             if(confirm("确认删除改博文吗？")){
@@ -102,7 +131,16 @@ export default{
     data() {
         return {
             data: {},
+            ifAlter:false,
+            ifAuthor:false,
+            newContext:"",
         };
+    },
+    computed:{
+        btn2Name(){
+            return this.ifAlter?"确认修改":"修改";    
+        },
+
     },
     components: { Foot }
 }
@@ -163,19 +201,16 @@ export default{
     .BlogShell{
         margin: auto;
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
         justify-content: center;
     }
     .headLine{
-        margin: auto;;
+        margin: 10px auto;;
         width: 1200px;
         height: 70px;
         display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start;
         background-color: #fff;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
-        margin: 10px;
         font-size: 32px;
     }
     .line{
@@ -222,7 +257,16 @@ export default{
         display: block;
         margin: auto;
     }
-    #mdView{
+    .mdPart{
+        margin: auto;
+        width: 1200px;
+        background-color: #fff;
+        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
+        height: fit-content;
+        min-height: 500px;
+    }
+    .editorShell{
+        margin: auto;
         width: 1200px;
         background-color: #fff;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);

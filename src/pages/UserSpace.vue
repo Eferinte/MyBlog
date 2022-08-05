@@ -19,12 +19,13 @@
 
 <script>
 import userIcon from '../assets/myuserImg.jpg'
+import { delCookie } from '../utils/cookies';
 export default {
     name:"UserSpace",
     methods:{
         logout(){
-            localStorage.removeItem('uid');
-            localStorage.removeItem('username');
+            delCookie("username")
+            delCookie("uid")
             this.$store.commit("clear");
             this.$router.push('/');
         },
