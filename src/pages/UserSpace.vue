@@ -1,12 +1,13 @@
 <template>
     <div id="head">
+        <Back></Back>
         <div id="iconShell">
             <img style="height:100%;width:100%" :src="userIcon"/>
         </div>
         <div id="optionShell">
-            <div class="cell">
+            <!-- <div class="cell">
                 <button class="button1" @click="back">返回主页</button>
-            </div>
+            </div> -->
             <div class="cell">
                 <button class="button1" @click="changePassword">修改密码</button>
             </div>
@@ -20,27 +21,28 @@
 <script>
 import userIcon from '../assets/myuserImg.jpg'
 import { delCookie } from '../utils/cookies';
+import Back from '../components/Back.vue';
 export default {
-    name:"UserSpace",
-    methods:{
-        logout(){
-            delCookie("username")
-            delCookie("uid")
+    name: "UserSpace",
+    methods: {
+        logout() {
+            delCookie("username");
+            delCookie("uid");
             this.$store.commit("clear");
-            this.$router.push('/');
+            this.$router.push("/");
         },
-        back(){
-            this.$router.push('/');
+        back() {
+            this.$router.push("/");
         },
-        changePassword(){
-
+        changePassword() {
         }
     },
     data() {
         return {
-            userIcon:userIcon,
-        }
+            userIcon: userIcon,
+        };
     },
+    components: { Back }
 }
 </script>
 

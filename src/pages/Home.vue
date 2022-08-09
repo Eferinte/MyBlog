@@ -1,9 +1,11 @@
 <template>
-  <body class="mainBody">
+<div class="shell">
+  <div class="background"></div>
+  <div class="mainBody">
     <transition name="fade">
       <div id="loginPart" v-show="maskShow">
         <div id="loginMask" />
-        <Login v-show="loginShow"></Login>
+        <Login v-if="loginShow"></Login>
         <Recorder v-show="recorderShow"></Recorder>
         <Timer v-show="timerShow"></Timer>
       </div>
@@ -15,7 +17,9 @@
         <router-view></router-view>
       </div>
     </div>
-  </body>
+  </div>  
+</div>
+
 </template>
 <script>
 import Head2 from '../components/Head2.vue'
@@ -50,6 +54,18 @@ export default {
 </script>
 
 <style scoped>
+.background{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  /* background-image: url("../assets/background.jpg"); */
+  background-size: cover;
+  z-index: -999;
+  /* opacity: 0; */
+  background-color: #f4f5f7;
+}
 .bosses-enter-from,
 .bosses-leave-to {
   opacity: 0;
@@ -66,14 +82,6 @@ export default {
 .fade-leave-to {
   opacity: 0;
 }
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 .mainBody{
   display: flex;
   flex-direction: row;
@@ -82,12 +90,10 @@ export default {
   /* 这个水平居中方法记得收录 */
   position: absolute;
   margin-top: 7%;
-  margin-left: -600px;
+  margin-left: -500px;
   margin-bottom: 3%;
   left: 50%;
-  background-color: #B0A69A;
-  width: 1200px;
-  border-radius:  10px 10px 0px 0px;
+  width: 1000px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -112,10 +118,9 @@ export default {
   background-size: 100% 180%;
   position: absolute;
   top: 0px;
-  width: 1200px;
-  margin-left: calc(50% - 650px);
+  width: 1000px;
+  margin-left: calc(50% - 500px);
   height: 200px;
-  left: 100px;
   background-color: rgb(208, 231, 251);
   z-index: -5;
   text-align:center;

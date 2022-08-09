@@ -1,10 +1,6 @@
 <template>
 <div class="shell">
-    <transition name="iconTrans">
-        <div class="back" @click="doBack">
-            <img src="../assets/back.png" style="height:100%">
-        </div>
-    </transition>
+    <Back></Back>
     <div class="head">
     </div>
     <div class="BlogShell">
@@ -52,7 +48,7 @@
         </div>
         <div class="context">
             <v-md-preview class="mdPart" :text="data.context" height="550px" v-if="!ifAlter"></v-md-preview>
-            <div class="editorShell" style="width:1200px" v-if="ifAlter">
+            <div class="editorShell" style="width:1000px" v-if="ifAlter">
                 <v-md-editor v-model="newContext" height="550px"></v-md-editor>
             </div>
         </div>
@@ -70,6 +66,7 @@
 import axios from 'axios'
 import store from '../main';
 import Foot from '../components/Foot.vue';
+import Back from '../components/Back.vue';
 export default{
     name: "atricle",
     methods: {
@@ -85,9 +82,6 @@ export default{
                 this.data.sub_date = subDate.getFullYear() + "-" + (subDate.getMonth() + 1) + "-" + subDate.getDate();
                 this.ifAuthor = this.data.author==store.state.username?true:false;
             });
-        },
-        doBack() {
-            this.$router.push("/");
         },
         unAlter(){
             this.ifAlter=false;
@@ -142,7 +136,7 @@ export default{
         },
 
     },
-    components: { Foot }
+    components: { Foot, Back }
 }
 </script>
 
@@ -172,25 +166,13 @@ export default{
     .shell{
         background-color: #b5c0ed;
     }
-    .back{
-        position: fixed;
-        height: 70px;
-        width: 70px;
-        top: 20px;
-        left: 30px;
-        transition: 0.4s;
-    }
-    .back:hover{
-        cursor: pointer;
-        transform: rotate(360deg) scale(1.1);
-    }
 
     .head{
         background-image: url("../../public/assert/background.jpg");
         background-size: 100% 180%;
         margin-top: 0px;
-        width: 1200px;
-        margin-left: calc(50% - 600px);
+        width: 1000px;
+        margin-left: calc(50% - 500px);
         height: 200px;
         left: 100px;
         background-color: rgb(208, 231, 251);
@@ -206,16 +188,17 @@ export default{
     }
     .headLine{
         margin: 10px auto;;
-        width: 1200px;
+        width: 1000px;
         height: 70px;
         display: flex;
         background-color: #fff;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
         font-size: 32px;
+        border-radius: 5px;
     }
     .line{
         margin: auto;
-        width: 1200px;
+        width: 1000px;
         height: 30px;
         display: flex;
         flex-wrap: wrap;
@@ -223,6 +206,7 @@ export default{
         /* box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%); */
         margin-bottom: 10px;
         flex-direction: row;
+        border-radius: 5px;
     }
     .ops{
         margin: auto;
@@ -259,7 +243,7 @@ export default{
     }
     .mdPart{
         margin: auto;
-        width: 1200px;
+        width: 1000px;
         background-color: #fff;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
         height: fit-content;
@@ -267,10 +251,16 @@ export default{
     }
     .editorShell{
         margin: auto;
-        width: 1200px;
+        width: 1000px;
         background-color: #fff;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
         height: fit-content;
         min-height: 500px;
+    }
+    .context{
+        border-radius: 5px;
+        width: 1000px;
+        overflow: hidden;
+        margin: auto;
     }
 </style>

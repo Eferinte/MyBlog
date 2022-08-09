@@ -65,7 +65,8 @@ export default {
       },
       openManga(){
         // 跳转到创建页
-        this.$router.push('/manga')
+        store.commit("setHintText","该模块暂时不可用")
+        // this.$router.push('/manga')
       },
       openTimer(){
         // 打开沙漏窗口
@@ -153,7 +154,6 @@ export default {
   position: absolute;
   top: 10px;
   left: 11px;
-  opacity: 0.8;
 }
 #hollowKnightRecorder{
   width: 90px;
@@ -170,15 +170,12 @@ export default {
   top: 10px;
   left: 10px;
   transform: scale(0.9);
-  opacity: 0.65;
 }
 #manga{
   transform: scale(0.7);
-  opacity: 0.7;
 }
 #test{
   transform: scale(0.7);
-  opacity: 0.7;
 }
 .imgShell{
   position: relative;

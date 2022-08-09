@@ -1,15 +1,29 @@
 <template>
-<div class="shell">
+<div class="shell">    
+    <Back @click="beforeBack"></Back>
     <div id="head">
-        <div id="iconShell" ref="icon" :style="{opacity: iconOpacityValue}">
+        <!-- <div id="iconShell" ref="icon" :style="{opacity: iconOpacityValue}">
             <img style="height:100%;width:100%" :src="userIcon"/>
-        </div>
+        </div> -->
         <div id="titleShell" :style="{left:editorLeft}">
-            <input class="input1" placeholder="请输入标题" v-model="title" @change="titleCheck">
+            <input id="title" class="input1" placeholder="请输入标题" v-model="uniDraft.title" @change="titleCheck" @keydown="enter">
+            <div class="tagShell">
+                <div class="tagItem" v-for="(tag , index) in uniDraft.tags" :key="tag">
+                    <div class="tagText">
+                        <div class="textShell tag">
+                            {{tag}}
+                        </div>
+                    </div>
+                    <div class="tagDel" @click="tagDel(index)">
+                        <img src="../assets/quit.png" style="height:50%;margin: auto;">
+                    </div>
+                </div>
+                <input id="tag" class="input1 tag" placeholder="输入后回车创建标签" v-model="tagInput" @change="titleCheck" @keydown="createTag">
+            </div>
             <div class="operations">
-                <button class="button1" @click="back">返回主页</button>
+                <!-- <button class="button1" @click="back">返回主页</button> -->
                 <button class="button1" id="addNew" @click="addNew" ref="addNew">新建</button>
-                <button class="button1" @click="deleteDraft">删除</button>
+                <button class="button1" @click="deleteDraft(false)">删除</button>
                 <button class="button1" @click="save">保存</button>
                 <button class="button1" @click="post" style="margin-right:0">发布</button>
             </div>
@@ -17,14 +31,14 @@
 
     </div>
     <div id="fileShell" :style="{opacity: iconOpacityValue}">
-        <div :class="this.index==index?'activeView':'view'" v-for="(draft,index) in this.drafts" :key="draft.title" @click="choose(index)">
-            <div style="margin:5px auto">
+        <div :class="this.index==index?'activeView':'view'"  v-for="(draft,index) in this.drafts" :key="draft.title" @click="choose(index)">
+            <div class="textShell file" :style="{fontSize:dynaSize(draft.title)}">
                 {{draft.title}}
             </div>
         </div>
     </div>
     <div id="editorShell" :style="{left:editorLeft}">
-        <v-md-editor id="editor" v-model="text" :height="editorHeight"></v-md-editor>
+        <v-md-editor id="editor" v-model="uniDraft.context" :height="editorHeight" tab-size=4></v-md-editor>
     </div>
 </div>
 </template>
@@ -33,87 +47,116 @@
 import userIcon from '../assets/myuserImg.jpg'
 import axios from 'axios';
 import store from '../main';
+import Back from '../components/Back.vue';
 export default {
     name: "Editor",
     methods: {
-        titleCheck(){
-            if(!(this.title.length>0)){//回滚
-                alert("标题不能为空")
-                this.title = this.oldDraft.title;
-            }else{
-                this.oldDraft.title = this.title;
-            }
-        },
-        refresh(){
-            this.title = this.drafts[this.index].title;
-            this.text = this.drafts[this.index].text;
-        },
-        back() {
-            this.$router.push("/");
+        beforeBack(){
             this.save();
         },
-        addNew(){
-            console.log("addNew");
-            if(this.drafts.length>=3){
-                document.getElementById("addNew").className="shakeClass";
-                setTimeout(()=>{
-                    document.getElementById("addNew").className="button1";
-                },400)
-            }else{
-                if(this.drafts.length!=0){
-                    this.save()
+        enter(e){//重载回车事件
+            if(e.keyCode==13){
+                document.getElementById('tag').focus();
+            }
+        },
+        createTag(e){
+            if((e.keyCode==13)&&(this.tagInput.length>0)){
+                this.uniDraft.tags.push(this.tagInput);
+                this.tagInput = "";
+            }
+        },
+        tagDel(index){
+            this.uniDraft.tags.splice(index,1);
+        },
+        formatTags(tagList){
+            let formatTag = ""
+            tagList.forEach((item)=>{
+                formatTag += "#"+item
+            })
+            return formatTag;
+        },
+        titleCheck() {
+            console.log(this.drafts)
+            if (!(this.uniDraft.title.length > 0)) { //回滚
+                alert("标题不能为空");
+                this.uniDraft.title = this.drafts[this.index].title;
+                document.getElementById('title').focus();
+            }
+        },
+        refresh() {
+            console.log("refresh");
+            console.log(JSON.stringify(this.uniDraft),"=?????=",JSON.stringify(this.drafts[this.index]));
+            this.uniDraft.title = this.drafts[this.index].title;
+            this.uniDraft.tags = [...this.drafts[this.index].tags];//扩展运算符深拷贝数组
+            this.uniDraft.context = this.drafts[this.index].context;
+            console.log(JSON.stringify(this.uniDraft),"=?????=",JSON.stringify(this.drafts[this.index]));
+        },
+        addNew() {
+            if (this.drafts.length >= 3) {
+                document.getElementById("addNew").className = "shakeClass";
+                setTimeout(() => {
+                    document.getElementById("addNew").className = "button1";
+                }, 400);
+                store.commit("setHintText","草稿已满")
+            }
+            else {
+                if (this.drafts.length != 0) {
+                    this.save();
                 }
                 this.index = this.drafts.length;
                 this.drafts.push({
-                    title:"无标题",
-                    text:""
-                })
-                this.refresh()
-                console.log("this.index=",this.index);
+                    title: "无标题",
+                    tags:[],
+                    context: "",
+                });
+                this.refresh();
+                console.log("this.index=", this.index);
             }
         },
-        deleteDraft(force=false){
-            if(force||confirm("确认删除当前草稿吗？")){
-                if(this.drafts.length>1){
-                    this.drafts.splice(this.index,1);
+        deleteDraft(force = false) {
+            console.log("[deleteDraft]:force=",force);
+            if (force || confirm("确认删除当前草稿吗？")) {
+                if (this.drafts.length > 1) {
+                    this.drafts.splice(this.index, 1);
                     this.index = 0;
-                }else{
-                    this.drafts.splice(this.index,1);
+                }
+                else {
+                    this.drafts.splice(this.index, 1);
                     this.index--;
                     this.addNew();
                 }
                 localStorage.setItem("drafts", JSON.stringify(this.drafts));
-                this.refresh()
+                this.refresh();
             }
         },
         save() {
-            if((this.drafts[this.index].title!=this.title)||(this.drafts[this.index].text!=this.text)){
-                this.drafts[this.index]=
-                {
-                    title:this.title,
-                    text:this.text
-                }
+            if(JSON.stringify(this.uniDraft)!=JSON.stringify(this.drafts[this.index])){
+                console.log("执行保存");
+                this.drafts[this.index].title =this.uniDraft.title;
+                this.drafts[this.index].tags =[...this.uniDraft.tags];
+                this.drafts[this.index].context =this.uniDraft.context;
                 localStorage.setItem("drafts", JSON.stringify(this.drafts));
-                store.commit("setHintText","保存成功");
-                this.oldDraft = this.drafts[this.index];
+                store.commit("setHintText", "保存成功");
             }
+
         },
         post() {
-            if (this.title.length == "") {
-                store.commit("setHintText","标题不能为空")
+            if (this.uniDraft.title.length == "") {
+                store.commit("setHintText", "标题不能为空");
             }
-            else if (this.text.length < 10) {
-                store.commit("setHintText","正文不能少于10个字符")
+            else if (this.uniDraft.context.length < 10) {
+                store.commit("setHintText", "正文不能少于10个字符");
             }
             else {
                 if (confirm("确认发布吗？")) {
-                    axios.get(store.state.preUrl+"/post", { params: {
-                            title: this.title,
+                    axios.get(store.state.preUrl + "/post", { params: {
+                            title: this.uniDraft.title,
                             author: this.author,
-                            context: this.text,
+                            context: this.uniDraft.context.replaceAll("'","\\'"),//转义引号
+                            tags:this.formatTags(this.uniDraft.tags)
                         } }).then((Response) => {
-                        store.commit("setHintText","发布成功")
-                        this.deleteDraft(true)
+                        store.commit("setHintText", "发布成功");
+                        this.deleteDraft(true);
                     });
                 }
                 else {
@@ -121,32 +164,44 @@ export default {
                 }
             }
         },
-        choose(index){
-            this.save()
-            this.index = index
-            this.oldDraft = this.drafts[this.index]
-            console.log("this.index=",index);
-            this.refresh()
+        choose(index) {
+            this.save();
+            this.index = index;
+            this.refresh();
+            console.log("this.index=", index);
+        },
+        dynaSize(title){
+            //接受0-1的值，返回0-1的值
+            let smooth = (x)=>{
+                let ans = (16-(16*x*x))^(1/2)
+                return ans/16
+            }
+            let ans = smooth(title.length/25)
+            console.log("ans=",ans);
+            return (6+Math.floor(20*ans))+"px";
         }
     },
     data() {
         return {
             userIcon: userIcon,
-            drafts:[],
-            oldDraft:{},//提供历史快照和回滚支持
-            title:"",
-            text:"",
-            index:0,
-            iconStyle:"opacity:1;transition: 0.3s;",
-            iconOpacityValue:1,
-            editorLeft:'15%',
+            drafts: [],
+            tagInput:"",
+            uniDraft: {
+                title:"",
+                tags:[],
+                context:""
+            },
+            index: 0,
+            iconStyle: "opacity:1;transition: 0.3s;",
+            iconOpacityValue: 1,
+            editorLeft: "15%",
         };
     },
     computed: {
         author() {
             return store.state.username;
         },
-        editorHeight(){
+        editorHeight() {
             return "550px";
         },
     },
@@ -154,27 +209,68 @@ export default {
         console.log(window.innerWidth);
         window.addEventListener("resize", () => {
             if (window.innerWidth < 1000) {
-                this.iconOpacityValue=0;
-                this.editorLeft='10%';
+                this.iconOpacityValue = 0;
+                this.editorLeft = "10%";
             }
-            else{
-                this.iconOpacityValue=1;
-                this.editorLeft='15%';
+            else {
+                this.iconOpacityValue = 1;
+                this.editorLeft = "15%";
             }
         });
-        let drafts = JSON.parse(localStorage.getItem("drafts"))
-        if(drafts){
+        let drafts = JSON.parse(localStorage.getItem("drafts"));
+        if (drafts) {
             this.drafts = drafts;
-            this.title = this.drafts[this.index].title;
-            this.text = this.drafts[this.index].text;
-            this.oldDraft =  this.drafts[this.index];
+            this.refresh();
         }
-        console.log("drafts=",this.drafts);
     },
+    components: { Back }
 }
 </script>
 
 <style scoped>
+.tagShell{
+    display: flex;
+    flex-direction: row;
+    background-color: #fff;
+    margin: 10px 0;
+    box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+}
+.tagItem{
+    display: flex;
+    flex-direction: row;
+    padding: 0 5px;
+    margin: 5px;
+    border: solid 1px rgb(114, 155, 155);
+    border-radius: 8px;
+}
+.tagText{
+    white-space: nowrap;
+    width: fit-content;
+    font-size: 8px;
+    display: flex;
+    justify-content: center;
+}
+.tag.textShell{
+    padding: 2px 5px;
+    margin: auto;
+    text-align: center;
+}
+.file.textShell{
+    padding: 2px 5px;
+    margin: auto;
+}
+.tagDel{
+    height: 20px;
+    display: flex;
+    justify-content: center;
+}
+.tagDel:hover{
+    cursor: pointer;
+}
+.tag.input1{
+    box-shadow:none;
+}
+
 @keyframes shake{
     0%   {transform:translateX(3px);}
     20%   {transform:translateX(-6px);}
@@ -294,7 +390,7 @@ export default {
 }
 #editorShell{
     position: absolute;
-    top: 130px;
+    top: 170px;
     left: 15%;
     width: 80%;
     margin: auto;

@@ -18,14 +18,11 @@ export default {
     created() {
       // 读取本地登录状态
       //使用cookies
-      setTimeout(()=>{
-        console.log("cookies=",getCookie("uid"),getCookie("username"));
-        if(getCookie("uid")){
-          this.$store.commit("setUid",getCookie('uid'));
-          this.$store.commit("setUsername",getCookie('username'));
-        }
-      },500)
-
+      console.log("cookies=",getCookie("uid"),getCookie("username"));
+      if(getCookie("uid")){
+        this.$store.commit("setUid",getCookie('uid'));
+        this.$store.commit("setUsername",getCookie('username'));
+      }
       this.$router.push("/home");
     },
     watch:{
@@ -59,5 +56,6 @@ export default {
 }
 #root{
   transition: 0.25s;
+  margin: 0;
 }
 </style>

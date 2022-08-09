@@ -1,11 +1,16 @@
 <template>
-  <div class="articlesPart">
-    <transition-group name="list" tag="blog-card">
-        <div class="cardShell" v-for="blog in blogs" :key="blog.blogId">
-            <blog-card  :title="blog.title" :blogId="blog.blogId"></blog-card>
-        </div>
-    </transition-group>
-  </div>
+<div>
+    <div class="articlesPart">
+        <transition-group name="list" tag="blog-card">
+            <div class="cardShell" v-for="blog in blogs" :key="blog.blogId" >
+                <blog-card  :title="blog.title" :blogId="blog.blogId" :brief="blog.brief" :subDate="blog.subDate" :tags="blog.tags"></blog-card>
+            </div>
+        </transition-group>
+    </div>
+    <div class="noMore">
+        <div class="text">没有更多</div>
+    </div>
+</div>
 </template>
 
 <script>
@@ -16,9 +21,6 @@ export default{
     name:"atricle",
     components:{BlogCard},
     methods: {
-        intoTag(){
-            
-        },
         //初始化请求数据
         init(){
             axios.get(store.state.preUrl+'/all_blogs').then((Response)=>{
@@ -29,7 +31,9 @@ export default{
                         title:obj.title,
                         author:obj.author,
                         subDate:obj.sub_date,
-                        blogId:obj.blog_id
+                        blogId:obj.blog_id,
+                        brief:obj.context,
+                        tags:obj.tags
                     })
                 }
             });
@@ -79,12 +83,25 @@ export default{
     display: flex;
     justify-content: center;
     position: relative;
-
 }
 .articlesPart{
     margin: auto;
-    width: 1200px;
+    width: 1000px;
     display: flex;
     flex-direction: column;
+    background-color: #b3ada5;
+    border-radius:  5px 5px 0 0 ;
+}
+.noMore{
+    height: 75px;
+    background-color: #b3ada5;
+    display: flex;
+}
+.text{
+    margin: auto;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 10px black;
 }
 </style>
