@@ -4,6 +4,7 @@
         <div id="iconShell">
             <img style="height:100%;width:100%" :src="userIcon"/>
         </div>
+        {{username}}
         <div id="optionShell">
             <!-- <div class="cell">
                 <button class="button1" @click="back">返回主页</button>
@@ -22,6 +23,7 @@
 import userIcon from '../assets/myuserImg.jpg'
 import { delCookie } from '../utils/cookies';
 import Back from '../components/Back.vue';
+import store from '../main';
 export default {
     name: "UserSpace",
     methods: {
@@ -40,6 +42,7 @@ export default {
     data() {
         return {
             userIcon: userIcon,
+            username:store.state.username
         };
     },
     components: { Back }

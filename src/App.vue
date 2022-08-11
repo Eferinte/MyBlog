@@ -22,6 +22,7 @@ export default {
       if(getCookie("uid")){
         this.$store.commit("setUid",getCookie('uid'));
         this.$store.commit("setUsername",getCookie('username'));
+        this.$store.commit("setToken",getCookie('token'));
       }
       this.$router.push("/home");
     },

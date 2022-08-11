@@ -57,7 +57,9 @@ export default{
             return subDate.getFullYear() + "-" + (subDate.getMonth() + 1) + "-" + subDate.getDate();
         },
         TAGS(){
-            if(this.tags==undefined){
+            console.log("[LOG]title=",this.title,"tags=",this.tags)
+            let str = new String(this.tags);
+            if(str.indexOf("#")==-1){
                 return ["该文章暂无标签"]
             }else{
                 let list =[];

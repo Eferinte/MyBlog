@@ -85,13 +85,11 @@
       </div>  
     </div>  
   </transition>
-
-
 </div>
-
 </template>
 
 <script>
+import Qs from 'qs'
 import axios from 'axios'
 import store from '../main';
 import { setCookie } from '../utils/cookies';
@@ -100,6 +98,10 @@ export default {
     methods: {
         // 提交表单登录
         login() {
+          let axiosInstance = axios.create({
+            baseURL: "http://localhost:50001",
+            timeout: 1000,
+          });
           if(this.username==""){
             document.getElementById("unameInput1").className="shakeLoginInput";
             setTimeout(()=>{
@@ -111,71 +113,79 @@ export default {
               document.getElementById("pwdInput1").className="loginInput";
             },400)
           }else{
-            axios.get(store.state.preUrl+"/login", {
-                params: {
-                    username: this.username,
-                    password: this.password
-                }
-            }).then((response) => {
-                console.log(response.data);
-                if (response.data == "unfound user") { //用户不存在
-                    store.commit("setHintText","用户名或密码错误")
-                }
-                else if (response.data == "wrong password") { //密码错误
-                    store.commit("setHintText","用户名或密码错误")
-                }
-                else { //登录成功
-                    let uid = response.data.uid;
-                    // localStorage.setItem("uid", uid); //本地存储记录登录状态
-                    // localStorage.setItem("username", this.username); //本地存储记录登录状态
-                    //使用cookie存储
-                    setCookie("uid",uid,365);
-                    setCookie("username",this.username,365);
-                    store.commit("setUid", uid);
-                    store.commit("setUsername", this.username);
-                    // 关闭登录窗口
-                    store.commit("closeMask");
-                    store.commit("closeLogin");
-                    store.commit("setHintText","登陆成功")
-                    console.log("store.state.hintText=",store.state.hintText);
-                    this.clear();
-                }
-            });            
+            let params = {
+              username:this.username,
+              password:this.password
+            }
+            axiosInstance.post("/login",Qs.stringify(params)).then((response)=>{
+              console.log(response.data);
+              if (response.data == "unfound user") { //用户不存在
+                  store.commit("setHintText","用户名或密码错误")
+              }
+              else if (response.data == "wrong password") { //密码错误
+                  store.commit("setHintText","用户名或密码错误")
+              }else if (response.data == "wrong data"){
+                  console.log("[ERROR]数据错误");
+              }
+              else { //登录成功
+                  let token = response.data.token;
+                  console.log("token=",token);
+                  let tokenMSG = window.atob(token.slice(token.indexOf(".")+1,token.lastIndexOf(".")));
+                  tokenMSG= JSON.parse(tokenMSG)
+                  //使用cookie存储
+                  setCookie("token",token,30);
+                  setCookie("uid",tokenMSG.uid,30);
+                  setCookie("username",tokenMSG.username,30);
+                  store.commit("setToken", token);
+                  store.commit("setUid", tokenMSG.uid);
+                  store.commit("setUsername", tokenMSG.username);
+                  // 关闭登录窗口
+                  store.commit("closeMask");
+                  store.commit("closeLogin");
+                  store.commit("setHintText","登陆成功")
+                  console.log("store.state.hintText=",store.state.hintText);
+                  this.clear();
+              }
+            });     
           }
-
         },
         signUp(){
+          let axiosInstance = axios.create({
+            baseURL: "http://localhost:50001",
+            timeout: 1000,
+          });
           if(this.usernamePass&&this.pwdPass&&this.rePwdPass){
-            axios.get(store.state.preUrl+"/signUp", {
-                params: {
-                    username: this.signUp_username,
-                    password: this.signUp_password,
-                }
-            }).then((response) => {
+            let params ={
+                username: this.signUp_username,
+                password: this.signUp_password,
+            }
+            console.log("QS=",Qs.stringify(params));
+            axiosInstance.post("/signUp", Qs.stringify(params)).then((response) => {
                 console.log(response.data);
-                if(response.data == "success") { //注册成功
-                  axios.get(store.state.preUrl+"/user", {
-                      params: {
-                          username: this.signUp_username,
-                      }
-                  }).then((response) => {
-                    let uid = response.data.uid;
-                    // localStorage.setItem("uid", uid); //本地存储记录登录状态
-                    // localStorage.setItem("username", this.username); //本地存储记录登录状态
+                try{
+                  if(response.data.token){//注册成功
+                    let token = response.data.token;
+                    console.log("token=",token);
+                    let tokenMSG = window.atob(token.slice(token.indexOf(".")+1,token.lastIndexOf(".")));
+                    tokenMSG= JSON.parse(tokenMSG)
                     //使用cookie存储
-                    setCookie("uid",uid,365);
-                    setCookie("username",this.username,365);
-                    store.commit("setUid", uid);
-                    store.commit("setUsername", this.username);
+                    setCookie("token",token,30);
+                    setCookie("uid",tokenMSG.uid,30);
+                    setCookie("username",tokenMSG.username,30);
+                    store.commit("setToken", token);
+                    store.commit("setUid", tokenMSG.uid);
+                    store.commit("setUsername", tokenMSG.username);
                     // 关闭登录窗口
                     store.commit("closeMask");
                     store.commit("closeLogin");
                     store.commit("setHintText","注册成功")
-                    this.clear();                    
-                  })
-                }
-                else { 
+                    console.log("store.state.hintText=",store.state.hintText);
+                    this.clear();
+                  } else { 
                   store.commit("setHintText","注册失败")
+                  }
+                }catch(err){
+                  console.log(err);
                 }
             });  
           }

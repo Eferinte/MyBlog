@@ -25,6 +25,7 @@ VMdPreview.use(vuepressTheme, {
 const store = createStore({
     state () {
       return {
+        token:undefined,
         uid:undefined,
         username:undefined,
         maskShow:false,
@@ -37,6 +38,10 @@ const store = createStore({
       }
     },
     mutations: {
+    // 添加token
+      setToken (state, token){
+        state.token=token
+      },
     //  添加uid 
       setUid (state,uid) {
         state.uid=uid
@@ -45,8 +50,9 @@ const store = createStore({
       setUsername (state,username) {
         state.username=username
       },
-    //   清除uid
+    //   清除登录状态
       clear(state){
+        state.token=undefined
         state.uid=undefined
         state.username=undefined
       },

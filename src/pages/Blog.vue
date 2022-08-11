@@ -64,6 +64,7 @@
 
 <script>
 import axios from 'axios'
+import Qs from 'qs'
 import store from '../main';
 import Foot from '../components/Foot.vue';
 import Back from '../components/Back.vue';
@@ -91,30 +92,50 @@ export default{
                 this.ifAlter=true;
                 this.newContext = this.data.context;
             }else{
-                //提交修改
-                axios.get(store.state.preUrl+"/updateBlog", { params: {
+                let axiosInstance = axios.create({
+                    baseURL: "http://localhost:50001",
+                    timeout: 1000,
+                    headers:{"token":store.state.token}
+                });
+                let params= {
                     username: store.state.username,
                     author:this.data.author,
                     blogId: this.data.blog_id,
                     newContext:this.newContext
-                } }).then((Response) => {
+                }
+                //提交修改
+                axiosInstance.post(store.state.preUrl+"/updateBlog", Qs.stringify(params)).then((Response) => {
                     console.log(Response.data);
-                    if(Response.data=="update success"){
+                    if(Response.data=="success"){
                         store.commit("setHintText","修改成功");
                         this.ifAlter = false;
                         this.init();
+                    }else{
+                        store.commit("setHintText","修改失败");
                     }
                 });
             }
         },
         del(){
             if(confirm("确认删除改博文吗？")){
-                axios.get(store.state.preUrl+"/deleteBlog", { params: {
+                console.log("[LOG]token=",store.state.token);
+                let axiosInstance = axios.create({
+                    baseURL: "http://localhost:50001",
+                    timeout: 1000,
+                    headers:{"token":store.state.token}
+                });
+                let params= {
                     username: store.state.username,
                     blogId: this.data.blog_id,
-                } }).then((Response) => {
-                    store.commit("setHintText","删除成功");
-                    this.$router.push("/");
+                }
+                axiosInstance.post("/deleteBlog", Qs.stringify(params)).then((Response) => {
+                    if(Response.data=="success"){
+                        store.commit("setHintText","删除成功");
+                        this.$router.push("/");
+                    }else{
+                        console.log(Response.data);
+                        store.commit("setHintText","删除失败");
+                    }
                 });
             }
         }

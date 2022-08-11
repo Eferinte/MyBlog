@@ -48,6 +48,7 @@ import userIcon from '../assets/myuserImg.jpg'
 import axios from 'axios';
 import store from '../main';
 import Back from '../components/Back.vue';
+import Qs from 'qs'
 export default {
     name: "Editor",
     methods: {
@@ -149,14 +150,25 @@ export default {
             }
             else {
                 if (confirm("确认发布吗？")) {
-                    axios.get(store.state.preUrl + "/post", { params: {
-                            title: this.uniDraft.title,
-                            author: this.author,
-                            context: this.uniDraft.context.replaceAll("'","\\'"),//转义引号
-                            tags:this.formatTags(this.uniDraft.tags)
-                        } }).then((Response) => {
-                        store.commit("setHintText", "发布成功");
-                        this.deleteDraft(true);
+                    let axiosInstance = axios.create({
+                        baseURL: "http://localhost:50001",
+                        timeout: 1000,
+                        headers:{"token":store.state.token}
+                    });
+                    let params= {
+                        title: this.uniDraft.title,
+                        author: this.author,
+                        context: this.uniDraft.context.replaceAll("'","\\'"),//转义引号
+                        tags:this.formatTags(this.uniDraft.tags)
+                    }
+                    console.log("params=",params);
+                    axiosInstance.post("/post", Qs.stringify(params)).then((response) => {
+                        if(response.data=="success"){
+                            store.commit("setHintText", "发布成功");
+                            this.deleteDraft(true);
+                        }else{
+                            store.commit("setHintText", "发布失败");
+                        }
                     });
                 }
                 else {

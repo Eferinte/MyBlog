@@ -32,6 +32,7 @@
 
 <script>
 import axios from 'axios';
+import Qs from 'qs'
 import StatueCell from './StatueCell.vue';
 import TimeSelector from './TimeSelector.vue';
 import store from '../main';
@@ -64,17 +65,27 @@ export default {
             this.show=!this.show
         },
         upload(){
+            let axiosInstance = axios.create({
+                baseURL: "http://localhost:50001",
+                timeout: 1000,
+                headers:{"token":store.state.token}
+            });
             let date = new Date();
             console.log(date);
             let strDate = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()
-            axios.get(store.state.preUrl+"/upRecorder",{params:{
-                recorder:this.recorder,
+            let params= {
+                recorder:JSON.stringify(this.recorder),
                 date:strDate,
                 useTime:this.$refs.timer.getTime()
-            }}).then((response)=>{
-                store.commit("setHintText","发布成功")
-                this.initMissTimes()//使用promise实现
-                this.show=!this.show
+            }
+            axiosInstance.post("/upRecorder",Qs.stringify(params)).then((response)=>{
+                if(response.data=="success"){
+                    store.commit("setHintText","提交成功")
+                    this.initMissTimes()//使用promise实现
+                    this.show=!this.show
+                }else{
+                    store.commit("setHintText","提交失败")
+                }
             })
         },
         initMissTimes(){        
