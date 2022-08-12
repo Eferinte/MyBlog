@@ -1,64 +1,82 @@
 <template>
 <div class="shell">
     <Back></Back>
-    <div class="head">
-    </div>
-    <div class="BlogShell">
-        <div class="headLine">
-            <span class="centerText title" >
-                {{data.title}}
-            </span>
-        </div>
-        <div class="line">
+    <div class="contentShell" ref="contentShell" v-show="!ifAlter">
+        <div class="paddingBlock"></div>
+        <div class="content" >
 
-            <div class="tag">
-                <span class="centerText tagName">
-                    作者
-                </span>
-                <span class="centerText tagValue">
-                    {{data.author}}
-                </span>
+            <div
+                v-for="anchor in titles"
+                :key="anchor"
+                :style="{ padding: `10px 0 10px ${anchor.indent * 10+10}px` }"
+                @click="handleAnchorClick(anchor)"
+            >
+                <a style="cursor: pointer">{{ anchor.title }}</a>
             </div>
-            <div class="tag">
-                <span class="centerText tagName">
-                    发布日期
-                </span>
-                <span class="centerText tagValue">
-                    {{data.sub_date}}
-                </span>
-            </div>
-            <div style="margin:auto"></div>
-            <div class="ops" v-if="ifAuthor">
-                <div class="btn" @click="unAlter" v-if="ifAlter">
-                    <span class="centerText" >
-                        取消修改
-                    </span>
-                </div>
-                <div class="btn" @click="alter" id="alter">
-                    <span class="centerText" >
-                        {{btn2Name}}
-                    </span>
-                </div>
-                <div class="btn" @click="del" id="del">
-                    <span class="centerText">
-                        删除
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="context">
-            <v-md-preview class="mdPart" :text="data.context" height="550px" v-if="!ifAlter"></v-md-preview>
-            <div class="editorShell" style="width:1000px" v-if="ifAlter">
-                <v-md-editor v-model="newContext" height="550px"></v-md-editor>
-            </div>
-        </div>
-        <div class="tagShell">
-            <div class="tag" v-for="tag in tags" :key="tag" @click.stop="intoTag(tag)">
-                {{tag}}
-            </div>
+
         </div>
     </div>
-    <Foot></Foot>
+    <div>
+        <div class="head">
+        </div>
+        <div class="BlogShell">
+            <div class="headLine" id="title">
+                <span class="centerText title" >
+                    {{data.title}}
+                </span>
+            </div>
+            <div class="line">
+
+                <div class="tag">
+                    <span class="centerText tagName" >
+                        作者
+                    </span>
+                    <span class="centerText tagValue">
+                        {{data.author}}
+                    </span>
+                </div>
+                <div class="tag">
+                    <span class="centerText tagName">
+                        发布日期
+                    </span>
+                    <span class="centerText tagValue">
+                        {{data.sub_date}}
+                    </span>
+                </div>
+                <div style="margin:auto"></div>
+                <div class="ops" v-if="ifAuthor">
+                    <div class="btn" @click="unAlter" v-if="ifAlter">
+                        <span class="centerText" >
+                            取消修改
+                        </span>
+                    </div>
+                    <div class="btn" @click="alter" id="alter">
+                        <span class="centerText" >
+                            {{btn2Name}}
+                        </span>
+                    </div>
+                    <div class="btn" @click="del" id="del">
+                        <span class="centerText">
+                            删除
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="context" ref="context">
+                <v-md-preview class="mdPart" ref="preview" :text="data.context" height="550px" v-if="!ifAlter"></v-md-preview>
+                <div class="editorShell" style="width:800px" v-if="ifAlter">
+                    <v-md-editor  v-model="newContext" height="550px"></v-md-editor>
+                </div>
+            </div>
+            <div class="tagShell">
+                <div class="tag" v-for="tag in tags" :key="tag" @click.stop="intoTag(tag)">
+                    {{tag}}
+                </div>
+            </div>
+        </div>
+        <Foot></Foot>
+    </div>
+ 
 </div>
 </template>
 
@@ -101,7 +119,7 @@ export default{
                     username: store.state.username,
                     author:this.data.author,
                     blogId: this.data.blog_id,
-                    newContext:this.newContext
+                    newContext:this.newContext.replaceAll("'","\\'")
                 }
                 //提交修改
                 axiosInstance.post(store.state.preUrl+"/updateBlog", Qs.stringify(params)).then((Response) => {
@@ -110,6 +128,7 @@ export default{
                         store.commit("setHintText","修改成功");
                         this.ifAlter = false;
                         this.init();
+                        this.setTitles();
                     }else{
                         store.commit("setHintText","修改失败");
                     }
@@ -138,6 +157,37 @@ export default{
                     }
                 });
             }
+        }, 
+        setTitles(){
+            const anchors = this.$refs.preview.$el.querySelectorAll('h1,h2,h3,h4,h5,h6');
+            const titles = Array.from(anchors).filter((title) => !!title.innerText.trim());
+            console.log("[setTitles]=",anchors);
+            if (!titles.length) {
+            this.titles = [];
+            return;
+            }
+
+            const hTags = Array.from(new Set(titles.map((title) => title.tagName))).sort();
+
+            this.titles = titles.map((el) => ({
+            title: el.innerText,
+            lineIndex: el.getAttribute('data-v-md-line'),
+            indent: hTags.indexOf(el.tagName),
+            }));
+        },
+        handleAnchorClick(anchor) {
+            const { preview } = this.$refs;
+            const { lineIndex } = anchor;
+
+            const heading = preview.$el.querySelector(`[data-v-md-line="${lineIndex}"]`);
+
+            if (heading) {
+                preview.scrollToTarget({
+                target: heading,
+                scrollContainer: window,
+                top: 60,
+                });
+            }
         }
     },
     created() {
@@ -149,13 +199,27 @@ export default{
             ifAlter:false,
             ifAuthor:false,
             newContext:"",
+            titles:""
         };
+    },
+    mounted() {     
+        setTimeout(()=>{
+            console.log("[preview]=",this.$refs.preview.$el.firstChild);
+            this.setTitles()
+        },300)
+        //利用getBoundingClientRect实现sticky
+        window.addEventListener("scroll",()=>{
+            if(document.getElementById("title").getBoundingClientRect().y<100){
+                this.$refs.contentShell.style="position:fixed;top:0";
+            }else{
+                this.$refs.contentShell.style="position:absolute;";
+            }
+        })
     },
     computed:{
         btn2Name(){
             return this.ifAlter?"确认修改":"修改";    
         },
-
     },
     components: { Foot, Back }
 }
@@ -163,6 +227,32 @@ export default{
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+    .contentShell{
+        top: 110px;
+        left: 100px;
+        position: absolute;
+        height: 800px;
+        width: 200px;
+        border-radius: 10px;
+        /* background-color: olivedrab; */
+        overflow: visible;
+    }
+    .paddingBlock{
+        height: 100px;
+        width: 200px;
+        margin: 0;
+        /* background-color: olivedrab; */
+    }
+    .content{
+        background-color: #fff;
+        min-height: 100px;
+        height: fit-content;
+        width: 200px;
+        transition: 0.25s;
+        border-radius: 3px;
+        font-size: 8px;
+        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
+    }
     .btn{
         width: 100px;
         height: 30px;
@@ -192,8 +282,8 @@ export default{
         background-image: url("../../public/assert/background.jpg");
         background-size: 100% 180%;
         margin-top: 0px;
-        width: 1000px;
-        margin-left: calc(50% - 500px);
+        width: 800px;
+        margin-left: calc(50% - 400px);
         height: 200px;
         left: 100px;
         background-color: rgb(208, 231, 251);
@@ -209,7 +299,7 @@ export default{
     }
     .headLine{
         margin: 10px auto;;
-        width: 1000px;
+        width: 800px;
         height: 70px;
         display: flex;
         background-color: #fff;
@@ -219,7 +309,7 @@ export default{
     }
     .line{
         margin: auto;
-        width: 1000px;
+        width: 800px;
         height: 30px;
         display: flex;
         flex-wrap: wrap;
@@ -264,7 +354,7 @@ export default{
     }
     .mdPart{
         margin: auto;
-        width: 1000px;
+        width: 800px;
         background-color: #fff;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
         height: fit-content;
@@ -272,7 +362,7 @@ export default{
     }
     .editorShell{
         margin: auto;
-        width: 1000px;
+        width: 800px;
         background-color: #fff;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
         height: fit-content;
@@ -280,8 +370,9 @@ export default{
     }
     .context{
         border-radius: 5px;
-        width: 1000px;
+        width: 800px;
         overflow: hidden;
         margin: auto;
+        height: fit-content;
     }
 </style>

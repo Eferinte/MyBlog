@@ -62,8 +62,18 @@ export default {
         },
         createTag(e){
             if((e.keyCode==13)&&(this.tagInput.length>0)){
-                this.uniDraft.tags.push(this.tagInput);
-                this.tagInput = "";
+                //判断标签是否过多
+                if(this.uniDraft.tags.length >= 10){
+                    store.commit("setHintText","最多创建10个标签")
+
+                }
+                //判断是否已存在该标签
+                else if(this.uniDraft.tags.find((item)=>{return this.tagInput==item?true:false}) != undefined){
+                    store.commit("setHintText","已存在相同标签")
+                }else{
+                    this.uniDraft.tags.push(this.tagInput);
+                    this.tagInput = "";
+                }
             }
         },
         tagDel(index){
@@ -158,7 +168,8 @@ export default {
                     let params= {
                         title: this.uniDraft.title,
                         author: this.author,
-                        context: this.uniDraft.context.replaceAll("'","\\'"),//转义引号
+                        //转义引号
+                        context: this.uniDraft.context.replaceAll("'","\\'"),
                         tags:this.formatTags(this.uniDraft.tags)
                     }
                     console.log("params=",params);
