@@ -1,24 +1,5 @@
-# firstvueproject
+# 博客站V1.0
+支持markdown语法编辑器，本地、远程双存档草稿箱
 
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+站点：http://106.54.177.184:8082
+域名解析还在备案。
