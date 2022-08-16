@@ -34,7 +34,7 @@ const store = createStore({
         timerShow:false,
         setTime:0,
         hintText:"",
-        preUrl:"http://localhost:50001",
+        preUrl:"http://106.54.177.184:50001",
         selectedTags:[]
       }
     },

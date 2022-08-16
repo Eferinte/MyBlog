@@ -29,11 +29,11 @@ export default {
     methods: {
         choose(){
             if(!this.banned){
-                console.log("点击了",this.bossName);
+                // console.log("点击了",this.bossName);
                 this.ifChosed=!this.ifChosed;
                 this.$emit("choose",this.bossName)
             }else{
-                console.log("该事件被禁用");
+                // console.log("该事件被禁用");
             }
         }
     },

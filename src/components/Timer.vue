@@ -36,7 +36,7 @@ export default {
                     axios.get(store.state.preUrl+"/getTimer",{params:{
                         uid:store.state.uid
                     }}).then((response)=>{
-                        console.log("TargetTime=",response.data[0].target_time);
+                        // console.log("TargetTime=",response.data[0].target_time);
                         let now = new Date()
                         let targetTime = new Date(response.data[0].target_time)
                         this.leftTime = Math.floor((targetTime.getTime() - now.getTime())/1000)
@@ -52,7 +52,7 @@ export default {
                 // this.$refs.shell.style.borderRadius="50%"
                 // this.$refs.shell.style.transform="scale(0.5)"
             }else{
-                console.log("关闭计时器显示");
+                // console.log("关闭计时器显示");
             }
         },
         start(){
@@ -62,7 +62,7 @@ export default {
             //转化为秒
             let hour=Number(time.slice(3,5))
             let minute=Number(time.slice(6,8))
-            console.log("time=",time,"hour=",hour,"minute=",minute);
+            // console.log("time=",time,"hour=",hour,"minute=",minute);
             this.leftTime = hour*3600+minute*60
             this.setTime = hour*3600+minute*60
             store.commit("setSetTime",this.setTime)
@@ -78,12 +78,12 @@ export default {
             time = date.getTime()+(this.setTime*1000)
             date = new Date(time)
             let targetTime = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()
-            console.log(targetTime);
+            // console.log(targetTime);
             axios.get(store.state.preUrl+"/setTimer",{params:{
                 targetTime:targetTime,
                 uid:store.state.uid
             }}).then((response)=>{
-                console.log("设置成功");
+                // console.log("设置成功");
             })
 
             document.addEventListener("visibilitychange",this.refresh)
@@ -115,7 +115,7 @@ export default {
                 targetTime:targetTime,
                 uid:store.state.uid
             }}).then((response)=>{
-                console.log("设置成功");
+                // console.log("设置成功");
             })
 
             this.ifPaused=false
@@ -146,7 +146,7 @@ export default {
         };
     },
     created() {
-        console.log("timer创建")
+        // console.log("timer创建");
         if(store.state.setTime){
             this.setTime=store.state.setTime
             this.ifStarted=true
@@ -156,7 +156,7 @@ export default {
                 let now = new Date()
                 let targetTime = new Date(response.data[0].target_time)
                 this.leftTime = Math.floor((targetTime.getTime() - now.getTime())/1000)
-                console.log("leftTime=",this.leftTime); 
+                // console.log("leftTime=",this.leftTime); 
                 this.timer.siv.push(            
                 setInterval(()=>{
                     if(this.leftTime<=0){
@@ -170,7 +170,7 @@ export default {
         }
     },
     unmounted(){
-        console.log("timer被销毁了")
+        // console.log("timer被销毁了")
     },
     computed:{
         hour(){

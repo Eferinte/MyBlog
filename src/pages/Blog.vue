@@ -136,13 +136,13 @@ export default{
         },
         //返回的回调函数
         beforeBack(){
-            console.log("移除监听事件");
+            // console.log("移除监听事件");
             // window.removeEventListener("scroll",this.funcName);
         },
         //初始化请求数据
         init() {
             let blogId = this.$route.query.blogId;
-            console.log(this.$route.query);
+            // console.log(this.$route.query);
             axios.get(store.state.preUrl + "/blog", { params: {
                     blogId: blogId
                 } }).then((Response) => {
@@ -180,7 +180,7 @@ export default{
                     return
                 }
                 let axiosInstance = axios.create({
-                    baseURL: "http://localhost:50001",
+                    baseURL: store.state.preUrl,
                     timeout: 1000,
                     headers:{"token":store.state.token}
                 });
@@ -194,7 +194,7 @@ export default{
                 }
                 //提交修改
                 axiosInstance.post(store.state.preUrl+"/updateBlog", Qs.stringify(params)).then((Response) => {
-                    console.log(Response.data);
+                    // console.log(Response.data);
                     if(Response.data=="success"){
                         store.commit("setHintText","修改成功");
                         this.ifAlter = false;
@@ -208,9 +208,9 @@ export default{
         },
         del(){
             if(confirm("确认删除改博文吗？")){
-                console.log("[LOG]token=",store.state.token);
+                // console.log("[LOG]token=",store.state.token);
                 let axiosInstance = axios.create({
-                    baseURL: "http://localhost:50001",
+                    baseURL: store.state.preUrl,
                     timeout: 1000,
                     headers:{"token":store.state.token}
                 });
@@ -223,7 +223,7 @@ export default{
                         store.commit("setHintText","删除成功");
                         this.$router.push("/");
                     }else{
-                        console.log(Response.data);
+                        // console.log(Response.data);
                         store.commit("setHintText","删除失败");
                     }
                 });
@@ -232,7 +232,7 @@ export default{
         setTitles(){
             const anchors = this.$refs.preview.$el.querySelectorAll('h1,h2,h3,h4,h5,h6');
             const titles = Array.from(anchors).filter((title) => !!title.innerText.trim());
-            console.log("[setTitles]=",anchors);
+            // console.log("[setTitles]=",anchors);
             if (!titles.length) {
                 this.titles = [];
                 return;
@@ -294,7 +294,7 @@ export default{
     },
     mounted() {     
         setTimeout(()=>{
-            console.log("[preview]=",this.$refs.preview.$el.firstChild);
+            // console.log("[preview]=",this.$refs.preview.$el.firstChild);
             this.setTitles();
         },300)
     },

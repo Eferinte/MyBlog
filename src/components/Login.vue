@@ -99,7 +99,7 @@ export default {
         // 提交表单登录
         login() {
           let axiosInstance = axios.create({
-            baseURL: "http://localhost:50001",
+            baseURL: store.state.preUrl,
             timeout: 1000,
           });
           if(this.username==""){
@@ -118,18 +118,18 @@ export default {
               password:this.password
             }
             axiosInstance.post("/login",Qs.stringify(params)).then((response)=>{
-              console.log(response.data);
+              // console.log(response.data);
               if (response.data == "unfound user") { //用户不存在
                   store.commit("setHintText","用户名或密码错误")
               }
               else if (response.data == "wrong password") { //密码错误
                   store.commit("setHintText","用户名或密码错误")
               }else if (response.data == "wrong data"){
-                  console.log("[ERROR]数据错误");
+                  // console.log("[ERROR]数据错误");
               }
               else { //登录成功
                   let token = response.data.token;
-                  console.log("token=",token);
+                  // console.log("token=",token);
                   let tokenMSG = window.atob(token.slice(token.indexOf(".")+1,token.lastIndexOf(".")));
                   tokenMSG= JSON.parse(tokenMSG)
                   //使用cookie存储
@@ -148,7 +148,7 @@ export default {
                   store.commit("closeMask");
                   store.commit("closeLogin");
                   store.commit("setHintText","登陆成功")
-                  console.log("store.state.hintText=",store.state.hintText);
+                  // console.log("store.state.hintText=",store.state.hintText);
                   this.clear();
               }
             });     
@@ -156,7 +156,7 @@ export default {
         },
         signUp(){
           let axiosInstance = axios.create({
-            baseURL: "http://localhost:50001",
+            baseURL: store.state.preUrl,
             timeout: 1000,
           });
           if(this.usernamePass&&this.pwdPass&&this.rePwdPass){
@@ -164,13 +164,13 @@ export default {
                 username: this.signUp_username,
                 password: this.signUp_password,
             }
-            console.log("QS=",Qs.stringify(params));
+            // console.log("QS=",Qs.stringify(params));
             axiosInstance.post("/signUp", Qs.stringify(params)).then((response) => {
-                console.log(response.data);
+                // console.log(response.data);
                 try{
                   if(response.data.token){//注册成功
                     let token = response.data.token;
-                    console.log("token=",token);
+                    // console.log("token=",token);
                     let tokenMSG = window.atob(token.slice(token.indexOf(".")+1,token.lastIndexOf(".")));
                     tokenMSG= JSON.parse(tokenMSG)
                     //使用cookie存储
@@ -184,13 +184,13 @@ export default {
                     store.commit("closeMask");
                     store.commit("closeLogin");
                     store.commit("setHintText","注册成功")
-                    console.log("store.state.hintText=",store.state.hintText);
+                    // console.log("store.state.hintText=",store.state.hintText);
                     this.clear();
                   } else { 
                   store.commit("setHintText","注册失败")
                   }
                 }catch(err){
-                  console.log(err);
+                  // console.log(err);
                 }
             });  
           }
@@ -217,7 +217,7 @@ export default {
                 username: this.signUp_username
               }
             }).then((response) => {
-              console.log(response.data);
+              // console.log(response.data);
               if (response.data == "unfound user") { //用户不存在
                 this.unameHint="";
                 this.usernamePass=true;

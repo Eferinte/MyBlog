@@ -50,7 +50,7 @@ export default{
         //操作路由，跳转到对应Tag分类页面
         intoTag(tag){
             // 根据获取到的tag转到对应页面
-            console.log("跳转到"+tag)
+            // console.log("跳转到"+tag)
         }
     },
     created(){

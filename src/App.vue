@@ -23,7 +23,12 @@ export default {
         this.$store.commit("setUid",getCookie('uid'));
         this.$store.commit("setUsername",getCookie('username'));
         this.$store.commit("setToken",getCookie('token'));
+      }else{
+        this.$store.commit("setUid",window.localStorage.getItem("uid"));
+        this.$store.commit("setUsername",window.localStorage.getItem("username"));
+        this.$store.commit("setToken",window.localStorage.getItem("token"));
       }
+      
       // this.$router.push("/home");
     },
     //监听Hint

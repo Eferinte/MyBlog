@@ -46,7 +46,7 @@ export default {
             this.$store.commit("closeRecorder");
         },
         chosen(name) {
-            console.log("chosen",name);
+            // console.log("chosen",name);
             this.recorder[name]=1
         },
         doChange(){
@@ -57,7 +57,7 @@ export default {
                     this.recorder = Object.assign(this.recorder,obj)
                 })
                 this.ds=false;
-                console.log("this.destory=",this.ds);
+                // console.log("this.destory=",this.ds);
             }else{//清空对象数组
                 this.recorder={}
                 this.ds=true;
@@ -66,12 +66,12 @@ export default {
         },
         upload(){
             let axiosInstance = axios.create({
-                baseURL: "http://localhost:50001",
+                baseURL: store.state.preUrl,
                 timeout: 1000,
                 headers:{"token":store.state.token}
             });
             let date = new Date();
-            console.log(date);
+            // console.log(date);
             let strDate = date.getFullYear()+"-"+(date.getMonth()+1)+"-"+date.getDate()+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds()
             let params= {
                 recorder:JSON.stringify(this.recorder),
@@ -115,7 +115,7 @@ export default {
     },
     computed:{
         ifEf(){
-            console.log(store.state.username);
+            // console.log(store.state.username);
             return store.state.username=="eferinte";
         }
     },

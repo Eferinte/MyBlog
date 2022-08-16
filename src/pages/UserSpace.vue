@@ -79,7 +79,7 @@ export default {
         init(){
             //请求个人信息
             axios.get(store.state.preUrl+"/user",{params:{username:this.username}}).then((Response)=>{
-                console.log("[LOG]data=",Response.data);
+                // console.log("[LOG]data=",Response.data);
                 let date = new Date(Response.data.registration_time);
                 date = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
                 this.msgList=[
@@ -101,7 +101,7 @@ export default {
             axios.get(store.state.preUrl+'/authorBlogs',{params:{
                 author:store.state.username,
             }}).then((Response)=>{
-                console.log(Response);
+                // console.log(Response);
                 for(let index in Response.data){
                     let obj = Response.data[index]
                     this.blogs.push({
@@ -113,7 +113,7 @@ export default {
                         tags:obj.tags
                     })
                 }
-                console.log("数据请求完毕",Response);
+                // console.log("数据请求完毕",Response);
             });
         }
     },

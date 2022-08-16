@@ -48,9 +48,9 @@ const router = createRouter({
 })
 router.beforeEach((to, from) => {
     // 若未登录则取消导航并打开登陆页
-    console.log("to=",to)
+    // console.log("to=",to)
     if(to.fullPath=="/UserSpace"||to.fullPath=="/Editor"){
-        console.log(store);
+        // console.log(store);
         if(!store.state.uid){
             // 返回 false 以取消导航
             // 打开登录窗口

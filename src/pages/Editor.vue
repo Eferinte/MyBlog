@@ -64,7 +64,7 @@ export default {
                 }
             });
             let axiosInstance = axios.create({
-                baseURL: "http://localhost:50001",
+                baseURL: store.state.preUrl,
                 timeout: 1000,
                 headers:{"token":store.state.token}
             });
@@ -72,35 +72,35 @@ export default {
             let params= {
                 uid: this.uid,
             }
-            console.log("params=",params);
+            // console.log("params=",params);
             axiosInstance.post("/getDrafts", Qs.stringify(params)).then((response) => {
-                console.log("远程草稿=",response.data[0].drafts);
+                // console.log("远程草稿=",response.data[0].drafts);
                 if(typeof response.data != 'undefined'){
                     this.drafts = JSON.parse(response.data[0].drafts);
-                    console.log("[drafts=]",this.drafts);
+                    // console.log("[drafts=]",this.drafts);
                     //本地存档和远程存档冲突时选择最新的使用
                     if(localStorage.getItem("drafts")!=response.data[0].drafts){
                         if(Number(localStorage.getItem("save_date"))>Number(response.data[0].save_date)){
                             this.drafts = JSON.parse(localStorage.getItem("drafts"));
-                            console.log("[init]加载本地存档");
+                            // console.log("[init]加载本地存档");
                         }else{
                             this.drafts = JSON.parse(response.data[0].drafts);
-                            console.log("[init]加载远程存档");
+                            // console.log("[init]加载远程存档");
                         }
                     }else{
-                        console.log("[init]存档未冲突");
+                        // console.log("[init]存档未冲突");
                     }
                     this.refresh();
                 }else{
-                    console.log("[init]未找到远程存档");
-                    console.log("[init]加载本地存档");
+                    // console.log("[init]未找到远程存档");
+                    // console.log("[init]加载本地存档");
                     this.drafts = JSON.parse(localStorage.getItem("drafts"));
                 }
             });
         },
         remoteSave(){
             let axiosInstance = axios.create({
-                baseURL: "http://localhost:50001",
+                baseURL: store.state.preUrl,
                 timeout: 1000,
                 headers:{"token":store.state.token}
             });
@@ -110,7 +110,7 @@ export default {
                 drafts: JSON.stringify(this.drafts).replaceAll("'","\\'"),
                 save_date:new Date().getTime()
             }
-            console.log("params=",params);
+            // console.log("params=",params);
             axiosInstance.post("/saveDrafts", Qs.stringify(params)).then((response) => {
                 if(response.data=="success"){
                     store.commit("setHintText", "保存成功");
@@ -154,7 +154,7 @@ export default {
             return formatTag;
         },
         titleCheck() {
-            console.log(this.drafts)
+            // console.log(this.drafts)
             if (!(this.uniDraft.title.length > 0)) { //回滚
                 alert("标题不能为空");
                 this.uniDraft.title = this.drafts[this.index].title;
@@ -162,12 +162,12 @@ export default {
             }
         },
         refresh() {
-            console.log("refresh");
-            console.log(JSON.stringify(this.uniDraft),"=?????=",JSON.stringify(this.drafts[this.index]));
+            // console.log("refresh");
+            // console.log(JSON.stringify(this.uniDraft),"=?????=",JSON.stringify(this.drafts[this.index]));
             this.uniDraft.title = this.drafts[this.index].title;
             this.uniDraft.tags = [...this.drafts[this.index].tags];//扩展运算符深拷贝数组
             this.uniDraft.context = this.drafts[this.index].context;
-            console.log(JSON.stringify(this.uniDraft),"=?????=",JSON.stringify(this.drafts[this.index]));
+            // console.log(JSON.stringify(this.uniDraft),"=?????=",JSON.stringify(this.drafts[this.index]));
         },
         addNew() {
             if (this.drafts.length >= 3) {
@@ -188,11 +188,11 @@ export default {
                     context: "",
                 });
                 this.refresh();
-                console.log("this.index=", this.index);
+                // console.log("this.index=", this.index);
             }
         },
         deleteDraft(force = false) {
-            console.log("[deleteDraft]:force=",force);
+            // console.log("[deleteDraft]:force=",force);
             if (force || confirm("确认删除当前草稿吗？")) {
                 if (this.drafts.length > 1) {
                     this.drafts.splice(this.index, 1);
@@ -209,7 +209,7 @@ export default {
         },
         save() {
             if(JSON.stringify(this.uniDraft)!=JSON.stringify(this.drafts[this.index])){
-                console.log("执行保存");
+                // console.log("执行保存");
                 this.drafts[this.index].title =this.uniDraft.title;
                 this.drafts[this.index].tags =[...this.uniDraft.tags];
                 this.drafts[this.index].context =this.uniDraft.context;
@@ -230,7 +230,7 @@ export default {
             else {
                 if (confirm("确认发布吗？")) {
                     let axiosInstance = axios.create({
-                        baseURL: "http://localhost:50001",
+                        baseURL: store.state.preUrl,
                         timeout: 1000,
                         headers:{"token":store.state.token}
                     });
@@ -241,7 +241,7 @@ export default {
                         context: this.uniDraft.context.replaceAll("'","\\'"),
                         tags:this.formatTags(this.uniDraft.tags)
                     }
-                    console.log("params=",params);
+                    // console.log("params=",params);
                     axiosInstance.post("/post", Qs.stringify(params)).then((response) => {
                         if(response.data=="success"){
                             store.commit("setHintText", "发布成功");
@@ -260,7 +260,7 @@ export default {
             this.save();
             this.index = index;
             this.refresh();
-            console.log("this.index=", index);
+            // console.log("this.index=", index);
         },
         dynaSize(title){
             //接受0-infinity的值，返回0-1的值 图像类似 acrtan()
@@ -268,9 +268,9 @@ export default {
                 return 2*Math.atan(x/6.18)/Math.PI
             }
             let ans = smooth(title.length)
-            console.log("ans=",ans);
+            // console.log("ans=",ans);
             ans = 18-Math.floor(12*ans)+"px"
-            console.log("ans=",ans);
+            // console.log("ans=",ans);
             return ans;
             // return "20px"
         }
