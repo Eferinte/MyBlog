@@ -136,6 +136,11 @@ export default {
                   setCookie("token",token,30);
                   setCookie("uid",tokenMSG.uid,30);
                   setCookie("username",tokenMSG.username,30);
+
+                  window.localStorage.setItem("uid",tokenMSG.uid);
+                  window.localStorage.setItem("username",tokenMSG.username);
+                  window.localStorage.setItem("token",token);
+
                   store.commit("setToken", token);
                   store.commit("setUid", tokenMSG.uid);
                   store.commit("setUsername", tokenMSG.username);
@@ -348,7 +353,7 @@ export default {
   width: 400px;
   height: fit-content;
   background-color: white;
-  z-index: 5;
+  z-index: 11;
 }
 .shell{
   width: fit-content;

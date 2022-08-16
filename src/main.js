@@ -34,7 +34,8 @@ const store = createStore({
         timerShow:false,
         setTime:0,
         hintText:"",
-        preUrl:"http://localhost:50001"
+        preUrl:"http://localhost:50001",
+        selectedTags:[]
       }
     },
     mutations: {
@@ -103,6 +104,14 @@ const store = createStore({
       //清除提示信息
       clearHint(state){
         state.hintText=""
+      },
+      //更新标签
+      updateTags(state,newTags){
+        state.selectedTags=newTags;
+      },
+      //清空标签
+      cleartags(state){
+        state.selectedTags=[];
       }
     }
 })

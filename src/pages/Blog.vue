@@ -1,10 +1,8 @@
 <template>
 <div class="shell">
-    <Back></Back>
-    <div class="contentShell" ref="contentShell" v-show="!ifAlter">
-        <div class="paddingBlock"></div>
-        <div class="content" >
-
+    <Back @click="beforeBack"></Back>
+    <div class="aside" >
+        <div class="content" v-show="!ifAlter" v-if="titles.length!=0">
             <div
                 v-for="anchor in titles"
                 :key="anchor"
@@ -13,33 +11,34 @@
             >
                 <a style="cursor: pointer">{{ anchor.title }}</a>
             </div>
-
         </div>
     </div>
-    <div>
+    <div class="mainShell">
         <div class="head">
         </div>
         <div class="BlogShell">
-            <div class="headLine" id="title">
+            <div class="headLine" id="title" v-if="!ifAlter">
                 <span class="centerText title" >
                     {{data.title}}
                 </span>
             </div>
+            <div class="headLine"  v-if="ifAlter">
+                <input class="input1 title" id="newTitle" v-model="newTitle" @change="titleCheck">
+            </div>
             <div class="line">
-
-                <div class="tag">
-                    <span class="centerText tagName" >
+                <div class="label">
+                    <span class="centerText labelName" >
                         作者
                     </span>
-                    <span class="centerText tagValue">
+                    <span class="centerText labelValue">
                         {{data.author}}
                     </span>
                 </div>
-                <div class="tag">
-                    <span class="centerText tagName">
+                <div class="label">
+                    <span class="centerText labelName">
                         发布日期
                     </span>
-                    <span class="centerText tagValue">
+                    <span class="centerText labelValue">
                         {{data.sub_date}}
                     </span>
                 </div>
@@ -62,6 +61,21 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="tagShell" v-if="ifAlter">
+                <div class="tagItem" v-for="(tag , index) in newTags" :key="tag">
+                    <div class="tagText">
+                        <div class="textShell tag">
+                            {{tag}}
+                        </div>
+                    </div>
+                    <div class="tagDel" @click="tagDel(index)">
+                        <img src="../assets/quit.png" style="height:50%;margin: auto;">
+                    </div>
+                </div>
+                <input id="tag" class="input1 tag" placeholder="输入后回车创建标签" v-model="tagInput" @change="titleCheck" @keydown="createTag">
+            </div>
+
             <div class="context" ref="context">
                 <v-md-preview class="mdPart" ref="preview" :text="data.context" height="550px" v-if="!ifAlter"></v-md-preview>
                 <div class="editorShell" style="width:800px" v-if="ifAlter">
@@ -76,7 +90,6 @@
         </div>
         <Foot></Foot>
     </div>
- 
 </div>
 </template>
 
@@ -86,21 +99,59 @@ import Qs from 'qs'
 import store from '../main';
 import Foot from '../components/Foot.vue';
 import Back from '../components/Back.vue';
+import {throttle} from '../utils/throttle';
 export default{
     name: "atricle",
     methods: {
+        titleCheck() {
+            if (!(this.newTitle.length > 0)) { //回滚
+                store.commit("setHintText","标题不能为空");
+                document.getElementById('newTitle').focus();
+            }
+        },
+        createTag(e){
+            if((e.keyCode==13)&&(this.tagInput.length>0)){
+                //判断标签是否过多
+                if(this.newTags.length >= 10){
+                    store.commit("setHintText","最多创建10个标签")
+                }
+                //判断是否已存在该标签
+                else if(this.newTags.find((item)=>{return this.tagInput==item?true:false}) != undefined){
+                    store.commit("setHintText","已存在相同标签")
+                }else{
+                    this.newTags.push(this.tagInput);
+                    this.tagInput = "";
+                }
+            }
+        },
+        tagDel(index){
+            this.newTags.splice(index,1);
+        },
+        formatTags(tagList){
+            let formatTag = ""
+            tagList.forEach((item)=>{
+                formatTag += "#"+item
+            })
+            return formatTag;
+        },
+        //返回的回调函数
+        beforeBack(){
+            console.log("移除监听事件");
+            // window.removeEventListener("scroll",this.funcName);
+        },
         //初始化请求数据
         init() {
-            let blogId = this.$route.params.blogId;
-            console.log(this.$route.params);
+            let blogId = this.$route.query.blogId;
+            console.log(this.$route.query);
             axios.get(store.state.preUrl + "/blog", { params: {
                     blogId: blogId
                 } }).then((Response) => {
                 this.data = Response.data;
-                let subDate = new Date(this.data.sub_date);
-                this.data.sub_date = subDate.getFullYear() + "-" + (subDate.getMonth() + 1) + "-" + subDate.getDate();
+                let date = new Date(this.data.sub_date);
+                this.data.sub_date = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
                 this.ifAuthor = this.data.author==store.state.username?true:false;
             });
+            // this.funcName = this.scrollFunc();
         },
         unAlter(){
             this.ifAlter=false;
@@ -109,17 +160,37 @@ export default{
             if(!this.ifAlter){
                 this.ifAlter=true;
                 this.newContext = this.data.context;
+                this.newTitle = this.data.title;
+
+                this.newTags=[];
+                let str = String(this.data.tags);
+                let point = str.lastIndexOf("#");
+                while(point!=-1){
+                    let tag = str.slice(point+1);
+                    this.newTags.push(tag);
+                    str =  str.slice(0,point);
+                    point = str.lastIndexOf("#");
+                }
+                
             }else{
+                
+                if (!(this.newTitle.length > 0)) { //回滚
+                    store.commit("setHintText","标题不能为空");
+                    document.getElementById('newTitle').focus();
+                    return
+                }
                 let axiosInstance = axios.create({
                     baseURL: "http://localhost:50001",
                     timeout: 1000,
                     headers:{"token":store.state.token}
                 });
                 let params= {
+                    newTitle:this.newTitle,
                     username: store.state.username,
                     author:this.data.author,
                     blogId: this.data.blog_id,
-                    newContext:this.newContext.replaceAll("'","\\'")
+                    newContext:this.newContext.replaceAll("'","\\'"),
+                    newTags:this.formatTags(this.newTags)
                 }
                 //提交修改
                 axiosInstance.post(store.state.preUrl+"/updateBlog", Qs.stringify(params)).then((Response) => {
@@ -163,8 +234,8 @@ export default{
             const titles = Array.from(anchors).filter((title) => !!title.innerText.trim());
             console.log("[setTitles]=",anchors);
             if (!titles.length) {
-            this.titles = [];
-            return;
+                this.titles = [];
+                return;
             }
 
             const hTags = Array.from(new Set(titles.map((title) => title.tagName))).sort();
@@ -174,6 +245,9 @@ export default{
             lineIndex: el.getAttribute('data-v-md-line'),
             indent: hTags.indexOf(el.tagName),
             }));
+            // //利用getBoundingClientRect实现sticky
+            // window.removeEventListener("scroll",this.funcName);
+            // window.addEventListener("scroll",this.funcName);
         },
         handleAnchorClick(anchor) {
             const { preview } = this.$refs;
@@ -186,9 +260,20 @@ export default{
                 target: heading,
                 scrollContainer: window,
                 top: 60,
+                behavior: "smooth"
                 });
             }
-        }
+        },
+        // //导航栏的sticky监听实现
+        // scrollFunc(){
+        //     return throttle(()=>{
+        //         if(document.getElementById("title").getBoundingClientRect().y<20){
+        //             this.$refs.contentShell.style="position:fixed;top:0";
+        //         }else{
+        //             this.$refs.contentShell.style="position:absolute;";
+        //         }
+        //     },100)
+        // }
     },
     created() {
         this.init();
@@ -198,23 +283,20 @@ export default{
             data: {},
             ifAlter:false,
             ifAuthor:false,
+            newTitle:"",
             newContext:"",
-            titles:""
+            newTags:[],
+            tagInput:"",
+            titles:"",
+            //存储实例化的节流函数对象,使监听器可以正确remove
+            funcName:undefined
         };
     },
     mounted() {     
         setTimeout(()=>{
             console.log("[preview]=",this.$refs.preview.$el.firstChild);
-            this.setTitles()
+            this.setTitles();
         },300)
-        //利用getBoundingClientRect实现sticky
-        window.addEventListener("scroll",()=>{
-            if(document.getElementById("title").getBoundingClientRect().y<100){
-                this.$refs.contentShell.style="position:fixed;top:0";
-            }else{
-                this.$refs.contentShell.style="position:absolute;";
-            }
-        })
     },
     computed:{
         btn2Name(){
@@ -227,18 +309,78 @@ export default{
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-    .contentShell{
-        top: 110px;
-        left: 100px;
-        position: absolute;
-        height: 800px;
+    .input1{
+        border: 4px;
+        border-radius: 0px;
+        width: 100%;
+        height: 33px;
+        padding: 0;
+        padding: 10px 15px;
+        box-sizing: border-box;
+        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+    }
+    .input1:focus{
+        outline: none;
+    }
+    .tagDel{
+        height: 20px;
+        display: flex;
+        justify-content: center;
+    }
+    .tagDel:hover{
+        cursor: pointer;
+    }
+    .tag.input1{
+        box-shadow:none;
+    }
+    .input1.title{
+        height: 70px;
+        padding: 0 40px;
+        font-size: 32px;
+        font-weight: bold;
+    }
+    .tagShell{
+        display: flex;
+        flex-direction: row;
+        background-color: #fff;
+        margin: 10px auto;
+        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+        width: 800px;
+    }
+    .tagItem{
+        display: flex;
+        flex-direction: row;
+        padding: 0 5px;
+        margin: 5px;
+        border: solid 1px rgb(114, 155, 155);
+        border-radius: 8px;
+    }
+    .tagText{
+        white-space: nowrap;
+        width: fit-content;
+        font-size: 8px;
+        display: flex;
+        justify-content: center;
+    }
+    .tag.textShell{
+        padding: 2px 5px;
+        margin: auto;
+        text-align: center;
+    }
+    .aside{
+        margin-top:210px;
+        bottom: 0;
+        height: auto;
         width: 200px;
         border-radius: 10px;
         /* background-color: olivedrab; */
-        overflow: visible;
+        margin-left: 100px;
+    }
+    .mainShell{
+        margin-right: calc(50% - 400px);
     }
     .paddingBlock{
-        height: 100px;
+        height: 20px;
         width: 200px;
         margin: 0;
         /* background-color: olivedrab; */
@@ -249,9 +391,11 @@ export default{
         height: fit-content;
         width: 200px;
         transition: 0.25s;
-        border-radius: 3px;
+        border-radius: 5px;
         font-size: 8px;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
+        position: sticky;
+        top: 10px;
     }
     .btn{
         width: 100px;
@@ -276,6 +420,9 @@ export default{
     }
     .shell{
         background-color: #b5c0ed;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
     }
 
     .head{
@@ -300,7 +447,7 @@ export default{
     .headLine{
         margin: 10px auto;;
         width: 800px;
-        height: 70px;
+        min-height: 70px;
         display: flex;
         background-color: #fff;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
@@ -326,18 +473,18 @@ export default{
         flex-direction: row;
         justify-content: flex-end;
     }
-    .tag{
+    .label{
         display: flex;
         flex-direction: row;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
         margin-right: 20px;
     }
-    .centerText.tagName{
+    .centerText.labelName{
         margin: 0;
         padding: 3px 10px;
         background-color: #EBEAAB;
     }
-    .centerText.tagValue{
+    .centerText.labelValue{
         margin: 0;
         padding: 3px 10px;
         background-color: #C3DCEB;

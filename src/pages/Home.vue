@@ -1,23 +1,35 @@
 <template>
 <div class="shell">
-  <div class="background"></div>
-  <div class="mainBody">
+  <div id="loginPart">
     <transition name="fade">
-      <div id="loginPart" v-show="maskShow">
-        <div id="loginMask" />
-        <Login v-if="loginShow"></Login>
-        <Recorder v-show="recorderShow"></Recorder>
-        <Timer v-show="timerShow"></Timer>
+      <div id="loginMask" v-show="maskShow">
+        <transition name="fade">
+          <Login v-if="loginShow"></Login>
+        </transition>
+        <transition name="fade">
+          <Recorder v-if="recorderShow"></Recorder>
+        </transition>
+        <transition name="fade">
+          <Timer v-if="timerShow"></Timer>
+        </transition>
       </div>
     </transition>
-    <LeftBar></LeftBar>
-    <div id="main">
+  </div>
+  <LeftBar></LeftBar>
+  <div class="mainShell">
+    <div class="headShell">
       <Head2></Head2>
-      <div id="mainBox">
-        <router-view></router-view>
+    </div>    
+    <div class="mainBox">
+      <router-view></router-view>
+      <div class="aside">
+        <div class="stickyBox">
+          <TagCollotion></TagCollotion>
+        </div>
       </div>
     </div>
-  </div>  
+  </div>
+
 </div>
 
 </template>
@@ -27,8 +39,9 @@ import Login from '../components/Login.vue'
 import LeftBar from '../components/LeftBar.vue'
 import Recorder from '../components/Recorder.vue';
 import Timer from '../components/Timer.vue';
+import TagCollotion from '../components/TagCollotion.vue';
 export default {
-  components:{ Head2, Login, LeftBar, Recorder, Timer },
+  components:{ Head2, Login, LeftBar, Recorder, Timer, TagCollotion },
   name: 'Home',
   computed:{
     uid(){
@@ -54,6 +67,14 @@ export default {
 </script>
 
 <style scoped>
+:root{
+    --blogWidth: 800px;
+}
+.shell{
+  /* background-image: url('../assets/background2.jpg');
+  background-size: 100% 100%; */
+  height: 100%;
+}
 .background{
   position: fixed;
   top: 0;
@@ -82,44 +103,69 @@ export default {
 .fade-leave-to {
   opacity: 0;
 }
-.mainBody{
+.mainShell{
+  display: flex;
+  flex-direction: column;
+  left: 200px;
+  width: fit-content;
+  margin-left: 200px;
+}
+.mainBox{
+  /* 这个水平居中方法记得收录 */
+  /* position: absolute;
+  top: 210px;
+  margin-left: -437.5px;
+  margin-bottom: 10px;
+  left: 50%; */
+  margin-top: 10px;
+  height: fit-content;
+  width: 100%;
   display: flex;
   flex-direction: row;
-}
-#mainBox{
-  /* 这个水平居中方法记得收录 */
-  position: absolute;
-  margin-top: 7%;
-  margin-left: -500px;
-  margin-bottom: 3%;
-  left: 50%;
-  width: 1000px;
-  display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: space-between;
+  position: relative;
+}
+.aside{
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+  top: 0;
+  bottom: 0;
+  height: auto;
+  width: 315px;
+  /* background-color: rgb(175, 160, 189); */
+}
+.stickyBox{
+  position: -webkit-sticky;
+  position: sticky;
+  top: 10px;
 }
 
 #loginPart{
-  z-index: 4;
+  z-index: 10;
 }
 #loginMask{
   position: fixed;
   left: 0;
   top: 0;
-  opacity: 40%;
+  /* opacity: 40%; */
   width: 100%;
   height: 100%;
-  background-color: black;
-  transition: z-index 0.5s;;
+  background: rgba(0,0,0,0.5);
+  transition: 0.5s;;
+  z-index: 10;
 }
 
-#main{
+.headShell{
   background-image: url("../../public/assert/background.jpg");
+  /* background-image: url('../assets/background.jpg'); */
   background-size: 100% 180%;
-  position: absolute;
+  /* position: absolute;
   top: 0px;
-  width: 1000px;
-  margin-left: calc(50% - 500px);
+  margin-left: calc(50% - 580px); */
+  width: 1200px;
   height: 200px;
   background-color: rgb(208, 231, 251);
   z-index: -5;

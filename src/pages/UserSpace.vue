@@ -1,4 +1,5 @@
 <template>
+<div style="position:relative;overflow-x: hidden;">
     <div class="headShell">
         <Back></Back>
         <div class="head">
@@ -16,32 +17,50 @@
                 </div>
             </div>
             <div class="optionShell">
-                <div class="cell">
+                <!-- <div class="cell">
                     <button class="button1" @click="changePassword">修改密码</button>
-                </div>
+                </div> -->
                 <div class="cell">
                     <button class="button1" @click="logout">退出登录</button>
                 </div>
             </div>
         </div>
-
     </div>
+
+    <div class="articlesPart">
+        <transition-group name="list" tag="blog-card">
+            <div class="cardShell" v-for="blog in blogs" :key="blog.blogId" >
+                <BlogCard  :title="blog.title" :blogId="blog.blogId" :brief="blog.brief" :subDate="blog.subDate" :tags="blog.tags"></BlogCard>
+            </div>
+        </transition-group>
+    </div>
+    <div class="noMore">
+        <div class="text">没有更多</div>
+    </div>
+</div>
 </template>
 
 <script>
-import userIcon from '../assets/myuserImg.jpg'
+import userIcon from '../assets/defaultUser.png'
 import { delCookie } from '../utils/cookies';
 import Back from '../components/Back.vue';
 import store from '../main';
 import axios from 'axios';
+import BlogCard from '../components/BlogCard.vue';
 export default {
     name: "UserSpace",
     methods: {
         logout() {
             delCookie("username");
             delCookie("uid");
+            delCookie("token")
             this.$store.commit("clear");
             this.$router.push("/");
+            
+            window.localStorage.removeItem("uid");
+            window.localStorage.removeItem("username");
+            window.localStorage.removeItem("token");
+
         },
         back() {
             this.$router.push("/");
@@ -56,6 +75,46 @@ export default {
                 element.style="transform:translateX(500px);"
             }
             this.ifHide = !this.ifHide;
+        },
+        init(){
+            //请求个人信息
+            axios.get(store.state.preUrl+"/user",{params:{username:this.username}}).then((Response)=>{
+                console.log("[LOG]data=",Response.data);
+                let date = new Date(Response.data.registration_time);
+                date = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
+                this.msgList=[
+                    {
+                        name:"用户名",
+                        context:Response.data.username
+                    },
+                    {
+                        name:"UID",
+                        context:Response.data.uid
+                    },
+                    {
+                        name:"注册时间",
+                        context:date
+                    }
+                ]
+            })
+            //请求个人博客
+            axios.get(store.state.preUrl+'/authorBlogs',{params:{
+                author:store.state.username,
+            }}).then((Response)=>{
+                console.log(Response);
+                for(let index in Response.data){
+                    let obj = Response.data[index]
+                    this.blogs.push({
+                        title:obj.title,
+                        author:obj.author,
+                        subDate:obj.sub_date,
+                        blogId:obj.blog_id,
+                        brief:obj.context,
+                        tags:obj.tags
+                    })
+                }
+                console.log("数据请求完毕",Response);
+            });
         }
     },
     data() {
@@ -63,43 +122,46 @@ export default {
             userIcon: userIcon,
             username:store.state.username,
             msgList:[],
-            ifHide:false
+            ifHide:false,
+            blogs:[],
         };
     },
     created() {
-        axios.get(store.state.preUrl+"/user",{params:{username:this.username}}).then((Response)=>{
-            console.log("[LOG]data=",Response.data);
-            let date = new Date(Response.data.registration_time);
-            date = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+date.getDate();
-            this.msgList=[
-                {
-                    name:"用户名",
-                    context:Response.data.username
-                },
-                {
-                    name:"UID",
-                    context:Response.data.uid
-                },
-                {
-                    name:"注册时间",
-                    context:date
-                }
-            ]
-
-        })
+        this.init();
     },
-    components: { Back }
+    components: { Back, BlogCard }
 }
 </script>
 
 <style scoped>
+.list-move, /* 对移动中的元素应用的过渡 */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.75s ease;
+}
+
+.list-enter-from:nth-child(2n+1){
+  opacity: 0;
+  transform: translateX(-300px);
+}
+.list-enter-from:nth-child(2n){
+  opacity: 0;
+  transform: translateX(300px);
+}
+
+/* 确保将离开的元素从布局流中删除
+  以便能够正确地计算移动的动画。 */
+.list-leave-active {
+  position: absolute;
+}
+
 .line{
     height: 20px;
     display: flex;
     flex-direction: row;
     margin: 10px 5px;
     margin-left: 75px;
-    justify-content: space-around;
+    justify-content: center;
 }
 .tagName{
     padding: 0px 10px;
@@ -136,7 +198,7 @@ export default {
     cursor: pointer;
 }
 .headShell{
-    position: absolute;
+    /* position: absolute; */
     top: 0;
     width: 100%;
     background-color: antiquewhite;
@@ -183,5 +245,42 @@ export default {
 .cell{
     margin: 20px auto;
     width:fit-content;
+}
+.cardShell:nth-child(2n+1){
+    left: -40px;
+}
+.cardShell:nth-child(2n){
+    left: 120px;
+}
+.cardShell{
+    margin: 10px;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+.articlesPart{
+    min-height: 468px;
+    margin:0 auto;
+    margin-top: 10px;
+    width: 875px;
+    display: flex;
+    flex-direction: column;
+    background-color: #b3ada5;
+    border-radius:  5px 5px 0 0 ;
+}
+.noMore{
+    margin: auto;
+    width: 875px;
+    height: 75px;
+    /* background-color: #b3ada5; */
+    background-color: #b3ada5;
+    display: flex;
+}
+.text{
+    margin: auto;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 10px black;
 }
 </style>

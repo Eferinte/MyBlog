@@ -62,7 +62,7 @@ export default {
             //转化为秒
             let hour=Number(time.slice(3,5))
             let minute=Number(time.slice(6,8))
-            // console.log("time=",time,"hour=",hour,"minute=",minute);
+            console.log("time=",time,"hour=",hour,"minute=",minute);
             this.leftTime = hour*3600+minute*60
             this.setTime = hour*3600+minute*60
             store.commit("setSetTime",this.setTime)
@@ -175,15 +175,15 @@ export default {
     computed:{
         hour(){
             let hour  = Math.floor(this.leftTime/3600)
-            return (hour>9)?hour:"0"+hour
+            return String(hour).padStart(2,"0");
         },
         minute(){
-            let minute  = Math.floor(this.leftTime/60)
-            return (minute>9)?minute:"0"+minute
+            let minute  = Math.floor(this.leftTime/60)%60
+            return String(minute).padStart(2,"0");
         },
         second(){
             let second  = this.leftTime%60
-            return (second>9)?second:"0"+second
+            return String(second).padStart(2,"0");
         },
         actColor(){
             let targetColor = {
@@ -227,7 +227,7 @@ export default {
         width: 500px;
         height: 500px;
         background-color: #ffffff;
-        z-index: 5;
+        z-index: 11;
         transition: 0.5s;
         overflow:hidden
     }

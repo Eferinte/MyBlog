@@ -11,18 +11,18 @@ export default {
     name:'Hint',
     methods: {
         timeFunc1(){
-            console.log("消失")
+            // console.log("消失")
             this.$refs.hint.style.transition="1s";
             this.$refs.hint.style.opacity="0";
             this.$refs.hint.style.top="200px";
         },
         timeFunc2(){
-            console.log("消失")
+            // console.log("消失")
             this.$refs.hint.style.visibility="hidden";
         },
         doHint(text){         
             this.hintText=text   
-            console.log("提示")
+            // console.log("提示")
             this.$refs.hint.style.top="calc(50% - 25px)";
             this.$refs.hint.style.opacity="1";
             this.$refs.hint.style.visibility="visible";

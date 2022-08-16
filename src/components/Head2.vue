@@ -27,7 +27,7 @@ export default {
 }
 #title{
     margin-top: 40px;
-    left: 300px;
+    left: 400px;
     height:150px;
     width:400px;
     /* background-color:#c1c1c1; */

@@ -210,7 +210,7 @@ export default {
         width: 1100px;
         height: 600px;
         background-color: #F2F1DC;
-        z-index: 5;
+        z-index: 11;
         transition: 0.5s;
     }
     .main{

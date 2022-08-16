@@ -52,6 +52,74 @@ import Qs from 'qs'
 export default {
     name: "Editor",
     methods: {
+        init(){
+            window.addEventListener("resize", () => {
+                if (window.innerWidth < 1000) {
+                    this.iconOpacityValue = 0;
+                    this.editorLeft = "10%";
+                }
+                else {
+                    this.iconOpacityValue = 1;
+                    this.editorLeft = "15%";
+                }
+            });
+            let axiosInstance = axios.create({
+                baseURL: "http://localhost:50001",
+                timeout: 1000,
+                headers:{"token":store.state.token}
+            });
+            //获取远程草稿
+            let params= {
+                uid: this.uid,
+            }
+            console.log("params=",params);
+            axiosInstance.post("/getDrafts", Qs.stringify(params)).then((response) => {
+                console.log("远程草稿=",response.data[0].drafts);
+                if(typeof response.data != 'undefined'){
+                    this.drafts = JSON.parse(response.data[0].drafts);
+                    console.log("[drafts=]",this.drafts);
+                    //本地存档和远程存档冲突时选择最新的使用
+                    if(localStorage.getItem("drafts")!=response.data[0].drafts){
+                        if(Number(localStorage.getItem("save_date"))>Number(response.data[0].save_date)){
+                            this.drafts = JSON.parse(localStorage.getItem("drafts"));
+                            console.log("[init]加载本地存档");
+                        }else{
+                            this.drafts = JSON.parse(response.data[0].drafts);
+                            console.log("[init]加载远程存档");
+                        }
+                    }else{
+                        console.log("[init]存档未冲突");
+                    }
+                    this.refresh();
+                }else{
+                    console.log("[init]未找到远程存档");
+                    console.log("[init]加载本地存档");
+                    this.drafts = JSON.parse(localStorage.getItem("drafts"));
+                }
+            });
+        },
+        remoteSave(){
+            let axiosInstance = axios.create({
+                baseURL: "http://localhost:50001",
+                timeout: 1000,
+                headers:{"token":store.state.token}
+            });
+            let params= {
+                uid: this.uid,
+                //转义引号
+                drafts: JSON.stringify(this.drafts).replaceAll("'","\\'"),
+                save_date:new Date().getTime()
+            }
+            console.log("params=",params);
+            axiosInstance.post("/saveDrafts", Qs.stringify(params)).then((response) => {
+                if(response.data=="success"){
+                    store.commit("setHintText", "保存成功");
+                    this.deleteDraft(true);
+                }else{
+                    store.commit("setHintText", response.data);
+                }
+            });
+        },
         beforeBack(){
             this.save();
         },
@@ -65,7 +133,6 @@ export default {
                 //判断标签是否过多
                 if(this.uniDraft.tags.length >= 10){
                     store.commit("setHintText","最多创建10个标签")
-
                 }
                 //判断是否已存在该标签
                 else if(this.uniDraft.tags.find((item)=>{return this.tagInput==item?true:false}) != undefined){
@@ -147,7 +214,9 @@ export default {
                 this.drafts[this.index].tags =[...this.uniDraft.tags];
                 this.drafts[this.index].context =this.uniDraft.context;
                 localStorage.setItem("drafts", JSON.stringify(this.drafts));
+                localStorage.setItem("save_date", new Date().getTime());
                 store.commit("setHintText", "保存成功");
+                this.remoteSave();
             }
 
         },
@@ -194,14 +263,16 @@ export default {
             console.log("this.index=", index);
         },
         dynaSize(title){
-            //接受0-1的值，返回0-1的值
+            //接受0-infinity的值，返回0-1的值 图像类似 acrtan()
             let smooth = (x)=>{
-                let ans = (16-(16*x*x))^(1/2)
-                return ans/16
+                return 2*Math.atan(x/6.18)/Math.PI
             }
-            let ans = smooth(title.length/25)
+            let ans = smooth(title.length)
             console.log("ans=",ans);
-            return (6+Math.floor(20*ans))+"px";
+            ans = 18-Math.floor(12*ans)+"px"
+            console.log("ans=",ans);
+            return ans;
+            // return "20px"
         }
     },
     data() {
@@ -227,24 +298,12 @@ export default {
         editorHeight() {
             return "550px";
         },
+        uid(){
+            return store.state.uid;
+        }
     },
     created() {
-        console.log(window.innerWidth);
-        window.addEventListener("resize", () => {
-            if (window.innerWidth < 1000) {
-                this.iconOpacityValue = 0;
-                this.editorLeft = "10%";
-            }
-            else {
-                this.iconOpacityValue = 1;
-                this.editorLeft = "15%";
-            }
-        });
-        let drafts = JSON.parse(localStorage.getItem("drafts"));
-        if (drafts) {
-            this.drafts = drafts;
-            this.refresh();
-        }
+        this.init();
     },
     components: { Back }
 }
@@ -279,7 +338,6 @@ export default {
     text-align: center;
 }
 .file.textShell{
-    padding: 2px 5px;
     margin: auto;
 }
 .tagDel{

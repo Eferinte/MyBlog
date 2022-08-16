@@ -1,9 +1,12 @@
+//全局cookie
 function setCookie(cname,cvalue,exdays=365)
 {
   var d = new Date();
   d.setTime(d.getTime()+(exdays*24*60*60*1000));
   var expires = "expires="+d.toGMTString();
-  document.cookie = cname + "=" + cvalue + "; " + expires;
+  let cql = cname + "=" + cvalue + ";" + expires+";path='/'";
+  console.log("[CQL=]",cql);
+  document.cookie = cql;
 }
 function getCookie(cname)
 {
@@ -18,6 +21,6 @@ function getCookie(cname)
 }
 function delCookie(cname){
 
-    document.cookie = cname+"=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = cname+"=; expires=Thu, 01 Jan 1970 00:00:00 GMT;path='/';";
 }
 export { setCookie , getCookie , delCookie};

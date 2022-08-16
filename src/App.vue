@@ -24,15 +24,16 @@ export default {
         this.$store.commit("setUsername",getCookie('username'));
         this.$store.commit("setToken",getCookie('token'));
       }
-      this.$router.push("/home");
+      // this.$router.push("/home");
     },
+    //监听Hint
     watch:{
       hintText(newText,oldText){
         if(newText!=""){
           this.$refs.rootHint.doHint(newText)
           store.commit("setHintText","")
         }
-        console.log("newText=",newText,"oldText=",oldText,);
+        // console.log("newText=",newText,"oldText=",oldText,);
       }
     },
     computed:{
@@ -56,7 +57,11 @@ export default {
   opacity: 0;
 }
 #root{
+  position: static;
   transition: 0.25s;
   margin: 0;
+  height: 100%;
+  width: 100%;
 }
+
 </style>
