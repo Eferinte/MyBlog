@@ -179,6 +179,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content:flex-start;
+  box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
 }
 .cell{
   margin: 20px auto;

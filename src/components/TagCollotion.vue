@@ -149,6 +149,7 @@ export default {
         transition: 0.25s;
         top: 0;
         position:absolute;
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
     }
     .tagItem{
         margin: 5px;
@@ -190,6 +191,7 @@ export default {
     width: fit-content;
     background-color: #7b8c5b;
     color: #ffffff;
+    box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
 }
 .tagText{
     white-space: nowrap;

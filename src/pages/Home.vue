@@ -171,5 +171,6 @@ export default {
   z-index: -5;
   text-align:center;
   border-radius: 0px 0px 10px 10px;
+  /* box-shadow: 0 2px 10px 2px rgba(54,58,80,.32); */
 }
 </style>

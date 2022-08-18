@@ -75,7 +75,11 @@
                 </div>
                 <input id="tag" class="input1 tag" placeholder="输入后回车创建标签" v-model="tagInput" @change="titleCheck" @keydown="createTag">
             </div>
-
+            
+            <div class="checkShell" v-if="ifAlter">
+                <input class="myCheckBox" type="checkbox" :checked="data.private==1?true:false">
+                <div class="checkText">仅自己可见</div>
+            </div>
             <div class="context" ref="context">
                 <v-md-preview class="mdPart" ref="preview" :text="data.context" height="550px" v-if="!ifAlter"></v-md-preview>
                 <div class="editorShell" style="width:800px" v-if="ifAlter">
@@ -190,7 +194,8 @@ export default{
                     author:this.data.author,
                     blogId: this.data.blog_id,
                     newContext:this.newContext.replaceAll("'","\\'"),
-                    newTags:this.formatTags(this.newTags)
+                    newTags:this.formatTags(this.newTags),
+                    private:document.getElementsByClassName("myCheckBox")[0].checked?1:0
                 }
                 //提交修改
                 axiosInstance.post(store.state.preUrl+"/updateBlog", Qs.stringify(params)).then((Response) => {
@@ -423,6 +428,33 @@ export default{
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+    }
+
+
+    .checkShell{
+        position: relative;
+        top: -5px;
+        margin: 0px 10px;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        width: 100%;
+        height: 30px;
+        /* background-color: #fff;
+        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%); */
+    }
+    .checkText{
+        height: fit-content;
+        width: 100px;
+        margin: auto 0px;
+        font-weight: bold;
+        color: rgb(139, 9, 139);
+    }
+    .myCheckBox{
+        height: 20px;
+        width: 20px;
+        margin: auto 10px;
+        background-color: rgb(139, 9, 139);
     }
 
     .head{

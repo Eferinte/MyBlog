@@ -25,7 +25,12 @@
                 <button class="button1" id="addNew" @click="addNew" ref="addNew">新建</button>
                 <button class="button1" @click="deleteDraft(false)">删除</button>
                 <button class="button1" @click="save">保存</button>
-                <button class="button1" @click="post" style="margin-right:0">发布</button>
+                <button class="button1" @click="post">发布</button>
+                <div class="checkShell">
+                    <input class="myCheckBox" type="checkbox">
+                    <div class="centerText">仅自己可见</div>
+                    <div class="noteText">发布后仅会出现在个人空间中</div>
+                </div>
             </div>
         </div>
 
@@ -74,31 +79,41 @@ export default {
             }
             // console.log("params=",params);
             axiosInstance.post("/getDrafts", Qs.stringify(params)).then((response) => {
-                // console.log("远程草稿=",response.data[0].drafts);
                 if(typeof response.data != 'undefined'){
-                    this.drafts = JSON.parse(response.data[0].drafts);
-                    // console.log("[drafts=]",this.drafts);
+                    console.log("远程草稿=",response.data.drafts);
+                    this.drafts = JSON.parse(response.data.drafts.replaceAll("\n","\\n"));
+                    console.log("远程草稿=",response.data);
+                    console.log("[drafts=]",this.drafts);
                     //本地存档和远程存档冲突时选择最新的使用
-                    if(localStorage.getItem("drafts")!=response.data[0].drafts){
-                        if(Number(localStorage.getItem("save_date"))>Number(response.data[0].save_date)){
-                            this.drafts = JSON.parse(localStorage.getItem("drafts"));
-                            // console.log("[init]加载本地存档");
+                    try{
+                        if(localStorage.getItem("save_date")!=response.data.save_date){
+                            if(Number(localStorage.getItem("save_date"))>Number(response.data.save_date)){
+                                this.drafts = JSON.parse(localStorage.getItem("drafts"));
+                                console.log("[init]加载本地存档");
+                            }else{
+                                this.drafts = JSON.parse(response.data.drafts.replaceAll("\n","\\n"));
+                                console.log("[init]加载远程存档");
+                            }
                         }else{
-                            this.drafts = JSON.parse(response.data[0].drafts);
-                            // console.log("[init]加载远程存档");
-                        }
-                    }else{
-                        // console.log("[init]存档未冲突");
+                            this.drafts = JSON.parse(localStorage.getItem("drafts"));
+                            console.log("[init]存档未冲突");
+                            console.log("[init]加载本地存档");
+                        }                        
+                    }catch(err){
+                        this.drafts = JSON.parse(localStorage.getItem("drafts"));
+                        console.log("[init]加载本地存档");
+                        console.log("[ERROR]",err);
                     }
                     this.refresh();
                 }else{
-                    // console.log("[init]未找到远程存档");
-                    // console.log("[init]加载本地存档");
+                    console.log("[init]未找到远程存档");
+                    console.log("[init]加载本地存档");
                     this.drafts = JSON.parse(localStorage.getItem("drafts"));
                 }
+                console.log('[init]this.dratfs=',this.drafts);
             });
         },
-        remoteSave(){
+        remoteSave(saveDate){
             let axiosInstance = axios.create({
                 baseURL: store.state.preUrl,
                 timeout: 1000,
@@ -108,13 +123,12 @@ export default {
                 uid: this.uid,
                 //转义引号
                 drafts: JSON.stringify(this.drafts).replaceAll("'","\\'"),
-                save_date:new Date().getTime()
+                save_date:saveDate
             }
             // console.log("params=",params);
             axiosInstance.post("/saveDrafts", Qs.stringify(params)).then((response) => {
                 if(response.data=="success"){
                     store.commit("setHintText", "保存成功");
-                    this.deleteDraft(true);
                 }else{
                     store.commit("setHintText", response.data);
                 }
@@ -167,6 +181,7 @@ export default {
             this.uniDraft.title = this.drafts[this.index].title;
             this.uniDraft.tags = [...this.drafts[this.index].tags];//扩展运算符深拷贝数组
             this.uniDraft.context = this.drafts[this.index].context;
+            document.getElementsByClassName("myCheckBox")[0].checked=false;
             // console.log(JSON.stringify(this.uniDraft),"=?????=",JSON.stringify(this.drafts[this.index]));
         },
         addNew() {
@@ -213,10 +228,12 @@ export default {
                 this.drafts[this.index].title =this.uniDraft.title;
                 this.drafts[this.index].tags =[...this.uniDraft.tags];
                 this.drafts[this.index].context =this.uniDraft.context;
+                let saveDate = new Date().getTime();
+                console.log("[save]this.drafts",this.drafts);
                 localStorage.setItem("drafts", JSON.stringify(this.drafts));
-                localStorage.setItem("save_date", new Date().getTime());
+                localStorage.setItem("save_date", saveDate);
                 store.commit("setHintText", "保存成功");
-                this.remoteSave();
+                this.remoteSave(saveDate);
             }
 
         },
@@ -239,7 +256,8 @@ export default {
                         author: this.author,
                         //转义引号
                         context: this.uniDraft.context.replaceAll("'","\\'"),
-                        tags:this.formatTags(this.uniDraft.tags)
+                        tags:this.formatTags(this.uniDraft.tags),
+                        private:document.getElementsByClassName("myCheckBox")[0].checked?1:0
                     }
                     // console.log("params=",params);
                     axiosInstance.post("/post", Qs.stringify(params)).then((response) => {
@@ -397,17 +415,49 @@ export default {
     transform: scale(1.1);
     box-shadow: 0 2px 12px 0 rgb(0 0 0 / 30%);
 }
+.operations{
+    display: flex;  
+}
 .button1{
-    margin-top: 10px;
+    margin: 10px 0px;
     max-width: 150px;
     margin-right: 10px;
-    width: 31%;
+    width: 120px;
     height: 30px;
     background-color: #fff;
     box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
     border: 4px;
     cursor: pointer;
     transition: 0.3s;
+}
+.checkShell{
+    margin: 10px 10px;
+    display: flex;
+    flex-direction: row;
+    width: 320px;
+    height: 30px;
+    /* background-color: #fff;
+    box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%); */
+}
+.centerText{
+    height: fit-content;
+    width: fit-content;
+    margin: auto 0px;
+    font-weight: bold;
+    color: rgb(139, 9, 139);
+}
+.noteText{
+    height: fit-content;
+    width: fit-content;
+    margin: auto 10px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: rgb(125, 117, 117);
+}
+.myCheckBox{
+    height: 20px;
+    width: 20px;
+    margin: auto 10px;
 }
 .button1:active{
     transform: scale(1.1);

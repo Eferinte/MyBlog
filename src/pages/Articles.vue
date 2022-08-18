@@ -3,7 +3,7 @@
     <div class="articlesPart">
         <transition-group name="list" tag="blog-card">
             <div class="cardShell" v-for="blog in blogs" :key="blog.blogId" >
-                <blog-card  :title="blog.title" :blogId="blog.blogId" :brief="blog.brief" :subDate="blog.subDate" :tags="blog.tags"></blog-card>
+                <blog-card  :title="blog.title" :blogId="blog.blogId" :brief="blog.brief" :subDate="blog.subDate" :tags="blog.tags" :ifPrivate="blog.private"></blog-card>
             </div>
         </transition-group>
     </div>
@@ -25,7 +25,7 @@
 import BlogCard from '../components/BlogCard.vue'
 import axios from 'axios'
 import store from '../main';
-import {strToList , listToStr} from '../utils/tagTrans';
+import { listToStr} from '../utils/tagTrans';
 export default{
     name:"atricle",
     components:{BlogCard},
@@ -47,7 +47,8 @@ export default{
                         subDate:obj.sub_date,
                         blogId:obj.blog_id,
                         brief:obj.context,
-                        tags:obj.tags
+                        tags:obj.tags,
+                        private:obj.private==1?true:false
                     })
                 }
                 this.offset+=this.defaultAmount;
@@ -56,7 +57,7 @@ export default{
                     (entries) =>{
                         // 如果不可见，就返回
                         if (entries[0].intersectionRatio <= 0) return;
-                        this.getMoreBlogs(10);
+                        this.getMoreBlogs(this.defaultAmount);
                         // console.log('Loaded new items');
                     }
                 );
@@ -104,7 +105,7 @@ export default{
         return {
             blogs:[],
             offset:0,
-            defaultAmount:10,
+            defaultAmount:5,
             intersectionObserver:undefined,
             ifLoading:false
         }
@@ -174,6 +175,8 @@ export default{
 }
 .shell{
     position: relative;
+    border-radius:  10px 10px 0 0 ;
+    box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
 }
 .articlesPart{
     margin: auto;
@@ -193,7 +196,7 @@ export default{
     background-color: #fff;
     opacity: 0.5;
     width: 100%;
-    border-radius: 10px;
+    /* border-radius: 10px 10px 0 0; */
     z-index: 5;
     display: flex;
 }

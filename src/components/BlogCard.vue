@@ -1,5 +1,5 @@
 <template>
-  <div class="cardShell" @click="intoBlog()" ref="card">
+    <div class="cardShell" @click="intoBlog()" ref="card">
         <div class="line">
             <div class="title">
                 {{title}}
@@ -8,7 +8,10 @@
                 <div class="hole"></div>
                 <div class="hole"></div>
             </div> -->
-            <div  class="subDate">
+            <div  class="mark private" v-if="ifPrivate">
+                仅自己可见
+            </div>      
+            <div  class="mark">
                 {{formatTime}}
             </div>            
         </div>
@@ -25,13 +28,13 @@
             </div>
 
         </div>
-  </div>
+    </div>
 </template>
 
 <script>
 export default{
     name:"articleCard",
-    props:["title","blogId","brief","subDate","tags"],
+    props:["title","blogId","brief","subDate","tags","ifPrivate"],
     methods: {
         //操作路由，跳转到对应的博文页
         intoBlog(){
@@ -54,6 +57,7 @@ export default{
         }
     },
     created(){
+        console.log("[card]title=",this.title,"ifPrivate=",this.ifPrivate);
     },
     computed:{
         formatTime(){
@@ -94,10 +98,21 @@ export default{
         flex-direction: column;
         transition: 0.25s;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+        position: relative;
     }
 
     .cardShell:hover{
-        cursor:pointer;
+        width: 650px;
+        height: 260px;
+        background-color: white;
+        border-radius: 3px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        transition: 0.25s;
+        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+        position: relative;
+        cursor: pointer;
     }
 
     .line{
@@ -111,6 +126,7 @@ export default{
         height: 50px;
         /* 不换行 */
         white-space: nowrap;
+        position: relative;
     }
 
     .title{
@@ -138,7 +154,7 @@ export default{
         background-color: #b2aca4;
         margin: auto 5px;
     }
-    .subDate{
+    .mark{
         font-size: 16px;
         text-align: right;
         position: relative;
@@ -150,6 +166,16 @@ export default{
         padding-right: 10px;
         background-color: olivedrab;
         color: aliceblue;
+    }
+    .mark.private{
+        position: absolute;
+        padding: 2px 15px;
+        background-color:  rgb(139, 9, 139);;
+        height: 16px;
+        font-size: 12px;
+        top: 33px;
+        left: auto;
+        right: -33px;
     }
     .brief{
         text-align: left;
