@@ -8,14 +8,16 @@
         <div id="titleShell" :style="{left:editorLeft}">
             <input id="title" class="input1" placeholder="请输入标题" v-model="uniDraft.title" @change="titleCheck" @keydown="enter">
             <div class="tagShell">
-                <div class="tagItem" v-for="(tag , index) in uniDraft.tags" :key="tag">
-                    <div class="tagText">
-                        <div class="textShell tag">
-                            {{tag}}
+                    <div class="itemShell">
+                    <div class="tagItem" v-for="(tag , index) in uniDraft.tags" :key="tag">
+                        <div class="tagText">
+                            <div class="textShell tag">
+                                {{tag}}
+                            </div>
                         </div>
-                    </div>
-                    <div class="tagDel" @click="tagDel(index)">
-                        <img src="../assets/quit.png" style="height:50%;margin: auto;">
+                        <div class="tagDel" @click="tagDel(index)">
+                            <img src="../assets/quit.png" style="height:50%;margin: auto;">
+                        </div>
                     </div>
                 </div>
                 <input id="tag" class="input1 tag" placeholder="输入后回车创建标签" v-model="tagInput" @change="titleCheck" @keydown="createTag">
@@ -146,12 +148,17 @@ export default {
             if((e.keyCode==13)&&(this.tagInput.length>0)){
                 //判断标签是否过多
                 if(this.uniDraft.tags.length >= 10){
-                    store.commit("setHintText","最多创建10个标签")
+                    store.commit("setHintText","最多创建10个标签");
                 }
                 //判断是否已存在该标签
                 else if(this.uniDraft.tags.find((item)=>{return this.tagInput==item?true:false}) != undefined){
-                    store.commit("setHintText","已存在相同标签")
-                }else{
+                    store.commit("setHintText","已存在相同标签");
+                }else if(this.tagInput.indexOf('#')!=-1){
+                    store.commit("setHintText","标签中不得包括‘#’字符");
+                }else if(this.tagInput.length>10){
+                    store.commit("setHintText","标签长度不超过10个字符");
+                }
+                else{
                     this.uniDraft.tags.push(this.tagInput);
                     this.tagInput = "";
                 }
@@ -218,7 +225,7 @@ export default {
                     this.index--;
                     this.addNew();
                 }
-                localStorage.setItem("drafts", JSON.stringify(this.drafts));
+                this.save();
                 this.refresh();
             }
         },
@@ -256,7 +263,7 @@ export default {
                         author: this.author,
                         //转义引号
                         context: this.uniDraft.context.replaceAll("'","\\'"),
-                        tags:this.formatTags(this.uniDraft.tags),
+                        tags:this.formatTags(this.uniDraft.tags).replaceAll("'","\\'"),
                         private:document.getElementsByClassName("myCheckBox")[0].checked?1:0
                     }
                     // console.log("params=",params);
@@ -334,6 +341,14 @@ export default {
     background-color: #fff;
     margin: 10px 0;
     box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+}
+.itemShell{
+    width: fit-content;
+    /* max-width: 80%; */
+    /* background-color: olivedrab; */
+    display: flex;
+    flex-direction: row;
+    /* overflow: hidden; */
 }
 .tagItem{
     display: flex;

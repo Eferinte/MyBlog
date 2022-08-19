@@ -20,21 +20,37 @@
             <v-md-preview class="mdPart" :text="brief"></v-md-preview>
         </div>
 
-        <div class="tagShell">
-            <div class="tags">
-                <div class="tagItem" v-for="tag in TAGS" :key="tag">
-                    {{tag}}
-                </div>               
+        <div class="bottomShell">
+            <div class="msgShell" v-if="!ifPrivate">
+                <div class="cell">
+                    <div class="iconShell">
+                        <img style="height:100%" src="../assets/eye.png">
+                    </div>
+                    <div class="centerText">{{views}}</div>
+                </div>
+                <div class="cell">
+                    <div class="iconShell">
+                        <img style="height:80%;margin:2px 2px;" src="../assets/like.png">
+                    </div>
+                    <div class="centerText">{{likes}}</div>
+                </div>
             </div>
-
+            <div class="tagShell">
+                <div class="tags">
+                    <div class="tagItem" v-for="tag in TAGS" :key="tag">
+                        {{tag}}
+                    </div>               
+                </div>
+            </div>            
         </div>
+
     </div>
 </template>
 
 <script>
 export default{
     name:"articleCard",
-    props:["title","blogId","brief","subDate","tags","ifPrivate"],
+    props:["title","blogId","brief","subDate","tags","ifPrivate","views","likes"],
     methods: {
         //操作路由，跳转到对应的博文页
         intoBlog(){
@@ -102,16 +118,6 @@ export default{
     }
 
     .cardShell:hover{
-        width: 650px;
-        height: 260px;
-        background-color: white;
-        border-radius: 3px;
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        transition: 0.25s;
-        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
-        position: relative;
         cursor: pointer;
     }
 
@@ -184,16 +190,56 @@ export default{
         font-size: 16px;
         overflow: hidden; 
     }
-    .tagShell{
+    .bottomShell{
         /* background-color: #FBF7D4; */
         width: 100%;
         height: fit-content;
-        min-height: 50px;
+        min-height: 30px;
         box-shadow: 0 -10px 100px -5px black;
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+    .msgShell{
+        width: 150px;
+        min-height: 30px;
+        /* background-color: royalblue; */
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        background-color: #ffffff;
+        padding-left: 15px;
+    }
+    .cell{
+        margin: auto 0px;
+        display: flex;
+        flex-direction: row;
+        background-color: #ffffff;
+    }
+    .iconShell{
+        height: 20px;
+        width: 20px;
+    }
+    .centerText{
+        font-size: 10px;
+        margin: auto 5px;
+        min-width: 20px;
+        /* background-color: olivedrab; */
+        min-height: 10px;
+        min-width: 35px;
+    }
+    .tagShell{
+        /* background-color: #FBF7D4; */
+        width: 500px;
+        height: fit-content;
+        min-height: 30px;
+        position: relative;
+        /* background-color: rebeccapurple; */
     }
     .tags{
-        width: 630px;
-        min-height: 50px;
+        width: 480px;
+        min-height: 30px;
         height: fit-content;
         margin: 0 10px;
         display: flex;
@@ -201,10 +247,11 @@ export default{
         flex-direction: row-reverse;
         flex-wrap: wrap;
         flex-direction: row;
+        padding-bottom: 5px;
     }
     .tagItem{
         margin-top: 10px;
-        margin-bottom: 10px;
+        margin-bottom: 0px;
         margin-left: 10px;
         padding: 2px 10px;
         width: fit-content;

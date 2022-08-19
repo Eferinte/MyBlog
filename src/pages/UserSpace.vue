@@ -30,7 +30,16 @@
     <div class="articlesPart">
         <transition-group name="list" tag="blog-card">
             <div class="cardShell" v-for="blog in blogs" :key="blog.blogId" >
-                <BlogCard  :title="blog.title" :blogId="blog.blogId" :brief="blog.brief" :subDate="blog.subDate" :tags="blog.tags" :ifPrivate="blog.private"></BlogCard>
+                <BlogCard  
+                :title="blog.title" 
+                :blogId="blog.blogId" 
+                :brief="blog.brief" 
+                :subDate="blog.subDate" 
+                :tags="blog.tags" 
+                :ifPrivate="blog.private" 
+                :views="blog.views"
+                :likes="blog.likes"
+                ></BlogCard>
             </div>
         </transition-group>
     </div>
@@ -111,7 +120,9 @@ export default {
                         blogId:obj.blog_id,
                         brief:obj.context,
                         tags:obj.tags,
-                        private:obj.private==1?true:false
+                        private:obj.private==1?true:false,
+                        views:obj.views,
+                        likes:obj.likes
                     })
                 }
                 // console.log("数据请求完毕",Response);

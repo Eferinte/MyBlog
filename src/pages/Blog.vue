@@ -63,16 +63,19 @@
             </div>
             
             <div class="tagShell" v-if="ifAlter">
-                <div class="tagItem" v-for="(tag , index) in newTags" :key="tag">
-                    <div class="tagText">
-                        <div class="textShell tag">
-                            {{tag}}
+                <div class="itemShell">
+                    <div class="tagItem" v-for="(tag , index) in newTags" :key="tag">
+                        <div class="tagText">
+                            <div class="textShell tag">
+                                {{tag}}
+                            </div>
                         </div>
-                    </div>
-                    <div class="tagDel" @click="tagDel(index)">
-                        <img src="../assets/quit.png" style="height:50%;margin: auto;">
-                    </div>
+                        <div class="tagDel" @click="tagDel(index)">
+                            <img src="../assets/quit.png" style="height:50%;margin: auto;">
+                        </div>
+                    </div>                
                 </div>
+
                 <input id="tag" class="input1 tag" placeholder="输入后回车创建标签" v-model="tagInput" @change="titleCheck" @keydown="createTag">
             </div>
             
@@ -94,6 +97,21 @@
         </div>
         <Foot></Foot>
     </div>
+    <div class="aside" >
+        <div class="fixedShell">
+            <div class="cell like" v-if="!ifPrivate">
+                <div class="iconShell" @click="likeToggle">
+                    <img style="height:100%" :src="likeIcon" alt="">
+                </div>
+                <div>{{data.likes}}</div>
+            </div>
+            <div class="cell toTop" @click="goTop">
+                <div class="iconShell">
+                    <img style="height:100%" src="../assets/angle-up.png" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </template>
 
@@ -103,10 +121,50 @@ import Qs from 'qs'
 import store from '../main';
 import Foot from '../components/Foot.vue';
 import Back from '../components/Back.vue';
-import {throttle} from '../utils/throttle';
+import likeIcon from '../assets/like-fill.png';
+import disLikeIcon from '../assets/like.png';
 export default{
     name: "atricle",
     methods: {
+        goTop(){
+            let timeStamp = requestAnimationFrame(function fn() {
+                let osTop = document.documentElement.scrollTop || document.body.scrollTop;
+                let speed = -osTop / 6;
+                document.documentElement.scrollTop = document.body.scrollTop = osTop + speed;
+                if (osTop == 0) {
+                    cancelAnimationFrame(timeStamp);
+                }else{
+                    timeStamp = requestAnimationFrame(fn);
+                }
+            });
+        },
+        likeToggle(){
+            if(!this.likeLock){
+                this.likeLock = true;
+                let axiosInstance = axios.create({
+                    baseURL: store.state.preUrl,
+                    timeout: 1000,
+                    headers:{"token":store.state.token}
+                });
+                let params= {
+                    blogId: this.data.blog_id,
+                    uid: store.state.uid
+                }
+                let lastUrl = this.ifLike?'/unLikeBlog':'/likeBlog';
+                //提交修改
+                axiosInstance.post(store.state.preUrl+lastUrl, Qs.stringify(params)).then((Response) => {
+                    // console.log(Response.data);
+                    if(Response.data=="success"){
+                        store.commit("setHintText",this.ifLike?'取消点赞':'点赞成功');
+                        this.likeLock = false;
+                        this.init();
+                    }else{
+                        store.commit("setHintText","操作失败");
+                        this.likeLock = false;
+                    }
+                });
+            }
+        },
         titleCheck() {
             if (!(this.newTitle.length > 0)) { //回滚
                 store.commit("setHintText","标题不能为空");
@@ -122,7 +180,12 @@ export default{
                 //判断是否已存在该标签
                 else if(this.newTags.find((item)=>{return this.tagInput==item?true:false}) != undefined){
                     store.commit("setHintText","已存在相同标签")
-                }else{
+                }else if(this.tagInput.indexOf('#')!=-1){
+                    store.commit("setHintText","标签中不得包括‘#’字符");
+                }else if(this.tagInput.length>10){
+                    store.commit("setHintText","标签长度不超过10个字符");
+                }
+                else{
                     this.newTags.push(this.tagInput);
                     this.tagInput = "";
                 }
@@ -149,13 +212,20 @@ export default{
             // console.log(this.$route.query);
             axios.get(store.state.preUrl + "/blog", { params: {
                     blogId: blogId
-                } }).then((Response) => {
+            } }).then((Response) => {
                 this.data = Response.data;
                 let date = new Date(this.data.sub_date);
                 this.data.sub_date = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
                 this.ifAuthor = this.data.author==store.state.username?true:false;
+                this.ifPrivate = this.data.private=="1"?true:false;
             });
-            // this.funcName = this.scrollFunc();
+            // 确认点赞情况
+            axios.get(store.state.preUrl + "/checkLike", { params: {
+                    uid:store.state.uid,
+                    blogId: blogId
+            } }).then((Response) => {
+                this.ifLike = Response.data=="1"?true:false;
+            });
         },
         unAlter(){
             this.ifAlter=false;
@@ -194,7 +264,7 @@ export default{
                     author:this.data.author,
                     blogId: this.data.blog_id,
                     newContext:this.newContext.replaceAll("'","\\'"),
-                    newTags:this.formatTags(this.newTags),
+                    newTags:this.formatTags(this.newTags).replaceAll("'","\\'"),
                     private:document.getElementsByClassName("myCheckBox")[0].checked?1:0
                 }
                 //提交修改
@@ -288,6 +358,9 @@ export default{
             data: {},
             ifAlter:false,
             ifAuthor:false,
+            ifLike:false,
+            likeLock:false,
+            ifPrivate:true,
             newTitle:"",
             newContext:"",
             newTags:[],
@@ -307,6 +380,9 @@ export default{
         btn2Name(){
             return this.ifAlter?"确认修改":"修改";    
         },
+        likeIcon(){
+            return this.ifLike?likeIcon:disLikeIcon;
+        }
     },
     components: { Foot, Back }
 }
@@ -349,8 +425,15 @@ export default{
         flex-direction: row;
         background-color: #fff;
         margin: 10px auto;
-        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
         width: 800px;
+    }
+    .itemShell{
+        /* width: fit-content; */
+        display: flex;
+        flex-direction: row;
+        /* max-width: 80%; */
+        /* overflow: hidden; */
     }
     .tagItem{
         display: flex;
@@ -373,16 +456,16 @@ export default{
         text-align: center;
     }
     .aside{
+        margin: 0 50px;
         margin-top:210px;
         bottom: 0;
         height: auto;
         width: 200px;
         border-radius: 10px;
         /* background-color: olivedrab; */
-        margin-left: 100px;
     }
     .mainShell{
-        margin-right: calc(50% - 400px);
+        /* margin-right: calc(50% - 400px); */
     }
     .paddingBlock{
         height: 20px;
@@ -398,9 +481,46 @@ export default{
         transition: 0.25s;
         border-radius: 5px;
         font-size: 8px;
-        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
         position: sticky;
         top: 10px;
+    }
+    .fixedShell{
+        position: fixed;
+        bottom: 0;
+        padding-bottom: 30px;
+    }
+    .cell{
+        background-color: #fff;
+        height: 75px;
+        width: 75px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
+        margin: 20px 0;
+        text-align: center;
+        color: #707070;
+    }
+    .cell:hover{
+        cursor: pointer;
+    }
+    .iconShell{
+        position: relative;
+        height: 35px;
+        width: 35px;
+        margin: 10px auto;
+        margin-bottom: 0;
+    }
+    .cell.toTop .iconShell{
+        margin: auto;
+        /* background-color: olivedrab; */
+    }
+    .cell.like{
+        display: flex;
+        flex-direction: column;
+
+    }
+    .cell.toTop{
+        display: flex;
     }
     .btn{
         width: 100px;
@@ -410,6 +530,7 @@ export default{
         display: flex;
         font-weight: bold;
         margin-left: 20px;
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
     }
     .btn:hover{
         cursor: pointer;
@@ -427,7 +548,7 @@ export default{
         background-color: #b5c0ed;
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: center;
     }
 
 
@@ -482,7 +603,7 @@ export default{
         min-height: 70px;
         display: flex;
         background-color: #fff;
-        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
         font-size: 32px;
         border-radius: 5px;
     }
@@ -508,7 +629,7 @@ export default{
     .label{
         display: flex;
         flex-direction: row;
-        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
         margin-right: 20px;
     }
     .centerText.labelName{
@@ -535,7 +656,7 @@ export default{
         margin: auto;
         width: 800px;
         background-color: #fff;
-        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
         height: fit-content;
         min-height: 500px;
     }
@@ -543,7 +664,7 @@ export default{
         margin: auto;
         width: 800px;
         background-color: #fff;
-        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 20%);
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
         height: fit-content;
         min-height: 500px;
     }
@@ -553,5 +674,6 @@ export default{
         overflow: hidden;
         margin: auto;
         height: fit-content;
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
     }
 </style>

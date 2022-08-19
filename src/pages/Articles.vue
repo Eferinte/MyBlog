@@ -3,7 +3,16 @@
     <div class="articlesPart">
         <transition-group name="list" tag="blog-card">
             <div class="cardShell" v-for="blog in blogs" :key="blog.blogId" >
-                <blog-card  :title="blog.title" :blogId="blog.blogId" :brief="blog.brief" :subDate="blog.subDate" :tags="blog.tags" :ifPrivate="blog.private"></blog-card>
+                <blog-card  
+                    :title="blog.title" 
+                    :blogId="blog.blogId" 
+                    :brief="blog.brief" 
+                    :subDate="blog.subDate" 
+                    :tags="blog.tags" 
+                    :ifPrivate="blog.private"
+                    :views="blog.views"
+                    :likes="blog.likes"
+                ></blog-card>
             </div>
         </transition-group>
     </div>
@@ -48,7 +57,8 @@ export default{
                         blogId:obj.blog_id,
                         brief:obj.context,
                         tags:obj.tags,
-                        private:obj.private==1?true:false
+                        views:obj.views,
+                        likes:obj.likes
                     })
                 }
                 this.offset+=this.defaultAmount;
@@ -91,7 +101,9 @@ export default{
                         subDate:obj.sub_date,
                         blogId:obj.blog_id,
                         brief:obj.context,
-                        tags:obj.tags
+                        tags:obj.tags,
+                        views:obj.views,
+                        likes:obj.likes
                     })
                 }
                 this.offset+=amount;
@@ -114,6 +126,7 @@ export default{
         selectedTags(oldText,newText){
             this.blogs=[];
             this.offset=0;
+            this.intersectionObserver.unobserve(document.querySelector('.noMore'));
             this.init();
         }
     },

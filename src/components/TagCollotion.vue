@@ -146,6 +146,7 @@ export default {
         flex-wrap: wrap;
         align-content: flex-start;
         padding-top: 20px;
+        padding-bottom: 10px;
         transition: 0.25s;
         top: 0;
         position:absolute;
