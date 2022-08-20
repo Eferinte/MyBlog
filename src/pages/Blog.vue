@@ -84,22 +84,25 @@
                 <div class="checkText">仅自己可见</div>
             </div>
             <div class="context" ref="context">
-                <v-md-preview class="mdPart" ref="preview" :text="data.context" height="550px" v-if="!ifAlter"></v-md-preview>
+                <div v-if="!ifAlter">
+                    <v-md-preview class="mdPart" ref="preview" :text="data.context" height="550px" ></v-md-preview>
+                    <div class="noteShell"><div class="textShell">本文最后修改于&nbsp;&nbsp;&nbsp;&nbsp;{{lastChanged}}</div> </div>                    
+                </div>
                 <div class="editorShell" style="width:800px" v-if="ifAlter">
                     <v-md-editor  v-model="newContext" height="550px"></v-md-editor>
                 </div>
             </div>
-            <div class="tagShell">
+            <!-- <div class="tagShell">
                 <div class="tag" v-for="tag in tags" :key="tag" @click.stop="intoTag(tag)">
                     {{tag}}
                 </div>
-            </div>
+            </div> -->
         </div>
         <Foot></Foot>
     </div>
     <div class="aside" >
         <div class="fixedShell">
-            <div class="cell like" v-if="!ifPrivate">
+            <div class="cell like" v-if="!ifPrivate&&uid">
                 <div class="iconShell" @click="likeToggle">
                     <img style="height:100%" :src="likeIcon" alt="">
                 </div>
@@ -123,6 +126,7 @@ import Foot from '../components/Foot.vue';
 import Back from '../components/Back.vue';
 import likeIcon from '../assets/like-fill.png';
 import disLikeIcon from '../assets/like.png';
+import { getCookie, setCookie } from '../utils/cookies';
 export default{
     name: "atricle",
     methods: {
@@ -210,7 +214,14 @@ export default{
         init() {
             let blogId = this.$route.query.blogId;
             // console.log(this.$route.query);
-            axios.get(store.state.preUrl + "/blog", { params: {
+            
+            let axiosInstance = axios.create({
+                baseURL: store.state.preUrl,
+                withCredentials: true, //携带cookie
+                timeout: 1000,
+                // headers:{"token":store.state.token}
+            });
+            axiosInstance.get("/blog", { params: {
                     blogId: blogId
             } }).then((Response) => {
                 this.data = Response.data;
@@ -218,7 +229,21 @@ export default{
                 this.data.sub_date = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
                 this.ifAuthor = this.data.author==store.state.username?true:false;
                 this.ifPrivate = this.data.private=="1"?true:false;
+                date = new Date(this.data.last_changed);
+                this.lastChanged = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
             });
+
+            //确认访问情况
+            console.log("[init]cookie=",getCookie(`viewCookie${this.$route.query.blogId}`));
+            if( getCookie(`viewCookie${this.$route.query.blogId}`) !== 'viewed'){
+                //更新访问cookie
+                setCookie(`viewCookie${this.$route.query.blogId}`,'viewed',3);
+                //浏览量+1
+                axios.get(store.state.preUrl + "/addViews", { params: {
+                        blogId: blogId
+                } })
+            }
+
             // 确认点赞情况
             axios.get(store.state.preUrl + "/checkLike", { params: {
                     uid:store.state.uid,
@@ -304,6 +329,7 @@ export default{
                 });
             }
         }, 
+        //更新目录
         setTitles(){
             const anchors = this.$refs.preview.$el.querySelectorAll('h1,h2,h3,h4,h5,h6');
             const titles = Array.from(anchors).filter((title) => !!title.innerText.trim());
@@ -356,6 +382,7 @@ export default{
     data() {
         return {
             data: {},
+            lastChanged:"",
             ifAlter:false,
             ifAuthor:false,
             ifLike:false,
@@ -366,6 +393,7 @@ export default{
             newTags:[],
             tagInput:"",
             titles:"",
+            uid:store.state.uid,
             //存储实例化的节流函数对象,使监听器可以正确remove
             funcName:undefined
         };
@@ -382,7 +410,7 @@ export default{
         },
         likeIcon(){
             return this.ifLike?likeIcon:disLikeIcon;
-        }
+        },
     },
     components: { Foot, Back }
 }
@@ -675,5 +703,18 @@ export default{
         margin: auto;
         height: fit-content;
         box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
+    }
+    .noteShell{
+        width: 800px;
+        height: 30px;
+        background-color: white;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+    .noteShell .textShell{
+        color: rgb(152, 161, 161);
+        font-size: 12px;
+        margin: auto 10px;
     }
 </style>

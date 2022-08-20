@@ -41,7 +41,7 @@ export default {
 
 <style scoped>
     #hint{
-        position: absolute;
+        position: fixed;
         height: 50px;
         width: 200px;
         top: calc(50% - 25px);

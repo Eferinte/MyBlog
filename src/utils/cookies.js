@@ -4,7 +4,7 @@ function setCookie(cname,cvalue,exdays=365)
   var d = new Date();
   d.setTime(d.getTime()+(exdays*24*60*60*1000));
   var expires = "expires="+d.toGMTString();
-  let cql = cname + "=" + cvalue + ";" + expires+";path='/'";
+  let cql = cname + "=" + cvalue + ";" + expires;
   console.log("[CQL=]",cql);
   document.cookie = cql;
 }

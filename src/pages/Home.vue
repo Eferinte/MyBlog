@@ -29,6 +29,11 @@
       </div>
     </div>
   </div>
+  <div class="cell" @click="goTop">
+    <div class="iconShell">
+      <img style="height:100%" src="../assets/angle-up.png" alt="">
+    </div>
+  </div>
 
 </div>
 
@@ -43,6 +48,20 @@ import TagCollotion from '../components/TagCollotion.vue';
 export default {
   components:{ Head2, Login, LeftBar, Recorder, Timer, TagCollotion },
   name: 'Home',
+  methods: {
+    goTop(){
+      let timeStamp = requestAnimationFrame(function fn() {
+        let osTop = document.documentElement.scrollTop || document.body.scrollTop;
+        let speed = -osTop / 6;
+        document.documentElement.scrollTop = document.body.scrollTop = osTop + speed;
+        if (osTop == 0) {
+            cancelAnimationFrame(timeStamp);
+        }else{
+            timeStamp = requestAnimationFrame(fn);
+        }
+      });
+    },
+  },
   computed:{
     uid(){
       return this.$store.state.uid;
@@ -172,5 +191,30 @@ export default {
   text-align:center;
   border-radius: 0px 0px 10px 10px;
   /* box-shadow: 0 2px 10px 2px rgba(54,58,80,.32); */
+}
+.cell{
+  background-color: #fff;
+  height: 75px;
+  width: 75px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
+  margin: 20px 0;
+  text-align: center;
+  color: #707070;
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+}
+.cell:hover{
+  cursor: pointer;
+}
+.iconShell{
+  position: relative;
+  height: 35px;
+  width: 35px;
+  margin: 10px auto;
+  margin-bottom: 0;
+  margin: auto;
 }
 </style>
