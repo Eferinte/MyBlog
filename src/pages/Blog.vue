@@ -4,6 +4,7 @@
     <div class="aside" >
         <div class="content" v-show="!ifAlter" v-if="titles.length!=0">
             <div
+                class="contentLine"
                 v-for="anchor in titles"
                 :key="anchor"
                 :style="{ padding: `10px 0 10px ${anchor.indent * 10+10}px` }"
@@ -512,6 +513,15 @@ export default{
         box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
         position: sticky;
         top: 10px;
+        transition: 0.25s;
+        padding: 10px;
+    }
+    .contentLine{
+        transition: 0.25s;
+    }
+    .contentLine:hover{
+        background-color: #9f9d9d;
+        cursor: pointer;
     }
     .fixedShell{
         position: fixed;

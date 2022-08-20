@@ -17,7 +17,7 @@
     </div>
     <div class="tagShell" :style="{top:dynaticTop}">
         <div v-for="(tag,index) in tags" :key="tag" @click="select(tag,index)">
-            <div class="tagItem" :ref="tag.tagName">
+            <div :id="'item'+index" class="tagItem" :ref="tag.tagName">
                 {{tag.tagName}}({{tag.blogId.length}})
             </div>
         </div>
@@ -52,8 +52,14 @@ export default {
                 return;
             }
             if(typeof this.selectedTags.find((item)=>{return item==tag?true:false}) != "undefined"){
-                store.commit("setHintText","已选择该标签");
-                // this.$refs[tag.tagName].className="shakeTagItem";
+                // console.log("[select]elment=",document.getElementById("item"+index),"index=",index);
+                // store.commit("setHintText","已选择该标签");
+                // 修改class 增加抖动动画
+                document.getElementById("item"+index).className = "shakeTagItem";
+                // class改回来
+                setTimeout(()=>{
+                    document.getElementById("item"+index).className = "tagItem";
+                },300)
             }else{
                 this.selectedTags.push(tag);
                 store.commit("updateTags",this.selectedTags.map(item=>{
@@ -102,11 +108,11 @@ export default {
 <style scoped>
 
     @keyframes shake{
-        0%   {transform:translateX(3px);}
-        20%   {transform:translateX(-6px);}
-        40%   {transform:translateX(10px);}
-        60%   {transform:translateX(-6px);}
-        80%   {transform:translateX(3px);}
+        0%   {transform:translateX(5px);}
+        20%   {transform:translateX(-10px);}
+        40%   {transform:translateX(15px);}
+        60%   {transform:translateX(-10px);}
+        80%   {transform:translateX(5px);}
         100%   {transform:translateX(0px);}
     }
     .list-move, /* 对移动中的元素应用的过渡 */
@@ -174,7 +180,7 @@ export default {
         width: fit-content;
         height: 20px;
         border-radius: 10px;
-        background-color: #fae6ef;
+        background-color: #fff;
         font-size: 10px;
         transition: 0.5s;
         text-align: center;
