@@ -1,6 +1,6 @@
 <template>
 <div class="shell">
-  <div id="loginPart">
+  <div id="loginPart" v-if="!ifMobile">
     <transition name="fade">
       <div id="loginMask" v-show="maskShow">
         <transition name="fade">
@@ -15,25 +15,29 @@
       </div>
     </transition>
   </div>
-  <LeftBar></LeftBar>
+  <LeftBar v-if="!ifMobile"></LeftBar>
   <div class="mainShell">
     <div class="headShell">
-      <Head2></Head2>
+      <Head2 v-if="!ifMobile"></Head2>
     </div>    
     <div class="mainBox">
-      <router-view></router-view>
-      <div class="aside">
+      <div class="articleBox">
+        <router-view></router-view>
+      </div>
+      <div class="aside" v-if="!ifMobile">
         <div class="stickyBox">
           <TagCollotion></TagCollotion>
         </div>
       </div>
     </div>
   </div>
-  <div class="cell" @click="goTop">
-    <div class="iconShell">
-      <img style="height:100%" src="../assets/angle-up.png" alt="">
-    </div>
-  </div>
+  <transition name="fadeUp">
+    <div class="cell" @click="goTop" v-show="ifTop" :style="goTopScale">
+      <div class="iconShell">
+        <img style="height:100%" src="../assets/angle-up.png" alt="">
+      </div>
+    </div>  
+  </transition>
 
 </div>
 
@@ -45,22 +49,73 @@ import LeftBar from '../components/LeftBar.vue'
 import Recorder from '../components/Recorder.vue';
 import Timer from '../components/Timer.vue';
 import TagCollotion from '../components/TagCollotion.vue';
+import { throttle } from '../utils/throttle';
+import store from '../main';
 export default {
   components:{ Head2, Login, LeftBar, Recorder, Timer, TagCollotion },
   name: 'Home',
   methods: {
-    goTop(){
-      let timeStamp = requestAnimationFrame(function fn() {
-        let osTop = document.documentElement.scrollTop || document.body.scrollTop;
-        let speed = -osTop / 6;
-        document.documentElement.scrollTop = document.body.scrollTop = osTop + speed;
-        if (osTop == 0) {
-            cancelAnimationFrame(timeStamp);
-        }else{
-            timeStamp = requestAnimationFrame(fn);
-        }
-      });
+    //适配函数
+    changeFunc(){
+      if(875<document.documentElement.clientWidth&&document.documentElement.clientWidth<1125){
+          document.getElementsByClassName('shell')[0].style.setProperty('--main-width','875px');
+          document.getElementsByClassName('shell')[0].style.setProperty('--head-height','200px');
+          document.getElementsByClassName('shell')[0].style.setProperty('--head-width','875px');
+          console.log('[throttleFunc]width=',document.documentElement.clientWidth,'次移动端模式');
+          this.goTopScale="transform:scale(1);";
+          this.ifMobile = true;
+          store.commit('setMode','pc');
+      }else if(document.documentElement.clientWidth<875){
+          document.getElementsByClassName('shell')[0].style.setProperty('--main-width','100%');
+          document.getElementsByClassName('shell')[0].style.setProperty('--head-height','100px');
+          document.getElementsByClassName('shell')[0].style.setProperty('--head-width','100%');
+          console.log('[throttleFunc]width=',document.documentElement.clientWidth,'移动端模式');
+          this.goTopScale="transform:scale(0.7);";
+          this.ifMobile = true;
+          store.commit('setMode','mobile');
+      }else{
+          document.getElementsByClassName('shell')[0].style.setProperty('--main-width','875px');
+          document.getElementsByClassName('shell')[0].style.setProperty('--head-height','200px');
+          document.getElementsByClassName('shell')[0].style.setProperty('--head-width','1200px');
+          this.goTopScale="transform:scale(1);";
+          this.ifMobile = false;
+          store.commit('setMode','pc');
+      }
     },
+    goTop(){
+      // let timeStamp = requestAnimationFrame(function fn() {
+      //   let osTop = document.documentElement.scrollTop || document.body.scrollTop;
+      //   let speed = -osTop / 6;
+      //   document.documentElement.scrollTop = document.body.scrollTop = osTop + speed;
+      //   if (osTop == 0) {
+      //       cancelAnimationFrame(timeStamp);
+      //   }else{
+      //       timeStamp = requestAnimationFrame(fn);
+      //   }
+      // });
+      window.scrollTo({top:0,behavior:'smooth'});
+    },
+    init(){
+      var intersectionObserver = new IntersectionObserver(
+        (entries)=> {
+          // 如果不可见，就返回
+          if (entries[0].intersectionRatio <= 0){
+            this.ifTop = true;
+          }else{
+            this.ifTop = false;
+          }
+        }
+      );
+      intersectionObserver.observe(document.getElementsByClassName("headShell")[0]);
+
+      //封装节流函数
+      this.throttleFunc = throttle(()=>{
+        this.changeFunc();
+      },314)
+
+      //监听页面大小变化进行适配
+      window.addEventListener('resize',this.throttleFunc);
+    }
   },
   computed:{
     uid(){
@@ -80,14 +135,33 @@ export default {
     }
   },
   created() {
-    this.$router.push('/home/articles')
+    this.$router.push('/home/articles');
+  },
+  mounted() {
+    this.init();
+    //挂载时监听
+    this.changeFunc();
+  },
+  beforeUnmount() {
+      //移除监听器
+      window.removeEventListener('resize',this.throttleFunc);
+  },
+  data() {
+    return {
+      ifTop:false,
+      ifMobile:false,
+      throttleFunc:undefined,
+      goTopScale:"transform:scale(1);"
+    }
   },
 }
 </script>
 
 <style scoped>
-:root{
-    --blogWidth: 800px;
+.shell{
+  --main-Width: 875px;
+  --head-height:200px;
+  --head-width:1200px;
 }
 .shell{
   /* background-image: url('../assets/background2.jpg');
@@ -122,12 +196,22 @@ export default {
 .fade-leave-to {
   opacity: 0;
 }
+.fadeUp-enter-active,
+.fadeUp-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fadeUp-enter-from,
+.fadeUp-leave-to {
+  opacity: 0;
+  transform: translateY(75px);
+}
 .mainShell{
   display: flex;
   flex-direction: column;
   left: 200px;
-  width: fit-content;
-  margin-left: 200px;
+  width: var(--head-width);
+  margin:auto;
 }
 .mainBox{
   /* 这个水平居中方法记得收录 */
@@ -138,12 +222,16 @@ export default {
   left: 50%; */
   margin-top: 10px;
   height: fit-content;
-  width: 100%;
+  width: var(--head-Width);
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
   position: relative;
+}
+.articleBox{
+  width: var(--main-Width);
+  overflow: hidden;
 }
 .aside{
   display: flex;
@@ -184,8 +272,8 @@ export default {
   /* position: absolute;
   top: 0px;
   margin-left: calc(50% - 580px); */
-  width: 1200px;
-  height: 200px;
+  width: var(--head-width);
+  height: var(--head-height);
   background-color: rgb(208, 231, 251);
   z-index: -5;
   text-align:center;
@@ -202,9 +290,11 @@ export default {
   text-align: center;
   color: #707070;
   position: fixed;
-  right: 20px;
+  right: 50px;
   bottom: 20px;
   display: flex;
+  transition: 0.25s;
+  z-index: 5;
 }
 .cell:hover{
   cursor: pointer;

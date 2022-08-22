@@ -1,8 +1,9 @@
 <template>
 <div class="shell">
-    <Back @click="beforeBack"></Back>
-    <div class="aside" >
-        <div class="content" v-show="!ifAlter" v-if="titles.length!=0">
+    <Back @click="beforeBack" v-if="!ifMobile"></Back>
+    <div class="aside left" v-if="!ifMobile">
+        <transition name="fade">
+        <div class="content" v-if="!ifAlter&&titles.length!=0">
             <div
                 class="contentLine"
                 v-for="anchor in titles"
@@ -12,10 +13,15 @@
             >
                 <a style="cursor: pointer">{{ anchor.title }}</a>
             </div>
-        </div>
+        </div>        
+        </transition>
     </div>
     <div class="mainShell">
         <div class="head">
+        </div>
+        <div class="MobileNav" v-if="ifMobile">
+            <div class="navItem" @click="goBack">返回主页</div>
+            <div class="navItem" @click="goTop">回到顶部</div>
         </div>
         <div class="BlogShell">
             <div class="headLine" id="title" v-if="!ifAlter">
@@ -44,7 +50,7 @@
                     </span>
                 </div>
                 <div style="margin:auto"></div>
-                <div class="ops" v-if="ifAuthor">
+                <div class="ops" v-if="ifAuthor&&(!ifMobile)">
                     <div class="btn" @click="unAlter" v-if="ifAlter">
                         <span class="centerText" >
                             取消修改
@@ -101,19 +107,21 @@
         </div>
         <Foot></Foot>
     </div>
-    <div class="aside" >
+    <div class="aside right" v-if="!ifMobile">
         <div class="fixedShell">
-            <div class="cell like" v-if="!ifPrivate&&uid">
-                <div class="iconShell" @click="likeToggle">
-                    <img style="height:100%" :src="likeIcon" alt="">
+            <transition-group name="list" tag="div">
+                <div class="cell like" v-if="!ifPrivate&&uid" key="like">
+                    <div class="iconShell" @click="likeToggle">
+                        <img style="height:100%" :src="likeIcon" alt="">
+                    </div>
+                    <div>{{data.likes}}</div>
                 </div>
-                <div>{{data.likes}}</div>
-            </div>
-            <div class="cell toTop" @click="goTop">
-                <div class="iconShell">
-                    <img style="height:100%" src="../assets/angle-up.png" alt="">
+                <div class="cell toTop" @click="goTop" v-if="ifTop" key="top">
+                    <div class="iconShell">
+                        <img style="height:100%" src="../assets/angle-up.png" alt="">
+                    </div>
                 </div>
-            </div>
+            </transition-group>
         </div>
     </div>
 </div>
@@ -128,46 +136,30 @@ import Back from '../components/Back.vue';
 import likeIcon from '../assets/like-fill.png';
 import disLikeIcon from '../assets/like.png';
 import { getCookie, setCookie } from '../utils/cookies';
+import {debounce} from '../utils/debounce';
+import { throttle } from '../utils/throttle';
 export default{
     name: "atricle",
     methods: {
+        goBack(){
+            this.$router.push('/');
+        },
         goTop(){
-            let timeStamp = requestAnimationFrame(function fn() {
-                let osTop = document.documentElement.scrollTop || document.body.scrollTop;
-                let speed = -osTop / 6;
-                document.documentElement.scrollTop = document.body.scrollTop = osTop + speed;
-                if (osTop == 0) {
-                    cancelAnimationFrame(timeStamp);
-                }else{
-                    timeStamp = requestAnimationFrame(fn);
-                }
-            });
+            // let timeStamp = requestAnimationFrame(function fn() {
+            //     let osTop = document.documentElement.scrollTop || document.body.scrollTop;
+            //     let speed = -osTop / 6;
+            //     document.documentElement.scrollTop = document.body.scrollTop = osTop + speed;
+            //     if (osTop == 0) {
+            //         cancelAnimationFrame(timeStamp);
+            //     }else{
+            //         timeStamp = requestAnimationFrame(fn);
+            //     }
+            // });
+            window.scrollTo({top:0,behavior:'smooth'});
         },
         likeToggle(){
             if(!this.likeLock){
-                this.likeLock = true;
-                let axiosInstance = axios.create({
-                    baseURL: store.state.preUrl,
-                    timeout: 1000,
-                    headers:{"token":store.state.token}
-                });
-                let params= {
-                    blogId: this.data.blog_id,
-                    uid: store.state.uid
-                }
-                let lastUrl = this.ifLike?'/unLikeBlog':'/likeBlog';
-                //提交修改
-                axiosInstance.post(store.state.preUrl+lastUrl, Qs.stringify(params)).then((Response) => {
-                    // console.log(Response.data);
-                    if(Response.data=="success"){
-                        store.commit("setHintText",this.ifLike?'取消点赞':'点赞成功');
-                        this.likeLock = false;
-                        this.init();
-                    }else{
-                        store.commit("setHintText","操作失败");
-                        this.likeLock = false;
-                    }
-                });
+                this.debounceFunc();
             }
         },
         titleCheck() {
@@ -235,7 +227,7 @@ export default{
             });
 
             //确认访问情况
-            console.log("[init]cookie=",getCookie(`viewCookie${this.$route.query.blogId}`));
+            // console.log("[init]cookie=",getCookie(`viewCookie${this.$route.query.blogId}`));
             if( getCookie(`viewCookie${this.$route.query.blogId}`) !== 'viewed'){
                 //更新访问cookie
                 setCookie(`viewCookie${this.$route.query.blogId}`,'viewed',3);
@@ -252,6 +244,49 @@ export default{
             } }).then((Response) => {
                 this.ifLike = Response.data=="1"?true:false;
             });
+
+            //封装防抖函数
+            this.debounceFunc = debounce(()=>{
+                this.likeLock = false;
+                let axiosInstance = axios.create({
+                    baseURL: store.state.preUrl,
+                    timeout: 1000,
+                    headers:{"token":store.state.token}
+                });
+                let params= {
+                    blogId: this.data.blog_id,
+                    uid: store.state.uid
+                }
+                let lastUrl = this.ifLike?'/unLikeBlog':'/likeBlog';
+                //提交修改
+                axiosInstance.post(store.state.preUrl+lastUrl, Qs.stringify(params)).then((Response) => {
+                    // console.log(Response.data);
+                    if(Response.data=="success"){
+                        store.commit("setHintText",this.ifLike?'取消点赞':'点赞成功');
+                        this.init();
+                    }else{
+                        store.commit("setHintText","操作失败");
+                    }
+                    this.likeLock = false;
+                });
+            },314);
+
+            //封装节流函数
+            this.throttleFunc = throttle(()=>{
+                if(document.documentElement.clientWidth<1125){
+                    document.getElementsByClassName('shell')[0].style.setProperty('--main-width','100%');
+                    document.getElementsByClassName('shell')[0].style.setProperty('--head-height','100px');
+                    console.log('[throttleFunc]width=',document.documentElement.clientWidth,'次宽模式');
+                    this.ifMobile = true;
+                }else{
+                    this.ifMobile = false;
+                    document.getElementsByClassName('shell')[0].style.setProperty('--main-width','800px');
+                    document.getElementsByClassName('shell')[0].style.setProperty('--head-height','200px');
+                }
+            },314)
+
+            //监听页面大小变化进行适配
+            window.addEventListener('resize',this.throttleFunc);
         },
         unAlter(){
             this.ifAlter=false;
@@ -387,6 +422,8 @@ export default{
             ifAlter:false,
             ifAuthor:false,
             ifLike:false,
+            ifTop:false,
+            ifMobile:false,
             likeLock:false,
             ifPrivate:true,
             newTitle:"",
@@ -395,8 +432,10 @@ export default{
             tagInput:"",
             titles:"",
             uid:store.state.uid,
-            //存储实例化的节流函数对象,使监听器可以正确remove
-            funcName:undefined
+            //包装好后防抖函数对象的引用-用于点赞
+            debounceFunc:undefined,
+            //包装好后节流函数对象的引用-用于监听页面大小变化
+            throttleFunc:undefined
         };
     },
     mounted() {     
@@ -404,6 +443,32 @@ export default{
             // console.log("[preview]=",this.$refs.preview.$el.firstChild);
             this.setTitles();
         },300)
+
+        //初始化【返回顶部】监听器
+        var intersectionObserver = new IntersectionObserver(
+            (entries)=> {
+            // 如果不可见，就返回
+            if (entries[0].intersectionRatio <= 0){
+                this.ifTop = true;
+            }else{
+                this.ifTop = false;
+            }
+            },{threshold:[0,1]}
+        );
+        intersectionObserver.observe(document.getElementsByClassName('head')[0]);
+
+        
+        //初始化模式
+        if(document.documentElement.clientWidth<1125){
+            document.getElementsByClassName('shell')[0].style.setProperty('--main-width','100%');
+            document.getElementsByClassName('shell')[0].style.setProperty('--head-height','100px');
+            console.log('[throttleFunc]width=',document.documentElement.clientWidth,'次宽模式');
+            this.ifMobile = true;
+        }else{
+            this.ifMobile = false;
+            document.getElementsByClassName('shell')[0].style.setProperty('--main-width','800px');
+            document.getElementsByClassName('shell')[0].style.setProperty('--head-height','200px');
+        }
     },
     computed:{
         btn2Name(){
@@ -413,12 +478,45 @@ export default{
             return this.ifLike?likeIcon:disLikeIcon;
         },
     },
+    beforeUnmount() {
+        //移除监听器
+        window.removeEventListener('resize',this.throttleFunc);
+    },
     components: { Foot, Back }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.shell{
+    --main-width:800px;
+    --head-height:200px;
+}
+    .fade-enter-to,
+    .fade-leave-from {
+        transform: translateX(-75px);
+        opacity: 0;
+    }
+
+    .list-move, /* 对移动中的元素应用的过渡 */
+    .list-enter-active,
+    .list-leave-active {
+        transition: all 0.25s ease;
+    }
+    .list-leave-to{
+        transform: translateY(75px);
+        opacity: 0;
+    }
+    .list-enter-from{
+        transform: translateY(75px);
+        opacity: 0;
+    }
+
+    /* 确保将离开的元素从布局流中删除
+    以便能够正确地计算移动的动画。 */
+    .list-leave-active {
+        position: absolute;
+    }
     .input1{
         border: 4px;
         border-radius: 0px;
@@ -485,16 +583,26 @@ export default{
         text-align: center;
     }
     .aside{
-        margin: 0 50px;
+        margin: 0 auto;
         margin-top:210px;
         bottom: 0;
         height: auto;
-        width: 200px;
+        width: 220px;
         border-radius: 10px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
         /* background-color: olivedrab; */
+    }
+    .aside.right{
+        justify-content: flex-end;
+    }
+    .aside.left{
+        justify-content: flex-start;
     }
     .mainShell{
         /* margin-right: calc(50% - 400px); */
+        width: var(--main-width);
     }
     .paddingBlock{
         height: 20px;
@@ -506,7 +614,7 @@ export default{
         background-color: #fff;
         min-height: 100px;
         height: fit-content;
-        width: 200px;
+        width: 100%;
         transition: 0.25s;
         border-radius: 5px;
         font-size: 8px;
@@ -515,18 +623,24 @@ export default{
         top: 10px;
         transition: 0.25s;
         padding: 10px;
+        margin-right:  10px;
     }
     .contentLine{
         transition: 0.25s;
     }
     .contentLine:hover{
-        background-color: #9f9d9d;
+        background-color: #ededed;
+        transform: scale(1.1);
+        color: #3eaf84;
         cursor: pointer;
+        font-weight: bold;
     }
     .fixedShell{
-        position: fixed;
-        bottom: 0;
         padding-bottom: 30px;
+        left: 50%;
+        position: sticky;
+        bottom: 20px;
+        margin: 0 auto;
     }
     .cell{
         background-color: #fff;
@@ -534,7 +648,7 @@ export default{
         width: 75px;
         border-radius: 5px;
         box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
-        margin: 20px 0;
+        margin: 20px auto;
         text-align: center;
         color: #707070;
     }
@@ -549,8 +663,8 @@ export default{
         margin-bottom: 0;
     }
     .cell.toTop .iconShell{
-        margin: auto;
         /* background-color: olivedrab; */
+        margin: auto;
     }
     .cell.like{
         display: flex;
@@ -587,6 +701,7 @@ export default{
         display: flex;
         flex-direction: row;
         justify-content: center;
+        width: 100%;
     }
 
 
@@ -620,14 +735,36 @@ export default{
         background-image: url("../../public/assert/background.jpg");
         background-size: 100% 180%;
         margin-top: 0px;
-        width: 800px;
-        margin-left: calc(50% - 400px);
-        height: 200px;
+        width: 100%;
+        height: var(--head-height);
         left: 100px;
         background-color: rgb(208, 231, 251);
         z-index: -5;
         text-align:center;
-        border-radius: 0px 0px 10px 10px;
+    }
+    .MobileNav{
+        margin: auto;
+        width: 100%;
+        height: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-top: 0px;
+        flex-direction: row;
+        background-color: white;
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+    .navItem{
+        width: fit-content;
+        padding: 0 5px;
+        margin: auto 0;
+        /* font-family: Microsoft YaHei; */
+    }
+    .navItem:hover{
+        cursor: pointer;
     }
     .BlogShell{
         margin: auto;
@@ -636,8 +773,8 @@ export default{
         justify-content: center;
     }
     .headLine{
-        margin: 10px auto;;
-        width: 800px;
+        margin: 10px auto;
+        width: 100%;
         min-height: 70px;
         display: flex;
         background-color: #fff;
@@ -647,12 +784,11 @@ export default{
     }
     .line{
         margin: auto;
-        width: 800px;
+        width: 100%;
         height: 30px;
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
-        /* box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%); */
         margin-bottom: 10px;
         flex-direction: row;
         border-radius: 5px;
@@ -692,7 +828,7 @@ export default{
     }
     .mdPart{
         margin: auto;
-        width: 800px;
+        width: 100%;
         background-color: #fff;
         box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
         height: fit-content;
@@ -700,7 +836,7 @@ export default{
     }
     .editorShell{
         margin: auto;
-        width: 800px;
+        width: 100%;
         background-color: #fff;
         box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
         height: fit-content;
@@ -708,14 +844,14 @@ export default{
     }
     .context{
         border-radius: 5px;
-        width: 800px;
+        width: 100%;
         overflow: hidden;
         margin: auto;
         height: fit-content;
         box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
     }
     .noteShell{
-        width: 800px;
+        width: 100%;
         height: 30px;
         background-color: white;
         display: flex;

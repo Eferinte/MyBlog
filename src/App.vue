@@ -18,7 +18,7 @@ export default {
     created() {
       // 读取本地登录状态
       //使用cookies
-      console.log("cookies=",getCookie("uid"),getCookie("username"));
+      // console.log("cookies=",getCookie("uid"),getCookie("username"));
       if(getCookie("uid")){
         this.$store.commit("setUid",getCookie('uid'));
         this.$store.commit("setUsername",getCookie('username'));

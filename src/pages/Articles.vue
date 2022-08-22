@@ -1,8 +1,8 @@
 <template>
 <div class="shell">
     <div class="articlesPart">
-        <transition-group name="list" tag="blog-card">
-            <div class="cardShell" v-for="blog in blogs" :key="blog.blogId" >
+        <transition-group name="list">
+            <div class="cardBox" v-for="blog in blogs" :key="blog.blogId" >
                 <blog-card  
                     :title="blog.title" 
                     :blogId="blog.blogId" 
@@ -12,6 +12,8 @@
                     :ifPrivate="blog.private"
                     :views="blog.views"
                     :likes="blog.likes"
+                    :titleFontSize="cardCSS.titleFontSize"
+                    :cardHeight="cardCSS.cardHeight"
                 ></blog-card>
             </div>
         </transition-group>
@@ -126,23 +128,56 @@ export default{
         selectedTags(oldText,newText){
             this.blogs=[];
             this.offset=0;
-            this.intersectionObserver.unobserve(document.querySelector('.noMore'));
+            if(this.intersectionObserver){
+                this.intersectionObserver.unobserve(document.querySelector('.noMore'));
+            }
             this.init();
+        },
+        mode(newV, oldV){
+            console.log('[watch]mode changed from ',oldV,' to ',newV);
+            // //修改字体大小
+            // if(newV == 'mobile'){
+            //     document.getElementsByClassName('cardShell')[0].style.setProperty('--title-font-size','16px');
+            //     document.getElementsByClassName('cardShell')[0].style.setProperty('--card-height','150px');
+            // }else if(newV == 'pc'){
+            //     document.getElementsByClassName('cardShell')[0].style.setProperty('--title-font-size','30px');
+            //     document.getElementsByClassName('cardShell')[0].style.setProperty('--card-height','250px');
+            // }else{
+            //     console.log('[watch] unknow mode');
+            // }
         }
     },
     computed:{
         selectedTags(){
             return store.state.selectedTags;
+        },
+        mode(){
+            return store.state.mode;
+        },
+        cardCSS(){
+            if(store.state.mode == 'mobile'){
+                return {
+                    cardHeight:'350px',
+                    titleFontSize:'16px'
+                }
+            }else{
+                return {
+                    cardHeight:'250px',
+                    titleFontSize:'30px'
+                }
+            }
         }
-    }
+    },
+    beforeUnmount() {            
+        if(this.intersectionObserver){
+            this.intersectionObserver.unobserve(document.querySelector('.noMore'));
+        }
+    },
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-:root{
-    --blogWidth: 800px;
-}
 .list-move, /* 对移动中的元素应用的过渡 */
 .list-enter-active,
 .list-leave-active {
@@ -157,6 +192,10 @@ export default{
   opacity: 0;
   transform: translateX(300px);
 }
+/* .list-enter-from{
+  opacity: 0;
+  transform: translateY(300px);
+} */
 
 /* 确保将离开的元素从布局流中删除
   以便能够正确地计算移动的动画。 */
@@ -174,32 +213,38 @@ export default{
 .fade-leave-to {
   opacity: 0;
 }
-.cardShell:nth-child(2n+1){
-    left: -40px;
+/* .cardBox:nth-child(2n+1){
+    transform: translateX(var(--offsetL));
 }
-.cardShell:nth-child(2n){
-    left: 120px;
-}
-.cardShell{
-    margin: 10px;
+.cardBox:nth-child(2n){
+    transform: translateX(var(--offsetR));
+} */
+.cardBox{
+    /* --offsetL:-50px;
+    --offsetR:50px; */
+    margin: 10px auto;
     display: flex;
     justify-content: center;
     position: relative;
+    max-width: 650px;
+    width: 80%;
 }
 .shell{
     position: relative;
     border-radius:  10px 10px 0 0 ;
     box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
+    width: 100%;
 }
 .articlesPart{
     margin: auto;
-    width: 875px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     background-color: #b3ada5;
     border-radius:  10px 10px 0 0 ;
     transition: 0.25s;
     height: fit-content;
+    justify-content: center;
 }
 .loadingMask{
     position: absolute;

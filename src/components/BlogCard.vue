@@ -1,23 +1,24 @@
 <template>
-    <div class="cardShell" @click="intoBlog()" ref="card">
-        <div class="line">
-            <div class="title">
+    <div class="cardShell"  ref="card" :style="{height:cardHeight}">
+        <div class="line" @click="intoBlog()">
+            <div class="title" :style="{fontSize:titleFontSize}">
                 {{title}}
             </div>
             <!-- <div class="decoration">
                 <div class="hole"></div>
                 <div class="hole"></div>
             </div> -->
-            <div  class="mark private" v-if="ifPrivate">
-                仅自己可见
-            </div>      
-            <div  class="mark">
-                {{formatTime}}
-            </div>            
+                
         </div>
+        <div  class="mark private" v-if="ifPrivate">
+            仅自己可见
+        </div>      
+        <div  class="mark">
+            {{formatTime}}
+        </div>        
 
-        <div class="brief">
-            <v-md-preview class="mdPart" :text="brief"></v-md-preview>
+        <div class="brief" @click="intoBlog()">
+            <v-md-preview class="mdPart" :text="brief" ></v-md-preview>
         </div>
 
         <div class="bottomShell">
@@ -48,9 +49,10 @@
 </template>
 
 <script>
+
 export default{
     name:"articleCard",
-    props:["title","blogId","brief","subDate","tags","ifPrivate","views","likes"],
+    props:["title","blogId","brief","subDate","tags","ifPrivate","views","likes",'titleFontSize','cardHeight'],
     methods: {
         //操作路由，跳转到对应的博文页
         intoBlog(){
@@ -73,7 +75,7 @@ export default{
         }
     },
     created(){
-        console.log("[card]title=",this.title,"ifPrivate=",this.ifPrivate);
+        // console.log("[card]title=",this.title,"ifPrivate=",this.ifPrivate);
     },
     computed:{
         formatTime(){
@@ -97,7 +99,7 @@ export default{
                 }
                 return list
             }
-        }
+        },
     }
 
 }
@@ -105,16 +107,20 @@ export default{
 
 <style scoped>
     .cardShell{
-        width: 650px;
-        height: fit-content;
+        /* --title-font-size:30px;
+        --card-height:250px; */
+        width: 100%;
+        /* height: var(--card-height); */
+        height: 250px;
         background-color: white;
         border-radius: 3px;
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         flex-direction: column;
         transition: 0.25s;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
         position: relative;
+        overflow: hidden;
     }
 
     .cardShell:hover{
@@ -129,10 +135,12 @@ export default{
         margin-top: 10px;
         /* background-color:#FBF7D4; */
         width: 90%;
-        height: 50px;
+        height: 20%;
+        max-height: 50px;
         /* 不换行 */
         white-space: nowrap;
         position: relative;
+        z-index: 3;
     }
 
     .title{
@@ -142,6 +150,7 @@ export default{
         border-width: 0 0 2px 0;
         font-weight: bold;
         overflow: hidden;
+        max-width: 60%;
     }    
     .decoration{
         height: 28px;
@@ -163,8 +172,10 @@ export default{
     .mark{
         font-size: 16px;
         text-align: right;
-        position: relative;
-        left: 33px;
+        position: absolute;
+        top: 10px;
+        right: 0;
+        /* left: 33px; */
         /* border: solid 1px black; */
         border-radius: 12px 0 0 12px;
         height: 24px;
@@ -172,6 +183,7 @@ export default{
         padding-right: 10px;
         background-color: olivedrab;
         color: aliceblue;
+        z-index: 4;
     }
     .mark.private{
         position: absolute;
@@ -179,16 +191,17 @@ export default{
         background-color:  rgb(139, 9, 139);;
         height: 16px;
         font-size: 12px;
-        top: 33px;
+        top: 40px;
         left: auto;
-        right: -33px;
+        right: 0px;
     }
     .brief{
         text-align: left;
-        width: 90%;
-        height: 150px;
+        width: 100%;
+        height: 80%;
         font-size: 16px;
         overflow: hidden; 
+        transform: scale(0.8);
     }
     .bottomShell{
         /* background-color: #FBF7D4; */
@@ -200,6 +213,9 @@ export default{
         display: flex;
         flex-direction: row;
         justify-content: flex-end;
+        position: absolute;
+        bottom: 0;
+        background-color: white;
     }
     .msgShell{
         width: 150px;
@@ -224,30 +240,34 @@ export default{
     .centerText{
         font-size: 10px;
         margin: auto 5px;
-        min-width: 20px;
         /* background-color: olivedrab; */
         min-height: 10px;
         min-width: 35px;
     }
     .tagShell{
         /* background-color: #FBF7D4; */
-        width: 500px;
-        height: fit-content;
+        width: calc(100% - 150px);
+        height: 100%;
         min-height: 30px;
         position: relative;
         /* background-color: rebeccapurple; */
-    }
-    .tags{
-        width: 480px;
-        min-height: 30px;
-        height: fit-content;
-        margin: 0 10px;
+        overflow: hidden;
         display: flex;
         justify-content: flex-end;
-        flex-direction: row-reverse;
-        flex-wrap: wrap;
-        flex-direction: row;
+    }
+    .tags{
+        width: fit-content;
+        min-height: 30px;
+        height: 100%;
+        margin: 0 10px;
         padding-bottom: 5px;
+        white-space: nowrap;
+        overflow-x:scroll;
+        float:left;
+        overflow-y:hidden
+    }
+    .tags::-webkit-scrollbar {
+        display: none;
     }
     .tagItem{
         margin-top: 10px;
@@ -262,5 +282,6 @@ export default{
         transition: 0.5s;
         text-align: center;
         color: white;
+        display: inline-block;
     }
 </style>

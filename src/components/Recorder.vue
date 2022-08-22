@@ -78,15 +78,15 @@ export default {
                 date:strDate,
                 useTime:this.$refs.timer.getTime()
             }
+            
             axiosInstance.post("/upRecorder",Qs.stringify(params)).then((response)=>{
                 if(response.data=="success"){
-                    store.commit("setHintText","提交成功")
-                    this.initMissTimes()//使用promise实现
-                    this.show=!this.show
+                    store.commit("setHintText","提交成功");
+                    this.initMissTimes();
                 }else{
-                    store.commit("setHintText","提交失败")
+                    store.commit("setHintText","提交失败");
                 }
-            })
+            })           
         },
         initMissTimes(){        
             axios.get(store.state.preUrl+"/missTimes").then((response) => {
@@ -94,6 +94,7 @@ export default {
                 this.bosses.forEach(function (item) {
                     item.hitTimes = missTimes[item.name];
                 });
+                this.show = true;
             });
         }
     },
