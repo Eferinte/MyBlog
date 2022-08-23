@@ -61,7 +61,7 @@ export default {
           document.getElementsByClassName('shell')[0].style.setProperty('--main-width','875px');
           document.getElementsByClassName('shell')[0].style.setProperty('--head-height','200px');
           document.getElementsByClassName('shell')[0].style.setProperty('--head-width','875px');
-          console.log('[throttleFunc]width=',document.documentElement.clientWidth,'次移动端模式');
+          // console.log('[throttleFunc]width=',document.documentElement.clientWidth,'次移动端模式');
           this.goTopScale="transform:scale(1);";
           this.ifMobile = true;
           store.commit('setMode','pc');
@@ -69,7 +69,7 @@ export default {
           document.getElementsByClassName('shell')[0].style.setProperty('--main-width','100%');
           document.getElementsByClassName('shell')[0].style.setProperty('--head-height','100px');
           document.getElementsByClassName('shell')[0].style.setProperty('--head-width','100%');
-          console.log('[throttleFunc]width=',document.documentElement.clientWidth,'移动端模式');
+          // console.log('[throttleFunc]width=',document.documentElement.clientWidth,'移动端模式');
           this.goTopScale="transform:scale(0.7);";
           this.ifMobile = true;
           store.commit('setMode','mobile');

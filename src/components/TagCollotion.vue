@@ -65,6 +65,7 @@ export default {
                 store.commit("updateTags",this.selectedTags.map(item=>{
                     return item.tagName
                 }));
+                console.log('[vuex]tags=',store.state.selectedTags);
             }
             // console.log("[TOP=]",document.getElementsByClassName("selectedShell")[0].offsetHeight);
             setTimeout(()=>{

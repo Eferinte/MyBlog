@@ -133,19 +133,6 @@ export default{
             }
             this.init();
         },
-        mode(newV, oldV){
-            console.log('[watch]mode changed from ',oldV,' to ',newV);
-            // //修改字体大小
-            // if(newV == 'mobile'){
-            //     document.getElementsByClassName('cardShell')[0].style.setProperty('--title-font-size','16px');
-            //     document.getElementsByClassName('cardShell')[0].style.setProperty('--card-height','150px');
-            // }else if(newV == 'pc'){
-            //     document.getElementsByClassName('cardShell')[0].style.setProperty('--title-font-size','30px');
-            //     document.getElementsByClassName('cardShell')[0].style.setProperty('--card-height','250px');
-            // }else{
-            //     console.log('[watch] unknow mode');
-            // }
-        }
     },
     computed:{
         selectedTags(){
