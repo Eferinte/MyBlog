@@ -105,6 +105,9 @@
                 </div>
             </div> -->
         </div>
+        <div class="commentBox">
+            <Comment :blog_id="blogId" :ifAuthor="ifAuthor"></Comment>
+        </div>
         <Foot></Foot>
     </div>
     <div class="aside right" v-if="!ifMobile">
@@ -138,6 +141,7 @@ import disLikeIcon from '../assets/like.png';
 import { getCookie, setCookie } from '../utils/cookies';
 import {debounce} from '../utils/debounce';
 import { throttle } from '../utils/throttle';
+import Comment from '../components/comment.vue';
 export default{
     name: "atricle",
     methods: {
@@ -215,6 +219,7 @@ export default{
         //初始化请求数据
         init() {
             let blogId = this.$route.query.blogId;
+            this.blogId = blogId;
             // console.log(this.$route.query);
             
             let axiosInstance = axios.create({
@@ -286,12 +291,13 @@ export default{
                 if(document.documentElement.clientWidth<1125){
                     document.getElementsByClassName('shell')[0].style.setProperty('--main-width','100%');
                     document.getElementsByClassName('shell')[0].style.setProperty('--head-height','100px');
-                    console.log('[throttleFunc]width=',document.documentElement.clientWidth,'次宽模式');
+                    store.commit('setMode','mobile');
                     this.ifMobile = true;
                 }else{
                     this.ifMobile = false;
                     document.getElementsByClassName('shell')[0].style.setProperty('--main-width','800px');
                     document.getElementsByClassName('shell')[0].style.setProperty('--head-height','200px');
+                    store.commit('setMode','pc');
                 }
             },314)
 
@@ -428,6 +434,7 @@ export default{
     data() {
         return {
             data: {},
+            blogId:undefined,
             authorName:'',
             lastChanged:"",
             ifAlter:false,
@@ -493,7 +500,7 @@ export default{
         //移除监听器
         window.removeEventListener('resize',this.throttleFunc);
     },
-    components: { Foot, Back }
+    components: { Foot, Back, Comment }
 }
 </script>
 
@@ -887,5 +894,14 @@ export default{
         color: rgb(152, 161, 161);
         font-size: 12px;
         margin: auto 10px;
+    }
+    .commentBox{
+        margin-top: 10px;
+        width: 100%;
+        height: fit-content;
+        background-color: white;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px 2px rgba(54,58,80,.32);
     }
 </style>

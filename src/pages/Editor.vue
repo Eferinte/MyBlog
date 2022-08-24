@@ -56,7 +56,7 @@ import userIcon from '../assets/myuserImg.jpg'
 import axios from 'axios';
 import store from '../main';
 import Back from '../components/Back.vue';
-import Qs from 'qs'
+import Qs from 'qs';
 export default {
     name: "Editor",
     methods: {
