@@ -51,6 +51,7 @@
 </template>
 
 <script>
+
 import userIcon from '../assets/myuserImg.jpg'
 import axios from 'axios';
 import store from '../main';
@@ -260,7 +261,7 @@ export default {
                     });
                     let params= {
                         title: this.uniDraft.title,
-                        author: this.author,
+                        author_uid: this.uid,
                         //转义引号
                         context: this.uniDraft.context.replaceAll("'","\\'"),
                         tags:this.formatTags(this.uniDraft.tags).replaceAll("'","\\'"),

@@ -38,7 +38,7 @@
                         作者
                     </span>
                     <span class="centerText labelValue">
-                        {{data.author}}
+                        {{authorName}}
                     </span>
                 </div>
                 <div class="label">
@@ -203,6 +203,15 @@ export default{
             // console.log("移除监听事件");
             // window.removeEventListener("scroll",this.funcName);
         },
+        setAuthorName(uid){
+            console.log('[setAuthorName]author_uid=',uid);
+            axios.get(store.state.preUrl+'/uid',{params:{
+                uid:uid
+            }}).then(Response=>{
+                console.log('[setAuthorName]response=',Response);
+                this.authorName = Response.data.username;
+            })
+        },
         //初始化请求数据
         init() {
             let blogId = this.$route.query.blogId;
@@ -218,9 +227,10 @@ export default{
                     blogId: blogId
             } }).then((Response) => {
                 this.data = Response.data;
+                this.setAuthorName(this.data.author_uid);
                 let date = new Date(this.data.sub_date);
                 this.data.sub_date = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
-                this.ifAuthor = this.data.author==store.state.username?true:false;
+                this.ifAuthor = this.data.author_uid==store.state.uid?true:false;
                 this.ifPrivate = this.data.private=="1"?true:false;
                 date = new Date(this.data.last_changed);
                 this.lastChanged = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
@@ -321,8 +331,8 @@ export default{
                 });
                 let params= {
                     newTitle:this.newTitle,
-                    username: store.state.username,
-                    author:this.data.author,
+                    uid: store.state.uid,
+                    author_uid:this.data.author_uid,
                     blogId: this.data.blog_id,
                     newContext:this.newContext.replaceAll("'","\\'"),
                     newTags:this.formatTags(this.newTags).replaceAll("'","\\'"),
@@ -418,6 +428,7 @@ export default{
     data() {
         return {
             data: {},
+            authorName:'',
             lastChanged:"",
             ifAlter:false,
             ifAuthor:false,
@@ -462,12 +473,12 @@ export default{
         if(document.documentElement.clientWidth<1125){
             document.getElementsByClassName('shell')[0].style.setProperty('--main-width','100%');
             document.getElementsByClassName('shell')[0].style.setProperty('--head-height','100px');
-            console.log('[throttleFunc]width=',document.documentElement.clientWidth,'次宽模式');
+            // console.log('[throttleFunc]width=',document.documentElement.clientWidth,'移动端模式');
             this.ifMobile = true;
         }else{
-            this.ifMobile = false;
             document.getElementsByClassName('shell')[0].style.setProperty('--main-width','800px');
             document.getElementsByClassName('shell')[0].style.setProperty('--head-height','200px');
+            this.ifMobile = false;
         }
     },
     computed:{
@@ -491,6 +502,8 @@ export default{
 .shell{
     --main-width:800px;
     --head-height:200px;
+    --BKG-color:#b5c0ed;
+    --box-margin:10px;
 }
     .fade-enter-to,
     .fade-leave-from {
@@ -561,6 +574,18 @@ export default{
         flex-direction: row;
         /* max-width: 80%; */
         /* overflow: hidden; */
+        width: 800px;
+        white-space: nowrap;
+        overflow-x:auto;
+    }
+    .itemShell::-webkit-scrollbar{
+        /* display: none; */
+        height: 5px;
+        background-color: #d4d2d2;
+    }
+    .itemShell::-webkit-scrollbar-thumb{
+        height: 5px;
+        background-color: #707070;
     }
     .tagItem{
         display: flex;
@@ -697,7 +722,7 @@ export default{
         background-color: rgb(145, 9, 9);
     }
     .shell{
-        background-color: #b5c0ed;
+        background-color: var(--BKG-color);
         display: flex;
         flex-direction: row;
         justify-content: center;
@@ -773,7 +798,7 @@ export default{
         justify-content: center;
     }
     .headLine{
-        margin: 10px auto;
+        margin: var(--box-margin) auto;
         width: 100%;
         min-height: 70px;
         display: flex;
@@ -789,7 +814,7 @@ export default{
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
-        margin-bottom: 10px;
+        margin-bottom: var(--box-margin);
         flex-direction: row;
         border-radius: 5px;
     }

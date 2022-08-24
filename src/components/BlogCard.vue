@@ -126,7 +126,6 @@ export default{
     .cardShell:hover{
         cursor: pointer;
     }
-
     .line{
         display: flex;
         flex-direction: row;
@@ -217,6 +216,12 @@ export default{
         bottom: 0;
         background-color: white;
     }
+    .bottomShell:hover{
+        cursor: default;
+    }
+    .bottomShell:active{
+        cursor: default;
+    }
     .msgShell{
         width: 150px;
         min-height: 30px;
@@ -262,12 +267,17 @@ export default{
         margin: 0 10px;
         padding-bottom: 5px;
         white-space: nowrap;
-        overflow-x:scroll;
+        overflow-x:auto;
         float:left;
         overflow-y:hidden
     }
     .tags::-webkit-scrollbar {
-        display: none;
+        height: 5px;
+        background-color: #d4d2d2;
+    }
+    .tags::-webkit-scrollbar-thumb{
+        height: 5px;
+        background-color: olivedrab;
     }
     .tagItem{
         margin-top: 10px;

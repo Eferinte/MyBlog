@@ -9,6 +9,7 @@
   </div>
 </template>
 <script>
+
 import Hint from './components/Hint.vue';
 import store from './main';
 import { getCookie } from './utils/cookies';
@@ -19,15 +20,15 @@ export default {
       // 读取本地登录状态
       //使用cookies
       // console.log("cookies=",getCookie("uid"),getCookie("username"));
-      if(getCookie("uid")){
-        this.$store.commit("setUid",getCookie('uid'));
-        this.$store.commit("setUsername",getCookie('username'));
-        this.$store.commit("setToken",getCookie('token'));
-      }else{
+      // if(getCookie("uid")){
+      //   this.$store.commit("setUid",getCookie('uid'));
+      //   this.$store.commit("setUsername",getCookie('username'));
+      //   this.$store.commit("setToken",getCookie('token'));
+      // }else{
         this.$store.commit("setUid",window.localStorage.getItem("uid"));
         this.$store.commit("setUsername",window.localStorage.getItem("username"));
         this.$store.commit("setToken",window.localStorage.getItem("token"));
-      }
+      // }
       
       // this.$router.push("/home");
     },

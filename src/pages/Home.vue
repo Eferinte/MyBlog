@@ -38,6 +38,11 @@
       </div>
     </div>  
   </transition>
+  <!-- <div class="cell test" @click="doTest" :style="goTopScale">
+    <div class="iconShell">
+      <img style="height:100%" src="../assets/test.png" alt="">
+    </div>
+  </div>   -->
 
 </div>
 
@@ -55,12 +60,19 @@ export default {
   components:{ Head2, Login, LeftBar, Recorder, Timer, TagCollotion },
   name: 'Home',
   methods: {
+      // //测试用函数
+      // doTest(){
+      //   let log = store.state.log;
+      //   alert(log);
+      // },
     //适配函数
     changeFunc(){
       if(875<document.documentElement.clientWidth&&document.documentElement.clientWidth<1125){
           document.getElementsByClassName('shell')[0].style.setProperty('--main-width','875px');
           document.getElementsByClassName('shell')[0].style.setProperty('--head-height','200px');
           document.getElementsByClassName('shell')[0].style.setProperty('--head-width','875px');
+          document.getElementsByClassName('shell')[0].style.setProperty('--mainBox-marginTop','10px');
+          document.getElementsByClassName('shell')[0].style.setProperty('--shellRadius','10px');
           // console.log('[throttleFunc]width=',document.documentElement.clientWidth,'次移动端模式');
           this.goTopScale="transform:scale(1);";
           this.ifMobile = true;
@@ -69,6 +81,8 @@ export default {
           document.getElementsByClassName('shell')[0].style.setProperty('--main-width','100%');
           document.getElementsByClassName('shell')[0].style.setProperty('--head-height','100px');
           document.getElementsByClassName('shell')[0].style.setProperty('--head-width','100%');
+          document.getElementsByClassName('shell')[0].style.setProperty('--mainBox-marginTop','0');
+          document.getElementsByClassName('shell')[0].style.setProperty('--shellRadius','0px');
           // console.log('[throttleFunc]width=',document.documentElement.clientWidth,'移动端模式');
           this.goTopScale="transform:scale(0.7);";
           this.ifMobile = true;
@@ -77,6 +91,8 @@ export default {
           document.getElementsByClassName('shell')[0].style.setProperty('--main-width','875px');
           document.getElementsByClassName('shell')[0].style.setProperty('--head-height','200px');
           document.getElementsByClassName('shell')[0].style.setProperty('--head-width','1200px');
+          document.getElementsByClassName('shell')[0].style.setProperty('--mainBox-marginTop','10px');
+          document.getElementsByClassName('shell')[0].style.setProperty('--shellRadius','10px');
           this.goTopScale="transform:scale(1);";
           this.ifMobile = false;
           store.commit('setMode','pc');
@@ -107,12 +123,6 @@ export default {
         }
       );
       intersectionObserver.observe(document.getElementsByClassName("headShell")[0]);
-
-      //封装节流函数
-      this.throttleFunc = throttle(()=>{
-        this.changeFunc();
-      },314)
-
       //监听页面大小变化进行适配
       window.addEventListener('resize',this.throttleFunc);
     }
@@ -136,6 +146,10 @@ export default {
   },
   created() {
     this.$router.push('/home/articles');
+    //封装节流函数
+    this.throttleFunc = throttle(()=>{
+      this.changeFunc();
+    },314)
   },
   mounted() {
     this.init();
@@ -162,6 +176,8 @@ export default {
   --main-Width: 875px;
   --head-height:200px;
   --head-width:1200px;
+  --mainBox-marginTop:10px;
+  --shellRadius:10px;
 }
 .shell{
   /* background-image: url('../assets/background2.jpg');
@@ -220,7 +236,7 @@ export default {
   margin-left: -437.5px;
   margin-bottom: 10px;
   left: 50%; */
-  margin-top: 10px;
+  margin-top: var(--mainBox-marginTop);
   height: fit-content;
   width: var(--head-Width);
   display: flex;
@@ -231,6 +247,7 @@ export default {
 }
 .articleBox{
   width: var(--main-Width);
+  border-radius: var(--shellRadius) var(--shellRadius) 0 0;
   overflow: hidden;
 }
 .aside{
@@ -277,7 +294,7 @@ export default {
   background-color: rgb(208, 231, 251);
   z-index: -5;
   text-align:center;
-  border-radius: 0px 0px 10px 10px;
+  border-radius: 0px 0px var(--shellRadius) var(--shellRadius);
   /* box-shadow: 0 2px 10px 2px rgba(54,58,80,.32); */
 }
 .cell{
@@ -295,6 +312,9 @@ export default {
   display: flex;
   transition: 0.25s;
   z-index: 5;
+}
+.cell.test{
+  bottom: 150px;
 }
 .cell:hover{
   cursor: pointer;

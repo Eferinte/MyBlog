@@ -1,15 +1,24 @@
 import { createApp } from 'vue'
 import { createStore } from 'vuex'
 
-// import ElementPlus from 'element-plus'
-// import 'element-plus/dist/index.css'
 
+//md基础模块
 import VueMarkdownEditor from '@kangc/v-md-editor';
 import VMdPreview from '@kangc/v-md-editor/lib/preview';
 import '@kangc/v-md-editor/lib/style/base-editor.css';
 import vuepressTheme from '@kangc/v-md-editor/lib/theme/vuepress.js';
 import '@kangc/v-md-editor/lib/theme/style/vuepress.css';
 import Prism from 'prismjs';
+//todo-list插件
+import createTodoListPlugin from '@kangc/v-md-editor/lib/plugins/todo-list/index';
+import '@kangc/v-md-editor/lib/plugins/todo-list/todo-list.css';
+//流程图插件
+// import createMermaidPlugin from '@kangc/v-md-editor/lib/plugins/mermaid/cdn';
+// import '@kangc/v-md-editor/lib/plugins/mermaid/mermaid.css';
+//快捷复制代码插件
+import createCopyCodePlugin from '@kangc/v-md-editor/lib/plugins/copy-code/index';
+import '@kangc/v-md-editor/lib/plugins/copy-code/copy-code.css';
+
 
 import App from './App.vue'
 import router from './router'
@@ -17,9 +26,16 @@ import router from './router'
 VueMarkdownEditor.use(vuepressTheme, {
   Prism,
 });
+
+//装载
+VueMarkdownEditor.use(createTodoListPlugin());
+// VueMarkdownEditor.use(createMermaidPlugin());
 VMdPreview.use(vuepressTheme, {
   Prism,
-})
+});
+VMdPreview.use(createTodoListPlugin());
+VMdPreview.use(createCopyCodePlugin());
+// VMdPreview.use(createMermaidPlugin());
 
 // 创建一个新的 store 实例
 const store = createStore({
@@ -36,10 +52,15 @@ const store = createStore({
         hintText:"",
         preUrl:process.env.VUE_APP_URL,
         selectedTags:[],
-        mode:'pc'
+        mode:'pc',
+        log:''
       }
     },
     mutations: {
+    // 输出log
+      setLog(state, msg){
+        state.log+=new Date()+msg+'\n';
+      },
     // 修改mode
       setMode(state, mode){
         state.mode= mode;

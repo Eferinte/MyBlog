@@ -87,7 +87,7 @@ export default {
         },
         init(){
             //请求个人信息
-            axios.get(store.state.preUrl+"/user",{params:{username:this.username}}).then((Response)=>{
+            axios.get(store.state.preUrl+"/uid",{params:{uid:store.state.uid}}).then((Response)=>{
                 // console.log("[LOG]data=",Response.data);
                 let date = new Date(Response.data.registration_time);
                 date = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
@@ -108,7 +108,7 @@ export default {
             })
             //请求个人博客
             axios.get(store.state.preUrl+'/authorBlogs',{params:{
-                author:store.state.username,
+                author_uid:store.state.uid,
             }}).then((Response)=>{
                 // console.log(Response);
                 for(let index in Response.data){
@@ -258,17 +258,18 @@ export default {
     margin: 20px auto;
     width:fit-content;
 }
-.cardShell:nth-child(2n+1){
+/* .cardShell:nth-child(2n+1){
     left: -40px;
 }
 .cardShell:nth-child(2n){
     left: 120px;
-}
+} */
 .cardShell{
-    margin: 10px;
+    margin: 10px auto;
     display: flex;
     justify-content: center;
     position: relative;
+    width: 650px;
 }
 .articlesPart{
     min-height: 468px;
@@ -279,6 +280,7 @@ export default {
     flex-direction: column;
     background-color: #b3ada5;
     border-radius:  5px 5px 0 0 ;
+    position: relative;
 }
 .noMore{
     margin: auto;

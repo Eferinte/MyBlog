@@ -43,6 +43,10 @@ export default{
     methods: {
         //初始化请求数据
         init(){
+            this.blogs=[];
+            this.offset=0;
+            console.log('[article-init]');
+            store.commit('setLog','[init]\nselectedTags='+this.selectedTags+'offset='+this.offset+'\n');
             this.ifLoading=true;
             axios.get(store.state.preUrl+'/partBlogs',{params:{
                 start:this.offset,
@@ -85,7 +89,8 @@ export default{
         },
         //接着获取指定条数的博客
         getMoreBlogs(amount){
-            // console.log('[getMoreBlogs]=from ',this.offset,' to ',amount);
+            console.log('[getMoreBlogs]=from ',this.offset,' to ',amount);
+            store.commit('setLog','[getMore]\nselectedTags='+this.selectedTags+'offset='+this.offset+'\n');
             axios.get(store.state.preUrl+'/partBlogs',{params:{
                 start:this.offset,
                 amount:amount,
@@ -121,17 +126,19 @@ export default{
             offset:0,
             defaultAmount:5,
             intersectionObserver:undefined,
-            ifLoading:false
+            ifLoading:false,
+            log:''
         }
     },
     watch:{
-        selectedTags(oldText,newText){
-            this.blogs=[];
-            this.offset=0;
+        selectedTags(newText,oldText){
             if(this.intersectionObserver){
                 this.intersectionObserver.unobserve(document.querySelector('.noMore'));
             }
-            this.init();
+            // console.log('setLog','[watch] from ',oldText,' to ',newText);
+            if(store.state.mode!='mobile'){
+                this.init();
+            }
         },
     },
     computed:{
@@ -228,7 +235,6 @@ export default{
     display: flex;
     flex-direction: column;
     background-color: #b3ada5;
-    border-radius:  10px 10px 0 0 ;
     transition: 0.25s;
     height: fit-content;
     justify-content: center;

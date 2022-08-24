@@ -39,9 +39,9 @@ export default {
           case 0: this.goUserSpace();break;
           case 1: this.openEditor();break;
           case 2: this.openRecorder();break;
-          case 3: this.openTimer();break;
-          case 4: this.openManga();break;
-          case 5: this.doTest();break;
+          case 3: this.doTest();break;
+          case 4: this.openTimer();break;
+          case 5: this.openManga();break;
         }
 
       },
@@ -61,7 +61,7 @@ export default {
       },
       //测试用函数
       doTest(){
-        let log = test();
+        let log = store.state.log;
         alert(log);
       },
       goUserSpace(){
@@ -132,6 +132,11 @@ export default {
               `
             },
             // {
+            //   icon:testIcon,
+            //   text:"测试",
+            //   imgCss:""
+            // },
+            // {
             //   icon:timerIcon,
             //   text:"计时器",
             //   imgCss:""
@@ -139,11 +144,6 @@ export default {
             // {
             //   icon:mangaIcon,
             //   text:"漫画柜",
-            //   imgCss:""
-            // },
-            // {
-            //   icon:testIcon,
-            //   text:"测试",
             //   imgCss:""
             // },
           ]
