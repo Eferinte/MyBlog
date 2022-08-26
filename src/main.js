@@ -44,6 +44,7 @@ const store = createStore({
         token:undefined,
         uid:undefined,
         username:undefined,
+        premisson:'user',
         maskShow:false,
         loginShow:false,
         recorderShow:false,

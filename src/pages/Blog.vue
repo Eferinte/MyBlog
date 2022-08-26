@@ -367,7 +367,7 @@ export default{
                     headers:{"token":store.state.token}
                 });
                 let params= {
-                    username: store.state.username,
+                    uid: store.state.uid,
                     blogId: this.data.blog_id,
                 }
                 axiosInstance.post("/deleteBlog", Qs.stringify(params)).then((Response) => {

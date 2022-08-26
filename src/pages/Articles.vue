@@ -2,6 +2,23 @@
 <div class="shell">
     <div class="articlesPart">
         <transition-group name="list">
+            <div class="cardBox topCard" >
+                <blog-card  
+                    :title="topBlog.title" 
+                    :blogId="topBlog.blog_id" 
+                    :brief="topBlog.context" 
+                    :subDate="topBlog.sub_date" 
+                    :tags="topBlog.tags" 
+                    :ifPrivate="topBlog.private"
+                    :views="topBlog.views"
+                    :likes="topBlog.likes"
+                    :titleFontSize="cardCSS.titleFontSize"
+                    :cardHeight="cardCSS.cardHeight"
+                ></blog-card>
+                <div class="top">
+                    <img style="height:100%" src="../assets/top.png" alt="">
+                </div>
+            </div>
             <div class="cardBox" v-for="blog in blogs" :key="blog.blogId" >
                 <blog-card  
                     :title="blog.title" 
@@ -43,6 +60,15 @@ export default{
     methods: {
         //初始化请求数据
         init(){
+            //加载置顶博客
+            axios.get(store.state.preUrl+'/blog',{params:{
+                blogId:34
+            }}).then(Response=>{
+                console.log('[init]topBlog res = ',Response.data);
+                for (let key in this.topBlog){
+                    this.topBlog[key] = Response.data[key];
+                }
+            })
             this.blogs=[];
             this.offset=0;
             console.log('[article-init]');
@@ -127,7 +153,17 @@ export default{
             defaultAmount:5,
             intersectionObserver:undefined,
             ifLoading:false,
-            log:''
+            log:'',
+            topBlog:{
+                title:undefined,
+                author:undefined,
+                sub_date:undefined,
+                blog_id:undefined,
+                context:undefined,
+                tags:undefined,
+                views:undefined,
+                likes:undefined
+            }
         }
     },
     watch:{
@@ -213,6 +249,16 @@ export default{
 .cardBox:nth-child(2n){
     transform: translateX(var(--offsetR));
 } */
+.top{
+    height: 40px;
+    width: 40px;
+    position: absolute;
+    right: calc(50% - 40px);
+    top: 15px;
+    z-index: 5;
+    border-radius: 100%;
+    border: 5px solid olivedrab;
+}
 .cardBox{
     /* --offsetL:-50px;
     --offsetR:50px; */

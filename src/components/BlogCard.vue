@@ -1,5 +1,5 @@
 <template>
-    <div class="cardShell"  ref="card" :style="{height:cardHeight}">
+    <div class="cardShell"  ref="card" :style="{height:cardHeight}" >
         <div class="line" @click="intoBlog()">
             <div class="title" :style="{fontSize:titleFontSize}">
                 {{title}}
@@ -44,8 +44,8 @@
                 </div>
             </div>            
         </div>
-
     </div>
+
 </template>
 
 <script>
@@ -56,22 +56,12 @@ export default{
     methods: {
         //操作路由，跳转到对应的博文页
         intoBlog(){
-            // this.$refs.card.style=`
-            //     transition: 0.3s ease-out;
-            //     transform: scaleY(3) scaleX(2);
-            //     opacity:0;
-            // `
             this.$router.push({
                 name:"Blog",
                 query:{
                     blogId:this.blogId
                 }
             })
-        },
-        //操作路由，跳转到对应Tag分类页面
-        intoTag(tag){
-            // 根据获取到的tag转到对应页面
-            // console.log("跳转到"+tag)
         }
     },
     created(){
@@ -107,10 +97,7 @@ export default{
 
 <style scoped>
     .cardShell{
-        /* --title-font-size:30px;
-        --card-height:250px; */
         width: 100%;
-        /* height: var(--card-height); */
         height: 250px;
         background-color: white;
         border-radius: 3px;
@@ -122,7 +109,6 @@ export default{
         position: relative;
         overflow: hidden;
     }
-
     .cardShell:hover{
         cursor: pointer;
     }

@@ -26,10 +26,35 @@
             </div>
         </div>
     </div>
-
+    <!-- <div class="topBlogPart">
+            <div class="cardShell" @mouseenter="showCancelTop()" @mouseleave="hideCancelTop()">            
+                <div class="cancelTopBtn" @click="cancelTop()">
+                    <div class="topIconShell">
+                        <img style="width:100%" src="../assets/setTop.png" alt="">
+                    </div>
+                    <div class="textShell">设为置顶</div>
+                </div>
+                <BlogCard  
+                :title="topBlog.title" 
+                :blogId="topBlog.blogId" 
+                :brief="topBlog.brief" 
+                :subDate="topBlog.subDate" 
+                :tags="topBlog.tags" 
+                :ifPrivate="topBlog.private" 
+                :views="topBlog.views"
+                :likes="topBlog.likes"
+                ></BlogCard>
+            </div>
+    </div> -->
     <div class="articlesPart">
         <transition-group name="list" tag="blog-card">
-            <div class="cardShell" v-for="blog in blogs" :key="blog.blogId" >
+            <div class="cardShell" v-for="(blog,index) in blogs" :key="blog.blogId" @mouseenter="showSetTop(index)" @mouseleave="hideSetTop(index)">            
+                <div class="setTopBtn" @click="setTop(blog.blogId)">
+                    <div class="topIconShell">
+                        <img style="width:100%" src="../assets/setTop.png" alt="">
+                    </div>
+                    <div class="textShell">设为置顶</div>
+                </div>
                 <BlogCard  
                 :title="blog.title" 
                 :blogId="blog.blogId" 
@@ -56,9 +81,36 @@ import Back from '../components/Back.vue';
 import store from '../main';
 import axios from 'axios';
 import BlogCard from '../components/BlogCard.vue';
+import Qs from 'qs';
 export default {
     name: "UserSpace",
     methods: {
+        showSetTop(index){
+            document.getElementsByClassName('setTopBtn')[index].style.setProperty('transform','translateX(60px)');
+        },
+        hideSetTop(index){
+            document.getElementsByClassName('setTopBtn')[index].style.setProperty('transform','none');
+        },
+        setTop(blogId){
+            let axiosInstance = axios.create({
+                baseURL: store.state.preUrl,
+                timeout: 1000,
+                headers:{"token":store.state.token}
+            });
+            let params= {
+                blogId:blogId,
+                uid:store.state.uid
+            }
+            //提交修改
+            axiosInstance.post(store.state.preUrl+"/userSetTop", Qs.stringify(params)).then((Response) => {
+                // console.log(Response.data);
+                if(Response.data=="success"){
+                    store.commit("setHintText","置顶成功");
+                }else{
+                    store.commit("setHintText","置顶失败");
+                }
+            });
+        },
         logout() {
             delCookie("username");
             delCookie("uid");
@@ -88,7 +140,7 @@ export default {
         init(){
             //请求个人信息
             axios.get(store.state.preUrl+"/uid",{params:{uid:store.state.uid}}).then((Response)=>{
-                // console.log("[LOG]data=",Response.data);
+                console.log("[LOG]data=",Response.data,'uid=',store.state.uid);
                 let date = new Date(Response.data.registration_time);
                 date = date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");
                 this.msgList=[
@@ -105,6 +157,14 @@ export default {
                         context:date
                     }
                 ]
+                this.topBlogId = Response.data.topBlog;
+                //加载置顶博客
+                axios.get(store.state.preUrl+'/blog',{params:{
+                    blogId:Response.data.topBlog
+                }}).then(response=>{
+                    this.topBlog = response.data;
+                    this.topBlog.private=this.topBlog.private==1?true:false;
+                })
             })
             //请求个人博客
             axios.get(store.state.preUrl+'/authorBlogs',{params:{
@@ -136,6 +196,7 @@ export default {
             msgList:[],
             ifHide:false,
             blogs:[],
+            topBlog:undefined
         };
     },
     created() {
@@ -167,6 +228,38 @@ export default {
   position: absolute;
 }
 
+    .setTopBtn{
+        height: 250px;
+        width: 60px;
+        position: absolute;
+        right: 0;
+        top: 0;
+        background-color: rgb(191, 166, 216);
+        box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+        transition: 0.25s;
+        border-radius: 3px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin: 20px 0;
+    }
+    .setTopBtn .topIconShell{
+        width: 40px;
+        height: 50px;
+        margin: auto;
+        margin-bottom: 0;
+    }
+    .setTopBtn .textShell{
+        width: 40px;
+        height: 50px;
+        margin: auto;
+        margin-top: 10px;
+        font-weight: bold;
+        text-align: center;
+    }
+    .setTopBtn:hover{
+        cursor: pointer;
+    }
 .line{
     height: 20px;
     display: flex;
@@ -265,11 +358,22 @@ export default {
     left: 120px;
 } */
 .cardShell{
-    margin: 10px auto;
+    margin: 20px auto;
     display: flex;
     justify-content: center;
     position: relative;
     width: 650px;
+}
+.topBlogPart{
+    min-height: 100px;
+    margin:0 auto;
+    margin-top: 10px;
+    width: 875px;
+    display: flex;
+    flex-direction: column;
+    background-color: #b3ada5;
+    border-radius:  5px;
+    position: relative;
 }
 .articlesPart{
     min-height: 468px;
