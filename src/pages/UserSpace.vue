@@ -7,7 +7,7 @@
                 <img class="iconImg" :src="userIcon" @click="hide"/>
             </div>
             <div class="msgShell">
-                <div class="line" v-for="item in msgList" :key="item">
+                <div class="line" v-for="item in msgList" :key="item" >
                     <div class="tagName">
                         {{item.name}}
                     </div>
@@ -26,30 +26,38 @@
             </div>
         </div>
     </div>
-    <!-- <div class="topBlogPart">
+    <!-- 置顶博客 -->
+    <!-- <transition name="fade"> -->
+        <div class="topBlogPart" v-if="topBlogId!=0">
+            <div class="topIcon">
+                <img style="height:100%" src="../assets/top.png" alt="">
+            </div>
             <div class="cardShell" @mouseenter="showCancelTop()" @mouseleave="hideCancelTop()">            
-                <div class="cancelTopBtn" @click="cancelTop()">
+                <div class="toggleBtn cancel" @click="cancelTop()">
                     <div class="topIconShell">
-                        <img style="width:100%" src="../assets/setTop.png" alt="">
+                        <img style="width:100%;" src="../assets/setTop.png" alt="">
                     </div>
-                    <div class="textShell">设为置顶</div>
+                    <div class="textShell">取消置顶</div>
                 </div>
                 <BlogCard  
                 :title="topBlog.title" 
-                :blogId="topBlog.blogId" 
-                :brief="topBlog.brief" 
-                :subDate="topBlog.subDate" 
+                :blogId="topBlog.blog_id" 
+                :brief="topBlog.context" 
+                :subDate="topBlog.sub_date" 
                 :tags="topBlog.tags" 
                 :ifPrivate="topBlog.private" 
                 :views="topBlog.views"
                 :likes="topBlog.likes"
+                :floors="topBlog.floors"
                 ></BlogCard>
             </div>
-    </div> -->
+        </div>
+    
+    <!-- </transition> -->
     <div class="articlesPart">
         <transition-group name="list" tag="blog-card">
             <div class="cardShell" v-for="(blog,index) in blogs" :key="blog.blogId" @mouseenter="showSetTop(index)" @mouseleave="hideSetTop(index)">            
-                <div class="setTopBtn" @click="setTop(blog.blogId)">
+                <div class="toggleBtn set" @click="setTop(blog.blogId)">
                     <div class="topIconShell">
                         <img style="width:100%" src="../assets/setTop.png" alt="">
                     </div>
@@ -64,6 +72,7 @@
                 :ifPrivate="blog.private" 
                 :views="blog.views"
                 :likes="blog.likes"
+                :floors="topBlog.floors"
                 ></BlogCard>
             </div>
         </transition-group>
@@ -85,11 +94,17 @@ import Qs from 'qs';
 export default {
     name: "UserSpace",
     methods: {
+        showCancelTop(){
+            document.getElementsByClassName('toggleBtn cancel')[0].style.setProperty('transform','translateX(60px)');
+        },
+        hideCancelTop(){
+            document.getElementsByClassName('toggleBtn cancel')[0].style.setProperty('transform','none');
+        },
         showSetTop(index){
-            document.getElementsByClassName('setTopBtn')[index].style.setProperty('transform','translateX(60px)');
+            document.getElementsByClassName('toggleBtn set')[index].style.setProperty('transform','translateX(60px)');
         },
         hideSetTop(index){
-            document.getElementsByClassName('setTopBtn')[index].style.setProperty('transform','none');
+            document.getElementsByClassName('toggleBtn set')[index].style.setProperty('transform','none');
         },
         setTop(blogId){
             let axiosInstance = axios.create({
@@ -106,8 +121,34 @@ export default {
                 // console.log(Response.data);
                 if(Response.data=="success"){
                     store.commit("setHintText","置顶成功");
+                    this.topBlogId = blogId;
+                    this.loadTop();
+                    window.scrollTo({top:0,behavior:"smooth"});
                 }else{
                     store.commit("setHintText","置顶失败");
+                }
+            });
+        },
+        cancelTop(){
+            let axiosInstance = axios.create({
+                baseURL: store.state.preUrl,
+                timeout: 1000,
+                headers:{"token":store.state.token}
+            });
+            //设置置顶博客id为0来取消
+            let params= {
+                blogId:0,
+                uid:store.state.uid
+            }
+            //提交修改
+            axiosInstance.post(store.state.preUrl+"/userSetTop", Qs.stringify(params)).then((Response) => {
+                // console.log(Response.data);
+                if(Response.data=="success"){
+                    store.commit("setHintText","取消置顶成功");
+                    this.topBlogId = 0;
+                    this.loadTop();
+                }else{
+                    store.commit("setHintText","取消置顶失败");
                 }
             });
         },
@@ -116,11 +157,11 @@ export default {
             delCookie("uid");
             delCookie("token")
             this.$store.commit("clear");
-            this.$router.push("/");
-            
             window.localStorage.removeItem("uid");
             window.localStorage.removeItem("username");
             window.localStorage.removeItem("token");
+            this.$router.push("/");
+            
 
         },
         back() {
@@ -136,6 +177,17 @@ export default {
                 element.style="transform:translateX(500px);"
             }
             this.ifHide = !this.ifHide;
+        },
+        loadTop(){
+            //加载置顶博客
+            if(this.topBlogId!=0){
+                axios.get(store.state.preUrl+'/blog',{params:{
+                    blogId:this.topBlogId
+                }}).then(response=>{
+                    this.topBlog = response.data;
+                    this.topBlog.private=this.topBlog.private==1?true:false;
+                })
+            }
         },
         init(){
             //请求个人信息
@@ -158,13 +210,7 @@ export default {
                     }
                 ]
                 this.topBlogId = Response.data.topBlog;
-                //加载置顶博客
-                axios.get(store.state.preUrl+'/blog',{params:{
-                    blogId:Response.data.topBlog
-                }}).then(response=>{
-                    this.topBlog = response.data;
-                    this.topBlog.private=this.topBlog.private==1?true:false;
-                })
+                this.loadTop();
             })
             //请求个人博客
             axios.get(store.state.preUrl+'/authorBlogs',{params:{
@@ -182,7 +228,8 @@ export default {
                         tags:obj.tags,
                         private:obj.private==1?true:false,
                         views:obj.views,
-                        likes:obj.likes
+                        likes:obj.likes,
+                        floors:obj.floors
                     })
                 }
                 // console.log("数据请求完毕",Response);
@@ -196,7 +243,18 @@ export default {
             msgList:[],
             ifHide:false,
             blogs:[],
-            topBlog:undefined
+            topBlog:{
+                title:undefined,
+                author:undefined,
+                sub_date:undefined,
+                blog_id:undefined,
+                context:undefined,
+                tags:undefined,
+                views:undefined,
+                likes:undefined,
+                floors:undefined
+            },
+            topBlogId:0
         };
     },
     created() {
@@ -228,13 +286,12 @@ export default {
   position: absolute;
 }
 
-    .setTopBtn{
+    .toggleBtn{
         height: 250px;
         width: 60px;
         position: absolute;
         right: 0;
         top: 0;
-        background-color: rgb(191, 166, 216);
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
         transition: 0.25s;
         border-radius: 3px;
@@ -243,13 +300,22 @@ export default {
         justify-content: center;
         margin: 20px 0;
     }
-    .setTopBtn .topIconShell{
+    .toggleBtn.set{
+        background-color: rgb(191, 166, 216);
+    }    
+    .toggleBtn.cancel{
+        background-color: rgb(243, 217, 161);
+    }
+    .toggleBtn .topIconShell{
         width: 40px;
         height: 50px;
         margin: auto;
         margin-bottom: 0;
     }
-    .setTopBtn .textShell{
+    .cancel .topIconShell{
+        transform: rotate(180deg);
+    }
+    .toggleBtn .textShell{
         width: 40px;
         height: 50px;
         margin: auto;
@@ -257,7 +323,7 @@ export default {
         font-weight: bold;
         text-align: center;
     }
-    .setTopBtn:hover{
+    .toggleBtn:hover{
         cursor: pointer;
     }
 .line{
@@ -374,6 +440,16 @@ export default {
     background-color: #b3ada5;
     border-radius:  5px;
     position: relative;
+}
+.topIcon{
+    height: 40px;
+    width: 40px;
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    z-index: 5;
+    border-radius: 100%;
+    border: 5px solid olivedrab;
 }
 .articlesPart{
     min-height: 468px;

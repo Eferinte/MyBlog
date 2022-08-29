@@ -61,7 +61,7 @@ export default {
       },
       //测试用函数
       doTest(){
-        let log = store.state.log;
+        let log = test();
         alert(log);
       },
       goUserSpace(){
@@ -131,11 +131,11 @@ export default {
                 left: -10px;
               `
             },
-            // {
-            //   icon:testIcon,
-            //   text:"测试",
-            //   imgCss:""
-            // },
+            {
+              icon:testIcon,
+              text:"测试",
+              imgCss:""
+            },
             // {
             //   icon:timerIcon,
             //   text:"计时器",

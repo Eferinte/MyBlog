@@ -35,6 +35,12 @@
                     </div>
                     <div class="centerText">{{likes}}</div>
                 </div>
+                <div class="cell">
+                    <div class="iconShell">
+                        <img style="height:80%;margin:3px 2px;" src="../assets/comment.png">
+                    </div>
+                    <div class="centerText">{{floors}}</div>
+                </div>
             </div>
             <div class="tagShell">
                 <div class="tags">
@@ -52,7 +58,7 @@
 
 export default{
     name:"articleCard",
-    props:["title","blogId","brief","subDate","tags","ifPrivate","views","likes",'titleFontSize','cardHeight'],
+    props:["title","blogId","brief","subDate","tags","ifPrivate","views","likes",'floors','titleFontSize','cardHeight'],
     methods: {
         //操作路由，跳转到对应的博文页
         intoBlog(){

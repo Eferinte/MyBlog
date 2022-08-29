@@ -108,7 +108,6 @@
         <div class="commentBox">
             <Comment :blog_id="blogId" :ifAuthor="ifAuthor"></Comment>
         </div>
-        <Foot></Foot>
     </div>
     <div class="aside right" v-if="!ifMobile">
         <div class="fixedShell">
@@ -134,7 +133,6 @@
 import axios from 'axios'
 import Qs from 'qs'
 import store from '../main';
-import Foot from '../components/Foot.vue';
 import Back from '../components/Back.vue';
 import likeIcon from '../assets/like-fill.png';
 import disLikeIcon from '../assets/like.png';
@@ -430,6 +428,7 @@ export default{
     },
     created() {
         this.init();
+        window.scrollTo({top:0});
     },
     data() {
         return {
@@ -500,7 +499,7 @@ export default{
         //移除监听器
         window.removeEventListener('resize',this.throttleFunc);
     },
-    components: { Foot, Back, Comment }
+    components: { Back, Comment }
 }
 </script>
 
@@ -635,6 +634,7 @@ export default{
     .mainShell{
         /* margin-right: calc(50% - 400px); */
         width: var(--main-width);
+        padding-bottom: 25px;
     }
     .paddingBlock{
         height: 20px;

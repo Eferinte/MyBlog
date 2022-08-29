@@ -1,18 +1,11 @@
 <template>
 <div class="shell">
-  <div id="loginPart" v-if="!ifMobile">
+  <div id="navPart" v-if="!ifMobile">
     <transition name="fade">
-      <div id="loginMask" v-show="maskShow">
-        <transition name="fade">
-          <Login v-if="loginShow"></Login>
-        </transition>
-        <transition name="fade">
-          <Recorder v-if="recorderShow"></Recorder>
-        </transition>
-        <transition name="fade">
-          <Timer v-if="timerShow"></Timer>
-        </transition>
-      </div>
+      <Recorder v-if="recorderShow"></Recorder>
+    </transition>
+    <transition name="fade">
+      <Timer v-if="timerShow"></Timer>
     </transition>
   </div>
   <LeftBar v-if="!ifMobile"></LeftBar>
@@ -49,7 +42,6 @@
 </template>
 <script>
 import Head2 from '../components/Head2.vue'
-import Login from '../components/Login.vue'
 import LeftBar from '../components/LeftBar.vue'
 import Recorder from '../components/Recorder.vue';
 import Timer from '../components/Timer.vue';
@@ -57,7 +49,7 @@ import TagCollotion from '../components/TagCollotion.vue';
 import { throttle } from '../utils/throttle';
 import store from '../main';
 export default {
-  components:{ Head2, Login, LeftBar, Recorder, Timer, TagCollotion },
+  components:{ Head2, LeftBar, Recorder, Timer, TagCollotion },
   name: 'Home',
   methods: {
       // //测试用函数
@@ -267,7 +259,7 @@ export default {
   top: 10px;
 }
 
-#loginPart{
+#navPart{
   z-index: 10;
 }
 #loginMask{

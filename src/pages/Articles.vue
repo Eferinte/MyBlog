@@ -12,6 +12,7 @@
                     :ifPrivate="topBlog.private"
                     :views="topBlog.views"
                     :likes="topBlog.likes"
+                    :floors="topBlog.floors"
                     :titleFontSize="cardCSS.titleFontSize"
                     :cardHeight="cardCSS.cardHeight"
                 ></blog-card>
@@ -29,6 +30,7 @@
                     :ifPrivate="blog.private"
                     :views="blog.views"
                     :likes="blog.likes"
+                    :floors="blog.floors"
                     :titleFontSize="cardCSS.titleFontSize"
                     :cardHeight="cardCSS.cardHeight"
                 ></blog-card>
@@ -90,7 +92,8 @@ export default{
                         brief:obj.context,
                         tags:obj.tags,
                         views:obj.views,
-                        likes:obj.likes
+                        likes:obj.likes,
+                        floors:obj.floors
                     })
                 }
                 this.offset+=this.defaultAmount;
@@ -136,7 +139,8 @@ export default{
                         brief:obj.context,
                         tags:obj.tags,
                         views:obj.views,
-                        likes:obj.likes
+                        likes:obj.likes,
+                        floors:obj.floors
                     })
                 }
                 this.offset+=amount;
@@ -162,7 +166,8 @@ export default{
                 context:undefined,
                 tags:undefined,
                 views:undefined,
-                likes:undefined
+                likes:undefined,
+                floors:undefined
             }
         }
     },

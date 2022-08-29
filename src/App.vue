@@ -1,11 +1,19 @@
 <template>
   <div id="root">    
+    <transition name="fade">
+      <div id="loginMask" v-show="maskShow">
+        <transition name="fade">
+          <Login v-if="loginShow"></Login>
+        </transition>
+      </div>
+    </transition>
     <router-view v-slot="{ Component }">
       <transition name="fade" mode="out-in">
         <component :is="Component" />
       </transition>
     </router-view>
     <Hint ref="rootHint"></Hint>
+    <Foot></Foot>
   </div>
 </template>
 <script>
@@ -13,6 +21,8 @@
 import Hint from './components/Hint.vue';
 import store from './main';
 import { getCookie } from './utils/cookies';
+import Foot from './components/Foot.vue';
+import Login from './components/Login.vue';
 // import HollowKnightCounter from './components/HollowKnightCounter.vue'
 export default {
     name: "App",
@@ -25,9 +35,9 @@ export default {
       //   this.$store.commit("setUsername",getCookie('username'));
       //   this.$store.commit("setToken",getCookie('token'));
       // }else{
-        this.$store.commit("setUid",window.localStorage.getItem("uid"));
-        this.$store.commit("setUsername",window.localStorage.getItem("username"));
-        this.$store.commit("setToken",window.localStorage.getItem("token"));
+        // this.$store.commit("setUid",window.localStorage.getItem("uid"));
+        // this.$store.commit("setUsername",window.localStorage.getItem("username"));
+        // this.$store.commit("setToken",window.localStorage.getItem("token"));
       // }
       
       // this.$router.push("/home");
@@ -46,8 +56,14 @@ export default {
       hintText(){
         return store.state.hintText;
       },
+      maskShow(){
+        return store.state.maskShow;
+      },
+      loginShow(){
+        return store.state.loginShow;
+      }
     },
-    components: { Hint }
+    components: { Hint, Foot, Login }
 }
 </script>
 
@@ -70,4 +86,15 @@ export default {
   width: 100%;
 }
 
+#loginMask{
+  position: fixed;
+  left: 0;
+  top: 0;
+  /* opacity: 40%; */
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  transition: 0.5s;;
+  z-index: 10;
+}
 </style>

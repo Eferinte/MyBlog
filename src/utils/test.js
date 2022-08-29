@@ -6,7 +6,10 @@ function test(){
         }
     };
     log.add("开始执行测试函数");
-    
+
+    setTimeout('alert(1)')
+
+      
     log.add("测试函数执行结束");
     return log.msg;
 }

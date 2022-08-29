@@ -1,6 +1,8 @@
 <template>
 <div class="shell">
-
+    <div class="centerText">
+        <a href="https://beian.miit.gov.cn">浙ICP备2022024722号-1</a>
+    </div>
 </div>  
 </template>
 
@@ -12,8 +14,17 @@ export default {
 
 <style scoped>
     .shell{
-        background-color: #6C769E;
         height: 75px;
         width: 100%;
+        display: flex;
+        z-index: 2;
+        background-color: #fafafa;
+    }
+    .centerText{
+        margin: auto;
+    }
+    a{
+        color:#aaaaaa;
+        text-decoration: none;
     }
 </style>
