@@ -17,7 +17,8 @@
                     :cardHeight="cardCSS.cardHeight"
                 ></blog-card>
                 <div class="top">
-                    <img style="height:100%" src="../assets/top.png" alt="">
+                    置顶
+                    <!-- <img style="height:100%" src="../assets/top.png" alt=""> -->
                 </div>
             </div>
             <div class="cardBox" v-for="blog in blogs" :key="blog.blogId" >
@@ -255,14 +256,18 @@ export default{
     transform: translateX(var(--offsetR));
 } */
 .top{
-    height: 40px;
-    width: 40px;
+    height: 24px;
+    width: 60px;
     position: absolute;
-    right: calc(50% - 40px);
-    top: 15px;
+    right: 0;
+    top: 50px;
     z-index: 5;
-    border-radius: 100%;
-    border: 5px solid olivedrab;
+    color: white;
+    font-weight: 500;
+    background-color: olivedrab;
+    text-align: center;
+    border-radius: 10px 0 0 10px;
+    /* border: 5px solid olivedrab; */
 }
 .cardBox{
     /* --offsetL:-50px;
