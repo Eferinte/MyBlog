@@ -3,15 +3,18 @@
     <Back @click="beforeBack" v-if="!ifMobile"></Back>
     <div class="aside left" v-if="!ifMobile">
         <transition name="fade">
-        <div class="content" v-if="!ifAlter&&titles.length!=0">
-            <div
-                class="contentLine"
-                v-for="anchor in titles"
-                :key="anchor"
-                :style="{ padding: `10px 0 10px ${anchor.indent * 10+10}px` }"
-                @click="handleAnchorClick(anchor)"
-            >
-                <a style="cursor: pointer">{{ anchor.title }}</a>
+        <div class="stickyBox" v-if="!ifAlter&&titles.length!=0">
+            <div :class="contentStyle">
+                <div
+                    class="contentLine"
+                    v-for="anchor in titles"
+                    :key="anchor"
+                    :style="{ padding: `10px 0 10px ${anchor.indent * 10+10}px` }"
+                    @click="handleAnchorClick(anchor)"
+                >
+                    <a style="cursor: pointer">{{ anchor.title }}</a>
+                </div>
+                <div class="scrollDetection"></div>
             </div>
         </div>        
         </transition>
@@ -143,6 +146,16 @@ import Comment from '../components/comment.vue';
 export default{
     name: "atricle",
     methods: {
+        // //加粗滑动条
+        // getBorder(){
+        //     console.log('修改css');
+        //     this.contentStyle="borderContent";
+        // },
+        // //恢复滑动条
+        // hideBorder(e){
+        //     console.log('e=',e,new Date());
+        //     this.contentStyle="content";
+        // },
         goBack(){
             this.$router.push('/');
         },
@@ -452,7 +465,8 @@ export default{
             //包装好后防抖函数对象的引用-用于点赞
             debounceFunc:undefined,
             //包装好后节流函数对象的引用-用于监听页面大小变化
-            throttleFunc:undefined
+            throttleFunc:undefined,
+            contentStyle:"content"
         };
     },
     mounted() {     
@@ -642,10 +656,8 @@ export default{
         margin: 0;
         /* background-color: olivedrab; */
     }
-    .content{
+    .stickyBox{
         background-color: #fff;
-        min-height: 100px;
-        height: fit-content;
         width: 100%;
         transition: 0.25s;
         border-radius: 5px;
@@ -655,7 +667,47 @@ export default{
         top: 10px;
         transition: 0.25s;
         padding: 10px;
+        padding-right: 0px;
         margin-right:  10px;
+    }
+    .scrollDetection{
+        position: absolute;
+        top: -10px;
+        right: 0px;
+        height: calc(100% + 20px);
+        width: 30px;
+    }
+    .content{
+        min-height: 100px;
+        height: fit-content;
+        max-height: 500px;
+        position: relative;
+        overflow-y: overlay;
+        overflow-x: hidden;
+    }
+    .content::-webkit-scrollbar{
+        width: 5px;
+    }
+    .content::-webkit-scrollbar-thumb{
+        width: 5px;
+        background-color: olivedrab;
+        border-radius: 5px;
+    }
+    .borderContent{
+        min-height: 100px;
+        height: fit-content;
+        max-height: 500px;
+        position: relative;
+        overflow-y: overlay;
+        overflow-x: hidden;
+    }
+    .borderContent::-webkit-scrollbar{
+        width: 15px;
+    }
+    .borderContent::-webkit-scrollbar-thumb{
+        width: 15px;
+        background-color: olivedrab;
+        border-radius: 5px;
     }
     .contentLine{
         transition: 0.25s;

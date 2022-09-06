@@ -264,7 +264,7 @@ export default{
     z-index: 5;
     color: white;
     font-weight: 500;
-    background-color: olivedrab;
+    background-color: #fb7574;
     text-align: center;
     border-radius: 10px 0 0 10px;
     /* border: 5px solid olivedrab; */
