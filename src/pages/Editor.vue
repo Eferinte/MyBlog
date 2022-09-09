@@ -45,7 +45,7 @@
         </div>
     </div>
     <div id="editorShell" :style="{left:editorLeft}">
-        <v-md-editor id="editor" v-model="uniDraft.context" :height="editorHeight" tab-size=4></v-md-editor>
+        <v-md-editor id="editor" v-model="uniDraft.context" :height="editorHeight"></v-md-editor>
     </div>
 </div>
 </template>
@@ -60,6 +60,7 @@ import Qs from 'qs';
 export default {
     name: "Editor",
     methods: {
+        //初始化函数
         init(){
             window.addEventListener("resize", () => {
                 if (window.innerWidth < 1000) {
@@ -116,6 +117,7 @@ export default {
                 console.log('[init]this.dratfs=',this.drafts);
             });
         },
+        //保存到远程草稿
         remoteSave(saveDate){
             let axiosInstance = axios.create({
                 baseURL: store.state.preUrl,
@@ -137,14 +139,17 @@ export default {
                 }
             });
         },
+        //退出时函数
         beforeBack(){
             this.save();
         },
-        enter(e){//重载回车事件
+        //重载回车事件
+        enter(e){
             if(e.keyCode==13){
                 document.getElementById('tag').focus();
             }
         },
+        //创建标签
         createTag(e){
             if((e.keyCode==13)&&(this.tagInput.length>0)){
                 //判断标签是否过多
@@ -165,9 +170,11 @@ export default {
                 }
             }
         },
+        //删除标签
         tagDel(index){
             this.uniDraft.tags.splice(index,1);
         },
+        //标签格式转化
         formatTags(tagList){
             let formatTag = ""
             tagList.forEach((item)=>{
@@ -175,6 +182,7 @@ export default {
             })
             return formatTag;
         },
+        //检测标题合法性
         titleCheck() {
             // console.log(this.drafts)
             if (!(this.uniDraft.title.length > 0)) { //回滚
@@ -183,6 +191,7 @@ export default {
                 document.getElementById('title').focus();
             }
         },
+        //刷新页面数据 将uniDrafts更新为当前index对应的drafts数据
         refresh() {
             // console.log("refresh");
             // console.log(JSON.stringify(this.uniDraft),"=?????=",JSON.stringify(this.drafts[this.index]));
@@ -192,6 +201,7 @@ export default {
             document.getElementsByClassName("myCheckBox")[0].checked=false;
             // console.log(JSON.stringify(this.uniDraft),"=?????=",JSON.stringify(this.drafts[this.index]));
         },
+        //新建草稿
         addNew() {
             if (this.drafts.length >= 3) {
                 document.getElementById("addNew").className = "shakeClass";
@@ -214,25 +224,29 @@ export default {
                 // console.log("this.index=", this.index);
             }
         },
+        //删除当前视图草稿
         deleteDraft(force = false) {
-            // console.log("[deleteDraft]:force=",force);
+            console.log("[deleteDraft]:index=",this.index);
+            console.log('[deleteDraft]:drafts=',this.drafts);
             if (force || confirm("确认删除当前草稿吗？")) {
                 if (this.drafts.length > 1) {
                     this.drafts.splice(this.index, 1);
-                    this.index = 0;
+                    this.index--;
+                    console.log('[deleteDraft]:drafts=',this.drafts);
                 }
                 else {
                     this.drafts.splice(this.index, 1);
                     this.index--;
                     this.addNew();
                 }
-                this.save();
                 this.refresh();
+                this.save();
             }
         },
+        //保存当前视图草稿
         save() {
             if(JSON.stringify(this.uniDraft)!=JSON.stringify(this.drafts[this.index])){
-                // console.log("执行保存");
+                console.log("执行保存");
                 this.drafts[this.index].title =this.uniDraft.title;
                 this.drafts[this.index].tags =[...this.uniDraft.tags];
                 this.drafts[this.index].context =this.uniDraft.context;
@@ -245,6 +259,7 @@ export default {
             }
 
         },
+        //发布当前视图草稿
         post() {
             if (this.uniDraft.title.length == "") {
                 store.commit("setHintText", "标题不能为空");
@@ -282,6 +297,7 @@ export default {
                 }
             }
         },
+        //切换草稿视图
         choose(index) {
             this.save();
             this.index = index;

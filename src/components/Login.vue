@@ -155,6 +155,9 @@ export default {
           }
         },
         signUp(){
+          this.usernameCheck();
+          this.pwdCheck();
+          this.rePwdCheck();
           let axiosInstance = axios.create({
             baseURL: store.state.preUrl,
             timeout: 1000,
