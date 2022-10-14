@@ -231,7 +231,7 @@ export default {
             if (force || confirm("确认删除当前草稿吗？")) {
                 if (this.drafts.length > 1) {
                     this.drafts.splice(this.index, 1);
-                    this.index--;
+                    if(this.index!=0) this.index--;
                     console.log('[deleteDraft]:drafts=',this.drafts);
                 }
                 else {

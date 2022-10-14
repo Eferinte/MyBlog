@@ -682,7 +682,7 @@ export default{
         height: fit-content;
         max-height: 500px;
         position: relative;
-        overflow-y: overlay;
+        overflow-y: auto;
         overflow-x: hidden;
     }
     .content::-webkit-scrollbar{

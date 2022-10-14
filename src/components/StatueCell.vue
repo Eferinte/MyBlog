@@ -102,5 +102,9 @@ export default {
         font:italic 1em Georgia, serif;
         padding-bottom: 10px;
         user-select: none;
+        width: 80%;
+        margin: 0 auto;
+        border: solid black;
+        border-width: 0 0 2px 0;
     }
 </style>

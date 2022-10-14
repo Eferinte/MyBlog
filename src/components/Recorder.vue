@@ -3,15 +3,26 @@
         <div class="quit" @click="recorderQuit">
             <img class="quitIcon" src="../assets/quit.png"/>
         </div>
-        <div class="main" v-show="show">
+        <div class="main" v-show="show" ref="mainBlank">
             <div class="statueShell"  v-for="boss in bosses" :key="boss">
                 <StatueCell :bossName="boss.name" :iconSrc="boss.iconSrc" :banned="1" ></StatueCell>
-                <div class="hitTimesText" >
-                    {{boss.hitTimes}}
+                <div class="dataShell" @mouseenter="toggleIn" @mouseleave="toggleOut" >
+                    <div class="hitTimesText left">
+                        {{boss.missRate}}
+                    </div>
+                    <div class="hitTimesText right">
+                        {{boss.hitTimes}}/{{totalNums}}
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="change" @click="doChange" v-if="ifEf">
+        <div class="changeShell">
+            <div class="sortBtn" @click="sort">
+                <span class="centerText">
+                    {{sortWayText}}
+                </span>
+            </div>
+            <div class="change" @click="doChange" v-if="ifEf"></div>
 
         </div>
         <div class="main" v-show="!show" v-if="!ds">
@@ -38,6 +49,37 @@ import TimeSelector from './TimeSelector.vue';
 import store from '../main';
 export default {
     methods: {
+        //显示数值
+        toggleIn(e){
+            console.log(e)
+            e.target.children[0].style.transform='translateX(-30px)';
+            e.target.children[0].style.opacity='0';
+            e.target.children[1].style.transform='translateX(-30px)';
+            e.target.children[1].style.opacity='1';
+        },
+        //显示百分比
+        toggleOut(e){
+            e.target.children[1].style.transform='translateX(30px)';
+            e.target.children[1].style.opacity='0';
+            e.target.children[0].style.transform='translateX(30px)';
+            e.target.children[0].style.opacity='1';
+        },
+        sort(){
+            if(this.sortWayText=='按流程排序'){
+                this.sortWayText='按失误率排序';
+                let temp = null;
+                temp = this.bosses;
+                this.bosses = this.sortedBosses;
+                this.sortedBosses = temp;
+            }else{
+                this.sortWayText='按流程排序';
+                let temp = null;
+                temp = this.bosses;
+                this.bosses = this.sortedBosses;
+                this.sortedBosses = temp;
+            }
+            this.$refs.mainBlank.scrollTop=0;
+        },
         recorderQuit() {
             // 关闭记录窗口
             this.ds=true;
@@ -91,10 +133,24 @@ export default {
         initMissTimes(){        
             axios.get(store.state.preUrl+"/missTimes").then((response) => {
                 let missTimes = response.data[0];
+                this.totalNums = missTimes['totalNums']
                 this.bosses.forEach(function (item) {
-                    item.hitTimes = missTimes[item.name];
+                    item.hitTimes = Number(missTimes[item.name]);
+                    item.missRate = (100*Number(missTimes[item.name]/missTimes['totalNums'])).toFixed(1)+'%';
                 });
                 this.show = true;
+                //深拷贝
+                this.sortedBosses = [...this.bosses];
+                // this.bosses.forEach(item=>{
+                //     this.sortedBosses.push(item);
+                // })
+
+                this.sortedBosses.sort((a, b)=>{
+                    let ans = Number(a.hitTimes) - Number(b.hitTimes)
+                    return -ans;
+                })
+                console.log('[init]sortedBosses=',this.sortedBosses);
+                console.log('[init]bosses=',this.bosses);
             });
         }
     },
@@ -104,6 +160,9 @@ export default {
             show: true,
             recorder:{},
             ds:false,
+            sortWayText:'按失误率排序',
+            sortedBosses:[],
+            totalNums:undefined
         };
     },
     mounted(){
@@ -117,7 +176,14 @@ export default {
     computed:{
         ifEf(){
             // console.log(store.state.username);
-            return store.state.username=="eferinte";
+            return store.state.username=="Eferinte";
+        },
+        showBosses(){
+            if(this.sortWayText=='按流程排序'){
+                return this.bosses;
+            }else{
+                return this.sortedBosses;
+            }
         }
     },
     components: { StatueCell, TimeSelector }
@@ -153,38 +219,73 @@ export default {
         background-color: #F2F1DC;
         box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
     }
-    .change{
-        width: 30px;
-        height: 400px;
-        background-color: #c1c1c1;
+    .changeShell{
         position: absolute;
-        top: calc(50% - 200px);
+        top: calc(50% - 250px);
         left: 30px;
         transition: 0.25s;
+        display: flex;
+        flex-direction: column;
+    }
+    .sortBtn{
+        width: 30px;
+        height: fit-content;
+        margin-bottom: 20px;
+        background-color: #c1c1c1;
+        transition: 0.25s;
+        display: flex;
+    }
+    .sortBtn:hover{
+        cursor: pointer;
+        background-color: #a8a8a8;
+    }
+    .centerText{
+        margin: auto;
+        width: fit-content;
+        text-align: center;
+    }
+    .change{
+        width: 30px;
+        height: 320px;
+        background-color: #c1c1c1;
+        transition: 0.25s;
+        text-align: center;
     }
     .change:hover{
         cursor: pointer;
         background-color: #a8a8a8;
     }
+    .dataShell{
+        margin: 0 auto;
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        overflow: hidden;
+        justify-content: center;
+    }
     .hitTimesText{
-        margin: 0 auto; 
+        margin: 0; 
         width:60px;
         text-align:center;
         font:italic 1em Georgia, serif;
-        border: solid black;
-        border-width: 2px 0 0 0;
         padding-bottom: 20px;
+        /* background-color: rgb(174, 143, 205); */
+        transition:0.314s;
     }
-    .bossNameText{
-        text-align:center;
-        font:italic 1em Georgia, serif;
-        padding-bottom: 10px;
+    .hitTimesText.left{
+        transform:translateX(30px);
+        opacity: 1;
+    }
+    .hitTimesText.right{
+        transform:translateX(30px);
+        opacity: 0;
     }
     .statueShell{
         /* width:160px;
         display: flex;
         flex-direction: column;
         user-select: none; */
+        position: relative;
     }
     .quit{
         float: right;

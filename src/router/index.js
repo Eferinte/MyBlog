@@ -6,6 +6,8 @@ import UserSpace from '../pages/UserSpace'
 import Editor from '../pages/Editor'
 import Manga from '../pages/Manga'
 import store from '../main'
+import XFAPI from '../pages/XFAPI'
+import Music from '../pages/Music'
 const router = createRouter({
     history:createWebHistory(),
     routes:[
@@ -43,6 +45,16 @@ const router = createRouter({
             name:"Manga",
             path:'/manga',
             component:Manga,
+        },
+        {
+            name:'XFAPI',
+            path:'/xfapi',
+            component:XFAPI,
+        },
+        {
+            name:'Music',
+            path:'/iMusic',
+            component:Music,
         }
     ]
 })

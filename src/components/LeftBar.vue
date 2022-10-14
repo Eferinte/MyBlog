@@ -25,6 +25,8 @@ import userIcon1 from '../assets/defaultUser.png'
 import editorIcon from '../assets/editor.png'
 import timerIcon from '../assets/timer.png'
 import mangaIcon from '../assets/manga.png'
+import XFAPIIcon from '../assets/XF-API-Icon.png'
+import musicIcon from '../assets/music.png'
 import testIcon from '../assets/test.png'
 import recorderIcon from '../assets/Pantheon_of_Hallownest.png'
 import store from '../main'
@@ -40,10 +42,16 @@ export default {
           case 1: this.openEditor();break;
           case 2: this.openRecorder();break;
           case 3: this.doTest();break;
-          case 4: this.openTimer();break;
-          case 5: this.openManga();break;
+          case 4: this.goXFAPI();break;
+          case 5: this.goMusic();break;
+          // case 4: this.openTimer();break;
+          // case 5: this.openManga();break;
         }
 
+      },
+      goMusic(){
+        // 跳转到音乐模块
+        this.$router.push('/iMusic')
       },
       //显示注解块
       enter(e){
@@ -67,6 +75,10 @@ export default {
       goUserSpace(){
         // 跳转到个人主页,登录逻辑交给路由守卫处理
         this.$router.push('/UserSpace')
+      },
+      goXFAPI(){
+        // 跳转到个人主页,登录逻辑交给路由守卫处理
+        this.$router.push('/xfapi')
       },
       openEditor(){
         // 跳转到创建页
@@ -98,16 +110,9 @@ export default {
         }
       }
     },
-    computed:{
-        userIcon(){
-            if(this.$store.state.uid){
-                return userIcon1;
-            }else{
-                return login;
-            }
-        },
-        items(){
-          return [
+    data() {
+      return {
+        items: [
             {
               icon:this.userIcon,
               text:"个人空间",
@@ -131,11 +136,6 @@ export default {
                 left: -10px;
               `
             },
-            {
-              icon:testIcon,
-              text:"测试",
-              imgCss:""
-            },
             // {
             //   icon:timerIcon,
             //   text:"计时器",
@@ -147,6 +147,15 @@ export default {
             //   imgCss:""
             // },
           ]
+      }
+    },
+    computed:{
+        userIcon(){
+            if(this.$store.state.uid){
+                return userIcon1;
+            }else{
+                return login;
+            }
         }
     },
     created() {
@@ -157,7 +166,29 @@ export default {
           this.$store.commit("setUsername",getCookie('username'));
         }
       },5000)
-    },
+      console.log('环境变量',process.env.VUE_APP_IF_DEV);
+      if(process.env.VUE_APP_IF_DEV=='true'){
+        this.items.push(
+            {
+              icon:testIcon,
+              text:"测试",
+              imgCss:""
+            },
+            //科大讯飞语音接口调用
+            {
+              icon:XFAPIIcon,
+              text:'讯飞语音接口',
+              imgCss:''
+            },
+            //移动端
+            {
+              icon:musicIcon,
+              text:'音乐播放器',
+              imgCss:''
+            })
+      }
+      this.items[0].icon = this.userIcon;
+    }
 }
 </script>
 

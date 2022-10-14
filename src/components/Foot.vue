@@ -26,5 +26,11 @@ export default {
     a{
         color:#aaaaaa;
         text-decoration: none;
+        font-weight: bold;
+        transition: 0.5s;
+    }
+    a:hover{
+        color: olivedrab;
+        text-decoration: underline;
     }
 </style>

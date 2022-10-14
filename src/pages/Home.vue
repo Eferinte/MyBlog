@@ -284,7 +284,7 @@ export default {
   width: var(--head-width);
   height: var(--head-height);
   background-color: rgb(208, 231, 251);
-  z-index: -5;
+  /* z-index: 0; */
   text-align:center;
   border-radius: 0px 0px var(--shellRadius) var(--shellRadius);
   /* box-shadow: 0 2px 10px 2px rgba(54,58,80,.32); */
