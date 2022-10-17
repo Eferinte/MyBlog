@@ -24,6 +24,13 @@
       </div>
     </div>
   </div>
+  <div v-if="ifMobile" @click="goMusic">
+    <div class="cell music" :style="goTopScale">
+      <div class="iconShell">
+        <img style="height:100%" src="../assets/music.png" alt="">
+      </div>
+    </div>  
+  </div>
   <transition name="fadeUp">
     <div class="cell" @click="goTop" v-show="ifTop" :style="goTopScale">
       <div class="iconShell">
@@ -57,6 +64,11 @@ export default {
       //   let log = store.state.log;
       //   alert(log);
       // },
+
+    // 跳转到音乐模块
+    goMusic(){
+      this.$router.push('/iMusic')
+    },
     //适配函数
     changeFunc(){
       if(875<document.documentElement.clientWidth&&document.documentElement.clientWidth<1125){
@@ -289,6 +301,7 @@ export default {
   border-radius: 0px 0px var(--shellRadius) var(--shellRadius);
   /* box-shadow: 0 2px 10px 2px rgba(54,58,80,.32); */
 }
+.cell.music{}
 .cell{
   background-color: #fff;
   height: 75px;
@@ -304,6 +317,12 @@ export default {
   display: flex;
   transition: 0.25s;
   z-index: 5;
+}
+.cell.music{
+  position: fixed;
+  right: 10px;
+  top: 20px;
+  border-radius: 100%;
 }
 .cell.test{
   bottom: 150px;

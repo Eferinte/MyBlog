@@ -21,19 +21,24 @@ export default {
             this.$refs.hint.style.visibility="hidden";
         },
         doHint(text){         
+            //重置定时器
+            clearTimeout(this.preTimeoutID1);
+            clearTimeout(this.preTimeoutID2);
             this.hintText=text   
             // console.log("提示")
             this.$refs.hint.style.top="calc(50% - 25px)";
             this.$refs.hint.style.opacity="1";
             this.$refs.hint.style.visibility="visible";
             this.$refs.hint.style.transition="0s";
-            setTimeout(this.timeFunc1,800);
-            setTimeout(this.timeFunc2,1200);
+            this.preTimeoutID1 = setTimeout(this.timeFunc1,800);
+            this.preTimeoutID2 = setTimeout(this.timeFunc2,1200);
         },
     },
     data() {
         return {
-            hintText:""
+            hintText:"",
+            preTimeoutID1:"",
+            preTimeoutID2:"",
         }
     },
 }

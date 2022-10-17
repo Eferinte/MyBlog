@@ -1,8 +1,10 @@
 <template>
 <div class="iMusicRoot">
-    <div class="iMusicHead">
+    <div class="iMusicHead" id="musicHead">
         <div class="back">
-            <img class="backIcon" src="../assets/back_android_white.png" alt="">
+            <div class="backIcon">
+                <img @click="goBack" style="height:100%" src="../assets/back_android_white.png" alt="">
+            </div>
             <span class="headTitle">我的歌单</span>
         </div>
         <div class="listMsgShell">
@@ -14,7 +16,7 @@
             </div>
             <div class="listMsg">
                 <div class="listName">我收藏的音乐</div>
-                <div class="ownerMsg">
+                <div class="ownerMsg" @click="goUserSpace">
                     <img src="../assets/defaultUser.png" class="ownerIcon">
                     <div class="ownerName">Eferinte</div>
                     <img src="../assets/arrow-right.png" class="goOwnerSpace">
@@ -22,21 +24,23 @@
             </div>
         </div>
         <div class="listOpsShell">
-            <div class="opsCell">
+            <div class="opsCell" @click="upload">
                 <div class="opsIcon">
                     <img style="height:100%" src="../assets/upload2.png" alt="">
                 </div>
                 <div class="opsName">上传</div>
+                <!-- 隐式input -->
+                <input type="file" id="fileElem" accept="audio/*" style="display:none" @change="upLoadHandle($event)">
             </div>
             <div class="splitLine"></div>
-            <div class="opsCell">
+            <div class="opsCell" @click="comment">
                 <div class="opsIcon comment">
                     <img style="height:100%" src="../assets/comment_music.png" alt="">
                 </div>
                 <div class="opsName">评论</div>
             </div>
             <div class="splitLine"></div>
-            <div class="opsCell">
+            <div class="opsCell" @click="share">
                 <div class="opsIcon share">
                     <img style="height:100%" src="../assets/share.png" alt="">
                 </div>
@@ -45,49 +49,48 @@
         </div>
     </div>
     <div class="listOpsShell2">
-        <div class="playAll">
+        <div class="playAll" @click="playAll">
             <div class="playAllIcon">
                 <img style="height:100%" src="../assets/play_red.png" alt="">
             </div>
             <span class="playAllText">{{'播放全部（'+musicList.length+'）'}}</span>
         </div>
         <div class="elseOps">
-            <div class="opsCell download">
+            <div class="opsCell download" @click="downloadAll">
                 <img style="height:100%" src="../assets/download.png" alt="">
             </div>
-            <div class="opsCell multiChoice">
+            <div class="opsCell multiChoice" @click="mutliChoice">
                 <img style="height:100%" src="../assets/multi-choice.png" alt="">
             </div>
         </div>
     </div>
     <div class="mainList">
-        <div class="musicItem" v-for="(music,index) in musicList" :key="music">
+        <div class="musicItem" v-for="(music,index) in musicList" :key="music" @click="play(music)">
             <div class="numsCell">{{index+1}}</div>
             <div class="musicMsgCell">
                 <div class="musicName">{{music.musicName}}</div>
-                <div class="musicMsg">{{music.singer+' - '+music.album}}</div>
+                <div class="musicMsg">{{music.musicSinger+' - '+music.musicAlbum}}</div>
             </div>
-            <div class="musicOpsCell">
+            <div class="musicOpsCell" @click.stop='itemOps(music)'>
                 <img style="height:100%" src="../assets/options.png" alt="">
             </div>
         </div>
     </div>
     <div class="myAudio">
-        <audio>
-            <source src="http://localhost:50001/getMusic">
+        <audio id="player" :src="musicSrc">
         </audio>
         <div class="musicIcon iconShell">
             <div class="coverShell">
-                <img class="cover" :src="playingMusic.coverUrl" alt="">
+                <img id="coverImg" class="cover" src="../assets/ミカヅキの航海.jpg" alt="">
             </div>
         </div>
         <div class="musicName">
             <span class="musicNameText">
-                {{playingMusic.musicName}}
+                {{playingMusic.musicName?playingMusic.musicName:"?"}}
             </span>
         </div>
-        <div class="playIcon iconShell">
-            <img class="icon" src="../assets/play-fill.png" alt="">
+        <div class="playIcon iconShell" @click="toggle(false)">
+            <img class="icon" :src="playIcon" alt="">
         </div>
         <div class="listIcon iconShell">
             <img class="icon" src="../assets/play-list.png" alt="">
@@ -98,6 +101,9 @@
 
 <script>
 import store from '../main'
+import router from '../router'
+import playIcon from '../assets/play-fill.png'
+import pauseIcon from '../assets/pause-fill.png'
 export default {
     name: "Music",
     computed: {
@@ -105,107 +111,183 @@ export default {
             return store.state.preUrl + "/getMusic";
         },
     },
+    methods: {
+        //获取对应uid的歌单
+        getMusicList(uid){
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', `${store.state.preUrl}/getMusicList?uid=${uid?uid:'00000002'}`, true);
+            xhr.send(null);
+            xhr.addEventListener('load', ()=>{
+                if(xhr.readyState == 4){
+                    let data = JSON.parse(xhr.response)
+                    this.musicList = []
+                    data.forEach(music=>{
+                        this.musicList.push({
+                            musicUrl:store.state.preUrl+'/getMusic?path=./Music/'+music['owner_id']+'/'+encodeURIComponent(music['music_name']),
+                            musicName:music['music_name'],
+                            musicSinger:music['music_singer'],
+                            listOrder:music['list_order'],
+                            musicLength:music['music_length'],
+                            musicAlbum:music['music_album']
+                        })
+                    })
+                    console.log(data);
+                    //默认载入第一首播放
+                    this.playingMusic = this.musicList[0]
+                    this.player.src = this.playingMusic.musicUrl
+                }
+            });
+        },
+        goBack(){
+            router.push('/');
+        },
+        goUserSpace(){
+
+        },
+        //将点击事件传递给隐式input
+        upload(){
+            if(store.state.token&&store.state.uid){
+                store.commit('setHintText','上传');
+                let fileElem = document.getElementById("fileElem");
+                fileElem.click();
+            }else{
+                store.commit('setHintText','请先登录');
+            }
+        },
+        upLoadHandle(event){
+            console.log(event.target.files);
+            let file = event.target.files[0];
+            
+            if(file){
+                let url = URL.createObjectURL(file);//获取录音时长
+                let audioElement = new Audio(url);//audio也可获取视频的时长
+                audioElement.addEventListener("loadedmetadata", ()=>{
+                    let duration = String(audioElement.duration);
+                    let xhr = new XMLHttpRequest();
+                    xhr.open("POST", "http://localhost:50001/uploadMusic");
+                    xhr.setRequestHeader('musicname',encodeURIComponent(file.name));
+                    xhr.setRequestHeader('listorder',this.musicList.length+1);
+                    xhr.setRequestHeader('musiclength',duration);
+                    xhr.setRequestHeader('token',store.state.token);
+                    xhr.setRequestHeader('uid',store.state.uid);
+                    xhr.setRequestHeader("Content-Type","multipart/form-data;")  
+                    xhr.send(file)
+                    //更新本地
+                    xhr.addEventListener('load', ()=>{
+                        if(xhr.readyState == 4){
+                            console.log('[log]',xhr.response);
+                            this.getMusicList()
+                        }
+                    });
+                });
+            }
+        },
+        comment(){
+            store.commit('setHintText','评论');
+        },
+        share(){
+            store.commit('setHintText','分享');
+        },
+        playAll(){
+            store.commit('setHintText','播放全部');
+        },
+        downloadAll(){
+            store.commit('setHintText','下载全部');
+        },
+        mutliChoice(){
+            store.commit('setHintText','复选');
+        },
+        toggle(justPlay){
+            //切换播放状态
+            this.playState = !this.playState;
+            if(justPlay){
+                this.playState = true;
+            }
+            if(this.playState){//开始播放
+                this.player.play();
+                this.playIcon = pauseIcon;
+
+                //开始动画
+                this.coverImg.style.setProperty('animation-play-state','running');
+
+            }else{//暂停播放
+                this.player.pause();
+                this.playIcon = playIcon;
+
+                //暂停动画
+                this.coverImg.style.setProperty('animation-play-state','paused');
+            }
+        },
+        play(music){
+            console.log(music.musicUrl);
+            this.player.src = music.musicUrl
+            this.playingMusic = music;
+            this.toggle(true);
+        },
+        itemOps(music){
+            store.commit('setHintText','操作单曲');
+        }
+    },
     data() {
         return {
-            musicList:[
-                {
-                    musicName:'平行線 -アニメ「クズの本懐」ED ver.- [期間生産限定盤]',
-                    singer:'さユり',
-                    album:'平行線',
-                    coverUrl:require("../assets/ミカヅキの航海.jpg"),
-                    audioUrl:''
-                },
-                {
-                    musicName:'平行線 -アニメ「クズの本懐」ED ver.- [期間生産限定盤]',
-                    singer:'さユり',
-                    album:'平行線',
-                    coverUrl:require("../assets/ミカヅキの航海.jpg"),
-                    audioUrl:''
-                },
-                {
-                    musicName:'平行線 -アニメ「クズの本懐」ED ver.- [期間生産限定盤]',
-                    singer:'さユり',
-                    album:'平行線',
-                    coverUrl:require("../assets/ミカヅキの航海.jpg"),
-                    audioUrl:''
-                },
-                {
-                    musicName:'平行線 -アニメ「クズの本懐」ED ver.- [期間生産限定盤]',
-                    singer:'さユり',
-                    album:'平行線',
-                    coverUrl:require("../assets/ミカヅキの航海.jpg"),
-                    audioUrl:''
-                },
-                {
-                    musicName:'平行線 -アニメ「クズの本懐」ED ver.- [期間生産限定盤]',
-                    singer:'さユり',
-                    album:'平行線',
-                    coverUrl:require("../assets/ミカヅキの航海.jpg"),
-                    audioUrl:''
-                },
-                {
-                    musicName:'平行線 -アニメ「クズの本懐」ED ver.- [期間生産限定盤]',
-                    singer:'さユり',
-                    album:'平行線',
-                    coverUrl:require("../assets/ミカヅキの航海.jpg"),
-                    audioUrl:''
-                },
-                {
-                    musicName:'平行線 -アニメ「クズの本懐」ED ver.- [期間生産限定盤]',
-                    singer:'さユり',
-                    album:'平行線',
-                    coverUrl:require("../assets/ミカヅキの航海.jpg"),
-                    audioUrl:''
-                },
-                {
-                    musicName:'平行線 -アニメ「クズの本懐」ED ver.- [期間生産限定盤]',
-                    singer:'さユり',
-                    album:'平行線',
-                    coverUrl:require("../assets/ミカヅキの航海.jpg"),
-                    audioUrl:''
-                },
-                {
-                    musicName:'平行線 -アニメ「クズの本懐」ED ver.- [期間生産限定盤]',
-                    singer:'さユり',
-                    album:'平行線',
-                    coverUrl:require("../assets/ミカヅキの航海.jpg"),
-                    audioUrl:''
-                },
-                {
-                    musicName:'平行線 -アニメ「クズの本懐」ED ver.- [期間生産限定盤]',
-                    singer:'さユり',
-                    album:'平行線',
-                    coverUrl:require("../assets/ミカヅキの航海.jpg"),
-                    audioUrl:''
-                },
-            ],
+            player:undefined,
+            coverImg:undefined,
+            playIcon:playIcon,
+            playState:false,
+            musciSrc:undefined,
+            musicList:[],
             playingMusic:{
             },
         }
     },
+    created() {
+        // 获取歌单
+        this.getMusicList(store.state.uid);
+    },
     mounted() {
-        this.playingMusic = this.musicList[0]
+        //加载结点
+        this.player = document.getElementById('player');
+        this.coverImg = document.getElementById('coverImg');
+
+        //监听页头可见百分比，实时修改透明度
+        let el = document.getElementById('musicHead');
+        let backEl = document.getElementsByClassName('back')[0];
+        let myThreshold = [0], n =100;
+        for(let i=n;i>0;i--){
+            myThreshold.push(1/i);
+        }
+        let ob = new IntersectionObserver(entries=>{
+            console.log(entries[0].intersectionRatio);
+            backEl.style.setProperty('background-color',`rgba(137, 100, 120, ${1 - entries[0].intersectionRatio})`);
+        },{
+            threshold: myThreshold
+        });
+        ob.observe(el)
     },
 }
 </script>
 
 <style scoped>
+@keyframes sping {
+    from {transform:rotate(0deg);} to {transform: rotate(360deg);}
+}
     .numsCell{
         text-align: center;
         height: fit-content;
-        width: 40px;
+        width: 60px;
         margin: auto 0;
         color: #b9b9b9;
     }
     .musicMsgCell{
         margin: auto 0;
-        width: 70%;
+        width: calc(100% - 60px - 10%);
     }
     .musicMsgCell .musicName{
         white-space: nowrap;
         overflow: hidden;
         font-size: 18px;
         font-weight: 500;
+        background-color: transparent;
     }
     .musicMsgCell .musicMsg{
         white-space: nowrap;
@@ -217,17 +299,19 @@ export default {
     .musicOpsCell{
         height: 20%;
         width: fit-content;
-        margin: auto 5% auto auto;
+        margin: auto 5% auto 5%;
+        border-radius: 100%;
     }
     .listOpsShell2{
         margin: 40px 0;
         width: 100%;
         height: 40px;
         position: sticky;
-        top: 5px;
+        top: 60px;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        background-color: white;
     }
     .playAll{
         display: flex;
@@ -244,6 +328,9 @@ export default {
         height: 80%;
         margin: auto 20px;
     }
+    .playAllIcon:hover{
+        cursor: pointer;
+    }
     .playAllText{
         font-size: 18px;
         font-weight: 550;
@@ -257,13 +344,18 @@ export default {
     }
     .mainList{
         width: 100%;
-        height: 1000px;
+        height: fit-content;
     }
     .musicItem{
         display: flex;
         flex-direction: row;
         width: 100%;
         height: 75px;
+        transition: 0.25s;
+    }
+    .musicItem:hover{
+        background-color: #e7e6e6;
+        cursor: pointer;
     }
     .splitLine{
         margin: auto 2px;
@@ -278,6 +370,9 @@ export default {
         display: flex;
         flex-direction: row;
         justify-content: center;
+    }
+    .opsCell:hover{
+        cursor: pointer;
     }
     .opsIcon{
         height:100%;
@@ -366,6 +461,9 @@ export default {
         flex-direction: row;
         justify-content: left;
     }
+    .ownerMsg:hover{
+        cursor: pointer;
+    }
     .ownerIcon{
         height: 30px;
         width: 30px;
@@ -383,22 +481,31 @@ export default {
     }
     .back{
         position: fixed;
-        left: 1em;
-        top: 1.5em;
+        left: 0;
+        padding-left: 1em;
+        top: 0;
         font-size: 18px;
         letter-spacing: 2px;
         color: white;
-        height: 1.8em;
-        width:10em;
+        height: 60px;
+        width:100%;
         display: flex;
+        z-index: 10;
+        align-items: flex-end;
+        background-color: transparent;
+        /* transition: 0.25s; */
     }
     .headTitle{
         display: block;
         height: fit-content;
-        margin: auto 5px;
+        margin: 14px 5px;
     }
     .backIcon{
-        height: 100%;
+        height:1.8em;
+        margin: 10px 0;
+    }
+    .backIcon:hover{
+        cursor: pointer;
     }
     .coverShell{
         border-radius: 100%;
@@ -412,15 +519,25 @@ export default {
     .cover{
         width: 100%;
         height: 100%;
+        transition: 1s;
+        animation: 36s linear infinite sping;
+        animation-play-state: paused; 
     }
     .iconShell{
         display: flex;   
+        position: relative;
     }
     .icon{
-        height: 50%;
-        margin: auto 0;   
+        height: 30px;
+        margin: auto;   
         position: relative;
-        top: -10%;
+        top: -10px;
+    }
+    .playIcon .icon{
+        height: 25px;
+    }
+    .icon:hover{
+        cursor: pointer;
     }
     .iMusicHead{
         height: 280px;
@@ -473,7 +590,7 @@ export default {
         background-color: white;
     }
     .listIcon{
-        margin: auto 10px auto auto;
+        margin: auto 3% auto auto;
         width: var(--icon-width);
         height: var(--icon-size);
         background-color: white;
