@@ -41,9 +41,9 @@ export default {
           case 0: this.goUserSpace();break;
           case 1: this.openEditor();break;
           case 2: this.openRecorder();break;
-          case 3: this.doTest();break;
-          case 4: this.goXFAPI();break;
-          case 5: this.goMusic();break;
+          case 3: this.goMusic();break;
+          case 4: this.doTest();break;
+          case 5: this.goXFAPI();break;
           // case 4: this.openTimer();break;
           // case 5: this.openManga();break;
         }
@@ -136,6 +136,12 @@ export default {
                 left: -10px;
               `
             },
+            //移动端
+            {
+              icon:musicIcon,
+              text:'音乐播放器',
+              imgCss:''
+            }
             // {
             //   icon:timerIcon,
             //   text:"计时器",
@@ -179,13 +185,7 @@ export default {
               icon:XFAPIIcon,
               text:'讯飞语音接口',
               imgCss:''
-            },
-            //移动端
-            {
-              icon:musicIcon,
-              text:'音乐播放器',
-              imgCss:''
-            })
+            },)
       }
       this.items[0].icon = this.userIcon;
     }

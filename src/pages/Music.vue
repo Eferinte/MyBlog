@@ -11,7 +11,7 @@
             <div class="listCoverShell">
                 <div class="coverShadow"></div>
                 <div class="listCover">
-                    <img class="listCoverImg" src="../assets/ミカヅキの航海.jpg" alt="">
+                    <img class="listCoverImg" src="../../public/assert/cover.jpg" alt="">
                 </div>
             </div>
             <div class="listMsg">
@@ -25,6 +25,13 @@
         </div>
         <div class="listOpsShell">
             <div class="opsCell" @click="upload">
+                
+                <div class="loadingMask upLoading" v-show="ifUpLoading">
+                    <div class="loadingBox">
+                        <div class="loader"></div>
+                        <div class="halfCricle"></div>
+                    </div>
+                </div>
                 <div class="opsIcon">
                     <img style="height:100%" src="../assets/upload2.png" alt="">
                 </div>
@@ -65,7 +72,13 @@
         </div>
     </div>
     <div class="mainList">
-        <div class="musicItem" v-for="(music,index) in musicList" :key="music" @click="play(music)">
+        <div class="loadingMask" v-show="ifLoading">
+            <div class="loadingBox">
+                <div class="loader"></div>
+                <div class="halfCricle"></div>
+            </div>
+        </div>
+        <div class="musicItem" v-for="(music,index) in musicList" :key="music" @click="play(index)">
             <div class="numsCell">{{index+1}}</div>
             <div class="musicMsgCell">
                 <div class="musicName">{{music.musicName}}</div>
@@ -81,12 +94,12 @@
         </audio>
         <div class="musicIcon iconShell">
             <div class="coverShell">
-                <img id="coverImg" class="cover" src="../assets/ミカヅキの航海.jpg" alt="">
+                <img id="coverImg" class="cover" src="../../public/assert/cover.jpg" alt="">
             </div>
         </div>
         <div class="musicName">
             <span class="musicNameText">
-                {{playingMusic.musicName?playingMusic.musicName:"?"}}
+                {{playingMusic.musicName?playingMusic.musicName:"加载中"}}
             </span>
         </div>
         <div class="playIcon iconShell" @click="toggle(false)">
@@ -104,14 +117,47 @@ import store from '../main'
 import router from '../router'
 import playIcon from '../assets/play-fill.png'
 import pauseIcon from '../assets/pause-fill.png'
+import cover from '../../public/assert/cover.jpg'
 export default {
     name: "Music",
     computed: {
         audioUrl() {
             return store.state.preUrl + "/getMusic";
         },
+        cover(){
+            return cover;
+        }
     },
     methods: {
+        //
+        copyToClipboard(text){
+            // 创建一个文本域 
+            const textArea = document.createElement('textarea')
+            // 隐藏掉这个文本域，使其在页面上不显示	
+            textArea.style.position = 'fixed'
+            textArea.style.visibility = '-10000px'
+            // 将需要复制的内容赋值给文本域
+            textArea.value = text
+            // 将这个文本域添加到页面上
+            document.body.appendChild(textArea)
+            // 添加聚焦事件，写了可以鼠标选取要复制的内容
+            textArea.focus()
+            // 选取文本域内容
+            textArea.select()
+
+            if (!document.execCommand('copy')) { // 检测浏览器是否支持这个方法
+                console.warn('浏览器不支持 document.execCommand("copy")')
+                // 复制失败将构造的标签 移除
+                document.body.removeChild(textArea)
+                return false
+            } else {
+                console.log("复制成功")
+                // 复制成功后再将构造的标签 移除
+                document.body.removeChild(textArea)
+                return true
+            }
+        },
+
         //获取对应uid的歌单
         getMusicList(uid){
             let xhr = new XMLHttpRequest();
@@ -131,10 +177,12 @@ export default {
                             musicAlbum:music['music_album']
                         })
                     })
-                    console.log(data);
+                    this.ifLoading = false;
                     //默认载入第一首播放
-                    this.playingMusic = this.musicList[0]
-                    this.player.src = this.playingMusic.musicUrl
+                    if(this.musicList.length>0){
+                        this.playingMusicIndex = 0;
+                        this.player.src = this.musicList[this.playingMusic].musicUrl;
+                    }
                 }
             });
         },
@@ -146,8 +194,8 @@ export default {
         },
         //将点击事件传递给隐式input
         upload(){
+            if(this.ifUpLoading) return
             if(store.state.token&&store.state.uid){
-                store.commit('setHintText','上传');
                 let fileElem = document.getElementById("fileElem");
                 fileElem.click();
             }else{
@@ -155,16 +203,15 @@ export default {
             }
         },
         upLoadHandle(event){
-            console.log(event.target.files);
             let file = event.target.files[0];
-            
+            this.ifUpLoading = true;
             if(file){
                 let url = URL.createObjectURL(file);//获取录音时长
                 let audioElement = new Audio(url);//audio也可获取视频的时长
                 audioElement.addEventListener("loadedmetadata", ()=>{
                     let duration = String(audioElement.duration);
                     let xhr = new XMLHttpRequest();
-                    xhr.open("POST", "http://localhost:50001/uploadMusic");
+                    xhr.open("POST", store.state.preUrl+"/uploadMusic");
                     xhr.setRequestHeader('musicname',encodeURIComponent(file.name));
                     xhr.setRequestHeader('listorder',this.musicList.length+1);
                     xhr.setRequestHeader('musiclength',duration);
@@ -175,21 +222,29 @@ export default {
                     //更新本地
                     xhr.addEventListener('load', ()=>{
                         if(xhr.readyState == 4){
-                            console.log('[log]',xhr.response);
                             this.getMusicList()
+                            this.ifUpLoading = false;
+                            store.commit('setHintText','上传成功')
                         }
                     });
                 });
+            }else{
+                this.ifUpLoading = false;
             }
         },
         comment(){
             store.commit('setHintText','评论');
         },
         share(){
-            store.commit('setHintText','分享');
+            store.commit('setHintText','网址已复制到剪贴板');
+            this.copyToClipboard('http://eferinte.xyz/iMusic');
         },
         playAll(){
-            store.commit('setHintText','播放全部');
+            if(this.musicList.length>0){
+                this.play(0);
+            }else{
+                store.commit('setHintText','当前歌单暂无歌曲')
+            }
         },
         downloadAll(){
             store.commit('setHintText','下载全部');
@@ -218,11 +273,18 @@ export default {
                 this.coverImg.style.setProperty('animation-play-state','paused');
             }
         },
-        play(music){
-            console.log(music.musicUrl);
-            this.player.src = music.musicUrl
-            this.playingMusic = music;
+        play(musicIndex){
+            this.player.src = this.musicList[musicIndex].musicUrl
+            this.playingMusic = this.musicList[musicIndex];
             this.toggle(true);
+            this.player.addEventListener('ended', (event) => {
+                
+                //暂停动画
+                this.coverImg.style.setProperty('animation-play-state','paused');
+                if(this.musicList[musicIndex+1]){
+                    this.play(musicIndex+1)
+                }
+            });
         },
         itemOps(music){
             store.commit('setHintText','操作单曲');
@@ -230,6 +292,8 @@ export default {
     },
     data() {
         return {
+            ifLoading:true,
+            ifUpLoading:false,
             player:undefined,
             coverImg:undefined,
             playIcon:playIcon,
@@ -257,7 +321,6 @@ export default {
             myThreshold.push(1/i);
         }
         let ob = new IntersectionObserver(entries=>{
-            console.log(entries[0].intersectionRatio);
             backEl.style.setProperty('background-color',`rgba(137, 100, 120, ${1 - entries[0].intersectionRatio})`);
         },{
             threshold: myThreshold
@@ -268,6 +331,63 @@ export default {
 </script>
 
 <style scoped>
+.loadingMask{
+    position: absolute;
+    top: -3px;
+    bottom: 0;
+    height: auto;
+    opacity: 0.5;
+    width: 100%;
+    /* border-radius: 10px 10px 0 0; */
+    z-index: 5;
+    display: flex;
+    transform: scale(0.7);
+}
+.loadingMask.upLoading{
+    left: -15px;
+}
+@keyframes spin
+{
+    from {transform:rotate(0deg);}
+    to {transform:rotate(360deg);}
+}
+.loadingBox{
+    margin: 0 auto;
+    top: 350px;
+    left: calc(50% - 160px);
+    height: 50px;
+    width: 50px;
+    position: fixed;
+    /* border: solid 1px olivedrab; */
+    animation: spin 1s ease infinite ;
+    position: sticky;
+}
+.loader{
+    top: 0;
+    left: 0;
+    position: absolute;
+    margin: auto;
+    height: 50px;
+    width: 50px;
+    border: solid 10px #f83b2a;
+    /* border-top: 20px; */
+    border-radius: 100% 100% 100% 100%;
+    /*内边框*/
+    box-sizing: border-box; 
+}
+.halfCricle{
+    top: 0;
+    left: 0;
+    position: absolute;
+    margin: auto;
+    height: 0px;
+    width: 0px;
+    border-top: 25px solid white;
+    border-left: 25px solid transparent;
+    border-right: 25px solid transparent;
+    border-bottom: 25px solid transparent;
+    border-radius: 100%;
+}
 @keyframes sping {
     from {transform:rotate(0deg);} to {transform: rotate(360deg);}
 }
@@ -280,7 +400,7 @@ export default {
     }
     .musicMsgCell{
         margin: auto 0;
-        width: calc(100% - 60px - 10%);
+        width: calc(100% - 60px - 15%);
     }
     .musicMsgCell .musicName{
         white-space: nowrap;
@@ -298,8 +418,8 @@ export default {
     }
     .musicOpsCell{
         height: 20%;
-        width: fit-content;
-        margin: auto 5% auto 5%;
+        width: 10%;
+        margin: auto 2.5% auto 2.5%;
         border-radius: 100%;
     }
     .listOpsShell2{
@@ -370,6 +490,7 @@ export default {
         display: flex;
         flex-direction: row;
         justify-content: center;
+        position: relative;
     }
     .opsCell:hover{
         cursor: pointer;
@@ -512,9 +633,10 @@ export default {
         overflow: hidden;
         height: 60%;
         width: 60%;
-        outline: solid 10px black;
+        border: solid 10px black;
         position: relative;
-        left: 40%;
+        left: 20%;
+        top: -10px;
     }
     .cover{
         width: 100%;
