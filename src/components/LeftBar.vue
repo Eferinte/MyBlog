@@ -32,6 +32,7 @@ import recorderIcon from '../assets/Pantheon_of_Hallownest.png'
 import store from '../main'
 import { test } from '../utils/test'
 import { getCookie } from '../utils/cookies'
+import router from '../router'
 export default {
     name:"LeftBar",
     methods: {
@@ -69,8 +70,9 @@ export default {
       },
       //测试用函数
       doTest(){
-        let log = test();
-        alert(log);
+        // let log = test();
+        // alert(log);
+        router.push('/GdyDemo')
       },
       goUserSpace(){
         // 跳转到个人主页,登录逻辑交给路由守卫处理
@@ -141,7 +143,12 @@ export default {
               icon:musicIcon,
               text:'音乐播放器',
               imgCss:''
-            }
+            },
+            {
+              icon:testIcon,
+              text:"测试",
+              imgCss:""
+            },
             // {
             //   icon:timerIcon,
             //   text:"计时器",
@@ -175,11 +182,6 @@ export default {
       console.log('环境变量',process.env.VUE_APP_IF_DEV);
       if(process.env.VUE_APP_IF_DEV=='true'){
         this.items.push(
-            {
-              icon:testIcon,
-              text:"测试",
-              imgCss:""
-            },
             //科大讯飞语音接口调用
             {
               icon:XFAPIIcon,

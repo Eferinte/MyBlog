@@ -8,6 +8,7 @@ import Manga from '../pages/Manga'
 import store from '../main'
 import XFAPI from '../pages/XFAPI'
 import Music from '../pages/Music'
+import GdyDemo from '../pages/GdyDemo'
 const router = createRouter({
     history:createWebHistory(),
     routes:[
@@ -55,6 +56,11 @@ const router = createRouter({
             name:'Music',
             path:'/iMusic',
             component:Music,
+        },
+        {
+            name:'GdyDemo',
+            path:'/GdyDemo',
+            component:GdyDemo
         }
     ]
 })
