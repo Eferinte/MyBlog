@@ -25,7 +25,6 @@
         </div>
         <div class="listOpsShell">
             <div class="opsCell" @click="upload">
-                
                 <div class="loadingMask upLoading" v-show="ifUpLoading">
                     <div class="loadingBox">
                         <div class="loader"></div>
@@ -105,8 +104,8 @@
         <div class="playIcon iconShell" @click="toggle(false)">
             <img class="icon" :src="playIcon" alt="">
         </div>
-        <div class="listIcon iconShell">
-            <img class="icon" src="../assets/play-list.png" alt="">
+        <div class="listIcon iconShell" @click="toggleMode()">
+            <img class="icon" :src="playMode" alt="">
         </div>
     </div>
 </div>  
@@ -118,6 +117,8 @@ import router from '../router'
 import playIcon from '../assets/play-fill.png'
 import pauseIcon from '../assets/pause-fill.png'
 import cover from '../../public/assert/cover.jpg'
+import playListIcon from '../assets/play-list.png'
+import playRepeatIcon from '../assets/play-repeat.png'
 export default {
     name: "Music",
     computed: {
@@ -129,6 +130,16 @@ export default {
         }
     },
     methods: {
+        //切换播放模式
+        toggleMode(){
+            if(this.playMode==playListIcon){
+                this.playMode = playRepeatIcon;
+                store.commit('setHintText','单曲循环');
+            }else{
+                this.playMode = playListIcon;
+                store.commit('setHintText','列表循环');
+            }
+        },
         //
         copyToClipboard(text){
             // 创建一个文本域 
@@ -278,11 +289,14 @@ export default {
             this.playingMusic = this.musicList[musicIndex];
             this.toggle(true);
             this.player.addEventListener('ended', (event) => {
-                
                 //暂停动画
                 this.coverImg.style.setProperty('animation-play-state','paused');
-                if(this.musicList[musicIndex+1]){
-                    this.play(musicIndex+1)
+                if(this.playMode==playListIcon){
+                    if(this.musicList[musicIndex+1]){
+                        this.play(musicIndex+1);
+                    }
+                }else{
+                    this.play(musicIndex);
                 }
             });
         },
@@ -302,6 +316,7 @@ export default {
             musicList:[],
             playingMusic:{
             },
+            playMode:playListIcon
         }
     },
     created() {
