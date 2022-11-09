@@ -288,12 +288,16 @@ export default {
             this.player.src = this.musicList[musicIndex].musicUrl
             this.playingMusic = this.musicList[musicIndex];
             this.toggle(true);
+
+            //播放结束后的行为模式
             this.player.addEventListener('ended', (event) => {
                 //暂停动画
                 this.coverImg.style.setProperty('animation-play-state','paused');
                 if(this.playMode==playListIcon){
                     if(this.musicList[musicIndex+1]){
                         this.play(musicIndex+1);
+                    }else{
+                        this.play(0);
                     }
                 }else{
                     this.play(musicIndex);
